@@ -1,0 +1,2946 @@
+/* ==========================================================
+   OpenMCC v0.1
+   Open Mission Control Center
+
+   Main interface style
+   ========================================================== */
+
+
+/* ==========================================================
+   GLOBAL
+   ========================================================== */
+
+
+:root {
+
+    --background:
+        #070b16;
+
+    --panel:
+        #10192c;
+
+    --panel-light:
+        #16233d;
+
+    --border:
+        #203552;
+
+    --cyan:
+        #00d9ff;
+
+    --green:
+        #00e676;
+
+    --yellow:
+        #ffc107;
+
+    --red:
+        #ff5252;
+
+    --text:
+        #eaf4ff;
+
+    --text-secondary:
+        #91a4bd;
+
+    --shadow:
+        0 0 25px rgba(0,217,255,0.08);
+
+}
+
+
+
+* {
+
+    box-sizing:
+        border-box;
+
+}
+
+
+
+body {
+
+    margin:
+        0;
+
+    padding:
+        0;
+
+    min-height:
+        100vh;
+
+    background:
+        var(--background);
+
+    color:
+        var(--text);
+
+    font-family:
+        "Segoe UI",
+        "Inter",
+        Arial,
+        sans-serif;
+
+}
+
+
+
+/* ==========================================================
+   APPLICATION CONTAINER
+   ========================================================== */
+
+
+#app {
+
+    width:
+        100%;
+
+    min-height:
+        100vh;
+
+    padding:
+        20px;
+
+}
+
+
+
+/* ==========================================================
+   HEADER
+   ========================================================== */
+
+
+#topBar {
+
+    height:
+        90px;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        2fr 1fr 1fr 1fr;
+
+    align-items:
+        center;
+
+    gap:
+        20px;
+
+
+    background:
+        linear-gradient(
+            145deg,
+            #10192c,
+            #0c1425
+        );
+
+
+    border:
+        1px solid var(--border);
+
+
+    border-radius:
+        12px;
+
+
+    padding:
+        20px 30px;
+
+
+    box-shadow:
+        var(--shadow);
+
+}
+
+
+
+.logo h1 {
+
+    margin:
+        0;
+
+
+    font-size:
+        32px;
+
+
+    letter-spacing:
+        3px;
+
+
+    color:
+        var(--cyan);
+
+
+}
+
+
+
+.subtitle {
+
+    color:
+        var(--text-secondary);
+
+
+    font-size:
+        13px;
+
+}
+
+
+
+.caption {
+
+    color:
+        var(--text-secondary);
+
+
+    font-size:
+        12px;
+
+
+    text-transform:
+        uppercase;
+
+
+    letter-spacing:
+        2px;
+
+}
+
+
+
+#utcClock {
+
+    font-size:
+        24px;
+
+
+    font-weight:
+        600;
+
+}
+
+
+
+#connectionState {
+
+    display:
+        flex;
+
+
+    align-items:
+        center;
+
+
+    gap:
+        10px;
+
+}
+
+
+
+.offlineLed,
+.onlineLed {
+
+    width:
+        12px;
+
+
+    height:
+        12px;
+
+
+    border-radius:
+        50%;
+
+}
+
+
+
+.offlineLed {
+
+    background:
+        var(--red);
+
+    box-shadow:
+        0 0 10px var(--red);
+
+}
+
+
+
+.onlineLed {
+
+    background:
+        var(--green);
+
+    box-shadow:
+        0 0 15px var(--green);
+
+}
+
+
+
+/* ==========================================================
+   DASHBOARD GRID
+   ========================================================== */
+
+
+#dashboard {
+
+    margin-top:
+        20px;
+
+
+    display:
+        grid;
+
+
+    grid-template-columns:
+        1fr 2fr 1fr;
+
+
+    grid-auto-rows:
+        minmax(180px, auto);
+
+
+    gap:
+        20px;
+
+}
+
+
+
+/* ==========================================================
+   PANELS
+   ========================================================== */
+
+
+.panel {
+
+    background:
+        linear-gradient(
+            145deg,
+            var(--panel),
+            #0c1425
+        );
+
+
+    border:
+        1px solid var(--border);
+
+
+    border-radius:
+        12px;
+
+
+    padding:
+        20px;
+
+
+    box-shadow:
+        var(--shadow);
+
+
+    overflow:
+        hidden;
+
+}
+
+
+
+.panel h2 {
+
+    margin-top:
+        0;
+
+
+    font-size:
+        18px;
+
+
+    font-weight:
+        500;
+
+
+    color:
+        var(--cyan);
+
+
+    border-bottom:
+        1px solid var(--border);
+
+
+    padding-bottom:
+        10px;
+
+}
+
+
+
+.wide {
+
+    grid-column:
+        span 3;
+
+}
+
+
+
+/* ==========================================================
+   BUTTONS
+   ========================================================== */
+
+
+button {
+
+    width:
+        100%;
+
+
+    padding:
+        14px;
+
+
+    margin-bottom:
+        20px;
+
+
+    background:
+        transparent;
+
+
+    color:
+        var(--cyan);
+
+
+    border:
+        1px solid var(--cyan);
+
+
+    border-radius:
+        8px;
+
+
+    cursor:
+        pointer;
+
+
+    font-size:
+        15px;
+
+
+    transition:
+        0.25s;
+
+}
+
+
+
+button:hover {
+
+
+    background:
+        rgba(0,217,255,0.12);
+
+
+    box-shadow:
+        0 0 15px rgba(0,217,255,0.5);
+
+}
+
+
+
+/* ==========================================================
+   TELEMETRY CARDS
+   ========================================================== */
+
+
+.telemetryGrid {
+
+
+    display:
+        grid;
+
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(160px,1fr)
+        );
+
+
+    gap:
+        15px;
+
+}
+
+
+
+.card {
+
+    background:
+        var(--panel-light);
+
+
+    border:
+        1px solid var(--border);
+
+
+    border-radius:
+        10px;
+
+
+    padding:
+        20px;
+
+
+    text-align:
+        center;
+
+}
+
+
+
+.card .label {
+
+    display:
+        block;
+
+
+    color:
+        var(--text-secondary);
+
+
+    font-size:
+        14px;
+
+}
+
+
+
+.value {
+
+
+    display:
+        block;
+
+
+    margin-top:
+        10px;
+
+
+    font-size:
+        32px;
+
+
+    font-weight:
+        700;
+
+
+    color:
+        var(--cyan);
+
+}
+
+
+
+/* ==========================================================
+   SYSTEM STATUS
+   ========================================================== */
+
+
+.ok {
+
+    color:
+        var(--green);
+
+}
+
+
+.warn {
+
+    color:
+        var(--yellow);
+
+}
+
+
+
+/* ==========================================================
+   LOG
+   ========================================================== */
+
+
+#eventLog {
+
+
+    height:
+        180px;
+
+
+    overflow-y:
+        auto;
+
+
+    font-family:
+        monospace;
+
+
+    color:
+        var(--text-secondary);
+
+
+}
+
+
+
+#eventLog div {
+
+    padding:
+        6px;
+
+
+    border-bottom:
+        1px solid var(--border);
+
+}
+
+
+
+/* ==========================================================
+   FUTURE MODULES
+   ========================================================== */
+
+
+#chartsPlaceholder,
+#satelliteViewport,
+#mapViewport {
+
+
+    height:
+        300px;
+
+
+    display:
+        flex;
+
+
+    align-items:
+        center;
+
+
+    justify-content:
+        center;
+
+
+    color:
+        var(--text-secondary);
+
+
+    border:
+        1px dashed var(--border);
+
+
+}
+
+
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+
+
+@media(max-width:1200px){
+
+
+    #dashboard {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .wide {
+
+        grid-column:
+            span 1;
+
+    }
+
+
+    #topBar {
+
+        grid-template-columns:
+            1fr;
+
+        height:
+            auto;
+
+    }
+
+
+}
+
+
+/* ==========================================================
+   OpenMCC serial connection settings
+   ========================================================== */
+
+.connectionSettings {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr;
+
+    gap:
+        12px;
+
+    margin-bottom:
+        16px;
+
+}
+
+
+.settingField {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        7px;
+
+}
+
+
+.settingField > span {
+
+    color:
+        var(--text-secondary);
+
+    font-size:
+        12px;
+
+    font-weight:
+        600;
+
+    letter-spacing:
+        0.7px;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+.settingField select {
+
+    width:
+        100%;
+
+    min-height:
+        42px;
+
+    padding:
+        0 12px;
+
+    color:
+        var(--text);
+
+    background:
+        var(--panel-light);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        7px;
+
+    font-family:
+        inherit;
+
+    font-size:
+        14px;
+
+    outline:
+        none;
+
+    cursor:
+        pointer;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+
+}
+
+
+.settingField select:hover {
+
+    border-color:
+        rgba(0, 217, 255, 0.6);
+
+}
+
+
+.settingField select:focus {
+
+    border-color:
+        var(--cyan);
+
+    box-shadow:
+        0 0 0 3px rgba(0, 217, 255, 0.1);
+
+}
+
+
+.settingField select:disabled {
+
+    cursor:
+        not-allowed;
+
+    opacity:
+        0.55;
+
+}
+
+
+.settingField select option {
+
+    color:
+        var(--text);
+
+    background:
+        var(--panel);
+
+}
+
+
+#connectButton.busy {
+
+    pointer-events:
+        none;
+
+    color:
+        var(--yellow);
+
+    border-color:
+        var(--yellow);
+
+    animation:
+        serialButtonPulse 1.2s ease-in-out infinite;
+
+}
+
+
+@keyframes serialButtonPulse {
+
+    0%,
+    100% {
+
+        box-shadow:
+            0 0 6px rgba(255, 193, 7, 0.1);
+
+    }
+
+    50% {
+
+        box-shadow:
+            0 0 18px rgba(255, 193, 7, 0.45);
+
+    }
+
+}
+
+
+
+
+
+
+/* ==========================================================
+   OpenMCC command center
+   ========================================================== */
+
+#commandPanel {
+
+    grid-column:
+        1;
+
+}
+
+
+#chartPanel {
+
+    grid-column:
+        2 / 4;
+
+}
+
+
+#satellitePanel {
+
+    grid-column:
+        1;
+
+}
+
+
+#mapPanel {
+
+    grid-column:
+        2 / 4;
+
+}
+
+
+.panelTitleRow {
+
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    justify-content:
+        space-between;
+
+    gap:
+        15px;
+
+    border-bottom:
+        1px solid var(--border);
+
+    margin-bottom:
+        16px;
+
+}
+
+
+.panelTitleRow h2 {
+
+    flex:
+        1;
+
+    border-bottom:
+        none;
+
+    margin-bottom:
+        0;
+
+}
+
+
+.commandAvailability {
+
+    flex-shrink:
+        0;
+
+    margin-top:
+        2px;
+
+    padding:
+        4px 8px;
+
+    border:
+        1px solid currentColor;
+
+    border-radius:
+        4px;
+
+    font-size:
+        10px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        0.8px;
+
+}
+
+
+.commandAvailability.offline {
+
+    color:
+        var(--text-secondary);
+
+}
+
+
+.commandAvailability.online {
+
+    color:
+        var(--green);
+
+    box-shadow:
+        0 0 10px rgba(0, 230, 118, 0.16);
+
+}
+
+
+.commandGroup {
+
+    margin-bottom:
+        18px;
+
+    padding-bottom:
+        18px;
+
+    border-bottom:
+        1px solid rgba(32, 53, 82, 0.65);
+
+}
+
+
+.commandGroup:last-of-type {
+
+    margin-bottom:
+        12px;
+
+}
+
+
+.commandGroupTitle {
+
+    margin-bottom:
+        10px;
+
+    color:
+        var(--text-secondary);
+
+    font-size:
+        11px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        1.1px;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+.commandButtonGrid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap:
+        8px;
+
+}
+
+
+.commandButton {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        8px;
+
+    min-height:
+        42px;
+
+    margin:
+        0;
+
+    padding:
+        9px 10px;
+
+    color:
+        var(--text);
+
+    background:
+        rgba(22, 35, 61, 0.72);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        7px;
+
+    font-size:
+        12px;
+
+    line-height:
+        1.2;
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.12s ease;
+
+}
+
+
+.commandButton:hover:not(:disabled) {
+
+    color:
+        var(--cyan);
+
+    background:
+        rgba(0, 217, 255, 0.08);
+
+    border-color:
+        var(--cyan);
+
+    box-shadow:
+        0 0 13px rgba(0, 217, 255, 0.18);
+
+}
+
+
+.commandButton:active:not(:disabled) {
+
+    transform:
+        translateY(1px);
+
+}
+
+
+.commandButton:disabled,
+.commandSendButton:disabled {
+
+    cursor:
+        not-allowed;
+
+    opacity:
+        0.36;
+
+    box-shadow:
+        none;
+
+}
+
+
+.commandPrimary {
+
+    color:
+        var(--cyan);
+
+    border-color:
+        rgba(0, 217, 255, 0.55);
+
+}
+
+
+.commandSuccess {
+
+    color:
+        var(--green);
+
+    border-color:
+        rgba(0, 230, 118, 0.45);
+
+}
+
+
+.commandSuccess:hover:not(:disabled) {
+
+    color:
+        var(--green);
+
+    border-color:
+        var(--green);
+
+    background:
+        rgba(0, 230, 118, 0.08);
+
+    box-shadow:
+        0 0 13px rgba(0, 230, 118, 0.18);
+
+}
+
+
+.commandDanger {
+
+    color:
+        var(--red);
+
+    border-color:
+        rgba(255, 82, 82, 0.45);
+
+}
+
+
+.commandDanger:hover:not(:disabled) {
+
+    color:
+        var(--red);
+
+    border-color:
+        var(--red);
+
+    background:
+        rgba(255, 82, 82, 0.08);
+
+    box-shadow:
+        0 0 13px rgba(255, 82, 82, 0.18);
+
+}
+
+
+.commandIcon {
+
+    min-width:
+        15px;
+
+    font-family:
+        "Consolas",
+        monospace;
+
+    font-weight:
+        700;
+
+    text-align:
+        center;
+
+}
+
+
+.commandField {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        7px;
+
+    margin-top:
+        11px;
+
+}
+
+
+.commandField > span {
+
+    color:
+        var(--text-secondary);
+
+    font-size:
+        11px;
+
+    font-weight:
+        600;
+
+    letter-spacing:
+        0.6px;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+.commandField select,
+#customCommand {
+
+    width:
+        100%;
+
+    min-height:
+        40px;
+
+    padding:
+        0 11px;
+
+    color:
+        var(--text);
+
+    background:
+        var(--panel-light);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        7px;
+
+    font-family:
+        inherit;
+
+    outline:
+        none;
+
+}
+
+
+.commandField select:focus,
+#customCommand:focus {
+
+    border-color:
+        var(--cyan);
+
+    box-shadow:
+        0 0 0 3px rgba(0, 217, 255, 0.1);
+
+}
+
+
+.commandField select option {
+
+    color:
+        var(--text);
+
+    background:
+        var(--panel);
+
+}
+
+
+.commandWide {
+
+    width:
+        100%;
+
+    margin-top:
+        8px;
+
+}
+
+
+.customCommandRow {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        minmax(0, 1fr) auto;
+
+    gap:
+        8px;
+
+}
+
+
+#customCommand {
+
+    font-family:
+        "Consolas",
+        "Cascadia Mono",
+        monospace;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+.commandSendButton {
+
+    min-width:
+        86px;
+
+    margin:
+        0;
+
+    padding:
+        0 12px;
+
+    color:
+        var(--cyan);
+
+    background:
+        transparent;
+
+    border:
+        1px solid var(--cyan);
+
+    border-radius:
+        7px;
+
+    cursor:
+        pointer;
+
+}
+
+
+.lastCommand {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        5px;
+
+    padding:
+        11px;
+
+    background:
+        rgba(7, 11, 22, 0.55);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        7px;
+
+}
+
+
+.lastCommand > span {
+
+    color:
+        var(--text-secondary);
+
+    font-size:
+        10px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        0.8px;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+#lastCommandText {
+
+    overflow:
+        hidden;
+
+    color:
+        var(--cyan);
+
+    font-family:
+        "Consolas",
+        monospace;
+
+    font-size:
+        12px;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+
+}
+
+
+.command-transmitted {
+
+    animation:
+        commandTransmitted 0.55s ease-out;
+
+}
+
+
+@keyframes commandTransmitted {
+
+    0% {
+
+        border-color:
+            var(--cyan);
+
+        box-shadow:
+            0 0 0 rgba(0, 217, 255, 0);
+
+    }
+
+    45% {
+
+        border-color:
+            var(--cyan);
+
+        box-shadow:
+            0 0 18px rgba(0, 217, 255, 0.38);
+
+    }
+
+    100% {
+
+        box-shadow:
+            0 0 0 rgba(0, 217, 255, 0);
+
+    }
+
+}
+
+
+@media (max-width: 1200px) {
+
+    #commandPanel,
+    #chartPanel,
+    #satellitePanel,
+    #mapPanel {
+
+        grid-column:
+            span 1;
+
+    }
+
+}
+
+
+@media (max-width: 520px) {
+
+    .commandButtonGrid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .customCommandRow {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .commandSendButton {
+
+        min-height:
+            40px;
+
+    }
+
+}
+
+
+
+/* ==========================================================
+   OpenMCC telemetry charts
+   ========================================================== */
+
+.chartToolbar {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+    padding-bottom:
+        10px;
+
+}
+
+
+.chartStatus {
+
+    padding:
+        4px 8px;
+
+    color:
+        var(--yellow);
+
+    border:
+        1px solid currentColor;
+
+    border-radius:
+        4px;
+
+    font-size:
+        10px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        0.8px;
+
+}
+
+
+.chartStatus.active {
+
+    color:
+        var(--green);
+
+}
+
+
+.chartStatus.paused {
+
+    color:
+        var(--yellow);
+
+}
+
+
+.chartToolbarButton {
+
+    width:
+        auto;
+
+    min-width:
+        72px;
+
+    min-height:
+        30px;
+
+    margin:
+        0;
+
+    padding:
+        5px 11px;
+
+    font-size:
+        11px;
+
+}
+
+
+.chartGrid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap:
+        14px;
+
+}
+
+
+.chartCard {
+
+    min-width:
+        0;
+
+    padding:
+        14px;
+
+    background:
+        rgba(7, 11, 22, 0.48);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        9px;
+
+}
+
+
+.chartHeader {
+
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    justify-content:
+        space-between;
+
+    gap:
+        16px;
+
+    margin-bottom:
+        8px;
+
+}
+
+
+.chartName {
+
+    display:
+        block;
+
+    color:
+        var(--text);
+
+    font-size:
+        13px;
+
+    font-weight:
+        600;
+
+}
+
+
+.chartUnit {
+
+    display:
+        block;
+
+    margin-top:
+        2px;
+
+    color:
+        var(--text-secondary);
+
+    font-size:
+        10px;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+.chartCurrentValue {
+
+    color:
+        var(--cyan);
+
+    font-family:
+        "Consolas",
+        "Cascadia Mono",
+        monospace;
+
+    font-size:
+        18px;
+
+    font-variant-numeric:
+        tabular-nums;
+
+}
+
+
+.chartCanvasContainer {
+
+    position:
+        relative;
+
+    width:
+        100%;
+
+    height:
+        185px;
+
+}
+
+
+.chartCanvasContainer canvas {
+
+    width:
+        100% !important;
+
+    height:
+        100% !important;
+
+}
+
+
+.chartSummaryCard {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+}
+
+
+.chartSummary {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    width:
+        100%;
+
+    gap:
+        12px;
+
+}
+
+
+.chartSummary > div {
+
+    padding:
+        15px 10px;
+
+    text-align:
+        center;
+
+    background:
+        rgba(16, 25, 44, 0.65);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        7px;
+
+}
+
+
+.chartSummary span {
+
+    display:
+        block;
+
+    color:
+        var(--text-secondary);
+
+    font-size:
+        10px;
+
+    letter-spacing:
+        0.6px;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+.chartSummary strong {
+
+    display:
+        block;
+
+    margin-top:
+        7px;
+
+    color:
+        var(--cyan);
+
+    font-family:
+        "Consolas",
+        monospace;
+
+    font-size:
+        17px;
+
+}
+
+
+@media (max-width: 1000px) {
+
+    .chartGrid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+}
+
+
+@media (max-width: 650px) {
+
+    .panelTitleRow {
+
+        flex-direction:
+            column;
+
+    }
+
+
+    .chartToolbar {
+
+        width:
+            100%;
+
+        flex-wrap:
+            wrap;
+
+    }
+
+
+    .chartSummary {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+}
+
+
+
+
+
+
+/* ==========================================================
+   OpenMCC 3D satellite viewport
+   ========================================================== */
+
+#satellitePanel {
+
+    min-width:
+        0;
+
+}
+
+
+.satelliteToolbar {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+    padding-bottom:
+        10px;
+
+}
+
+
+.satelliteStatus {
+
+    padding:
+        4px 8px;
+
+    color:
+        var(--yellow);
+
+    border:
+        1px solid currentColor;
+
+    border-radius:
+        4px;
+
+    font-size:
+        10px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        0.8px;
+
+}
+
+
+.satelliteStatus.ready {
+
+    color:
+        var(--green);
+
+}
+
+
+.satelliteStatus.error {
+
+    color:
+        var(--red);
+
+}
+
+
+.satelliteToolbarButton {
+
+    width:
+        auto;
+
+    min-width:
+        92px;
+
+    min-height:
+        30px;
+
+    margin:
+        0;
+
+    padding:
+        5px 10px;
+
+    font-size:
+        11px;
+
+}
+
+
+#satelliteViewport {
+
+    position:
+        relative;
+
+    width:
+        100%;
+
+    height:
+        430px;
+
+    overflow:
+        hidden;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(17, 37, 65, 0.95) 0%,
+            rgba(7, 11, 22, 1) 72%
+        );
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        9px;
+
+}
+
+
+#satelliteViewport::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    inset:
+        0;
+
+    z-index:
+        0;
+
+    pointer-events:
+        none;
+
+    background-image:
+        linear-gradient(
+            rgba(0, 217, 255, 0.025) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(0, 217, 255, 0.025) 1px,
+            transparent 1px
+        );
+
+    background-size:
+        34px 34px;
+
+}
+
+
+#satelliteCanvas {
+
+    position:
+        absolute;
+
+    inset:
+        0;
+
+    z-index:
+        1;
+
+    display:
+        block;
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    cursor:
+        grab;
+
+}
+
+
+#satelliteCanvas:active {
+
+    cursor:
+        grabbing;
+
+}
+
+
+.satelliteOverlay {
+
+    position:
+        absolute;
+
+    left:
+        14px;
+
+    bottom:
+        14px;
+
+    z-index:
+        2;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3, minmax(72px, 1fr));
+
+    gap:
+        8px;
+
+    pointer-events:
+        none;
+
+}
+
+
+.orientationValue {
+
+    min-width:
+        78px;
+
+    padding:
+        8px 10px;
+
+    background:
+        rgba(7, 11, 22, 0.80);
+
+    border:
+        1px solid rgba(32, 53, 82, 0.92);
+
+    border-radius:
+        6px;
+
+    backdrop-filter:
+        blur(6px);
+
+}
+
+
+.orientationValue span {
+
+    display:
+        block;
+
+    color:
+        var(--text-secondary);
+
+    font-size:
+        9px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        0.8px;
+
+}
+
+
+.orientationValue strong {
+
+    display:
+        block;
+
+    margin-top:
+        4px;
+
+    color:
+        var(--cyan);
+
+    font-family:
+        "Consolas",
+        monospace;
+
+    font-size:
+        14px;
+
+    font-variant-numeric:
+        tabular-nums;
+
+}
+
+
+.satelliteAxisLegend {
+
+    position:
+        absolute;
+
+    right:
+        14px;
+
+    bottom:
+        14px;
+
+    z-index:
+        2;
+
+    display:
+        flex;
+
+    gap:
+        5px;
+
+    pointer-events:
+        none;
+
+}
+
+
+.satelliteAxisLegend span {
+
+    display:
+        grid;
+
+    width:
+        25px;
+
+    height:
+        25px;
+
+    place-items:
+        center;
+
+    border:
+        1px solid currentColor;
+
+    border-radius:
+        4px;
+
+    font-family:
+        "Consolas",
+        monospace;
+
+    font-size:
+        11px;
+
+    font-weight:
+        700;
+
+    background:
+        rgba(7, 11, 22, 0.78);
+
+}
+
+
+.axisX {
+
+    color:
+        #ff5c72;
+
+}
+
+
+.axisY {
+
+    color:
+        #49e68b;
+
+}
+
+
+.axisZ {
+
+    color:
+        #4fa7ff;
+
+}
+
+
+@media (max-width: 650px) {
+
+    .satelliteToolbar {
+
+        flex-wrap:
+            wrap;
+
+    }
+
+
+    #satelliteViewport {
+
+        height:
+            350px;
+
+    }
+
+
+    .satelliteOverlay {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+}
+
+
+
+
+
+
+
+
+/* ==========================================================
+   OpenMCC antenna rotator
+   ========================================================== */
+
+#rotatorPanel {
+
+    min-width:
+        0;
+
+}
+
+
+.rotatorStatus {
+
+    flex-shrink:
+        0;
+
+    padding:
+        4px 8px;
+
+    color:
+        var(--text-secondary);
+
+    border:
+        1px solid currentColor;
+
+    border-radius:
+        4px;
+
+    font-size:
+        10px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        0.8px;
+
+}
+
+
+.rotatorStatus.online {
+
+    color:
+        var(--green);
+
+    box-shadow:
+        0 0 10px rgba(0, 230, 118, 0.18);
+
+}
+
+
+.rotatorStatus.moving {
+
+    color:
+        var(--yellow);
+
+    box-shadow:
+        0 0 10px rgba(255, 193, 7, 0.18);
+
+}
+
+
+.rotatorStatus.error {
+
+    color:
+        var(--red);
+
+    box-shadow:
+        0 0 10px rgba(255, 82, 82, 0.18);
+
+}
+
+
+.rotatorConnectionRow {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        minmax(0, 1fr) 126px;
+
+    gap:
+        9px;
+
+    margin-bottom:
+        18px;
+
+}
+
+
+.rotatorConnectionRow button {
+
+    margin:
+        0;
+
+}
+
+
+.rotatorConnectionRow select,
+.rotatorInputField input {
+
+    width:
+        100%;
+
+    min-height:
+        42px;
+
+    padding:
+        0 11px;
+
+    color:
+        var(--text);
+
+    background:
+        var(--panel-light);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        7px;
+
+    font-family:
+        inherit;
+
+    outline:
+        none;
+
+}
+
+
+.rotatorConnectionRow select:focus,
+.rotatorInputField input:focus {
+
+    border-color:
+        var(--cyan);
+
+    box-shadow:
+        0 0 0 3px rgba(0, 217, 255, 0.1);
+
+}
+
+
+.rotatorSectionCaption {
+
+    display:
+        block;
+
+    margin-bottom:
+        9px;
+
+    color:
+        var(--text-secondary);
+
+    font-size:
+        10px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        0.9px;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+.rotatorModeRow,
+.rotatorTargetSection {
+
+    margin-bottom:
+        18px;
+
+    padding-bottom:
+        18px;
+
+    border-bottom:
+        1px solid rgba(32, 53, 82, 0.7);
+
+}
+
+
+.rotatorModeSwitch {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap:
+        8px;
+
+}
+
+
+.rotatorModeButton {
+
+    min-height:
+        38px;
+
+    margin:
+        0;
+
+    color:
+        var(--text-secondary);
+
+    border-color:
+        var(--border);
+
+}
+
+
+.rotatorModeButton.active {
+
+    color:
+        var(--cyan);
+
+    border-color:
+        var(--cyan);
+
+    background:
+        rgba(0, 217, 255, 0.08);
+
+}
+
+
+.rotatorAngles {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap:
+        10px;
+
+    margin-bottom:
+        18px;
+
+}
+
+
+.rotatorAngleCard {
+
+    position:
+        relative;
+
+    min-width:
+        0;
+
+    padding:
+        15px;
+
+    background:
+        rgba(7, 11, 22, 0.52);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        8px;
+
+}
+
+
+.rotatorAngleCard span {
+
+    display:
+        block;
+
+    color:
+        var(--text-secondary);
+
+    font-size:
+        10px;
+
+    letter-spacing:
+        0.5px;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+.rotatorAngleCard strong {
+
+    display:
+        block;
+
+    margin-top:
+        7px;
+
+    color:
+        var(--cyan);
+
+    font-family:
+        "Consolas",
+        monospace;
+
+    font-size:
+        27px;
+
+    font-variant-numeric:
+        tabular-nums;
+
+}
+
+
+.rotatorAngleCard small {
+
+    position:
+        absolute;
+
+    right:
+        12px;
+
+    bottom:
+        10px;
+
+    color:
+        rgba(145, 164, 189, 0.55);
+
+    font-family:
+        "Consolas",
+        monospace;
+
+    font-size:
+        10px;
+
+}
+
+
+.rotatorTargetGrid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap:
+        10px;
+
+}
+
+
+.rotatorInputField {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        6px;
+
+}
+
+
+.rotatorInputField span {
+
+    color:
+        var(--text-secondary);
+
+    font-size:
+        10px;
+
+    font-weight:
+        600;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+.rotatorInputField input {
+
+    font-family:
+        "Consolas",
+        monospace;
+
+    font-size:
+        16px;
+
+}
+
+
+.rotatorCommandButton {
+
+    min-height:
+        40px;
+
+    margin:
+        0;
+
+    color:
+        var(--text);
+
+    background:
+        rgba(22, 35, 61, 0.68);
+
+    border-color:
+        var(--border);
+
+}
+
+
+.rotatorMove {
+
+    width:
+        100%;
+
+    margin-top:
+        10px;
+
+    color:
+        var(--green);
+
+    border-color:
+        rgba(0, 230, 118, 0.55);
+
+}
+
+
+.rotatorMove:hover:not(:disabled) {
+
+    color:
+        var(--green);
+
+    border-color:
+        var(--green);
+
+    background:
+        rgba(0, 230, 118, 0.08);
+
+}
+
+
+.rotatorStop {
+
+    color:
+        var(--red);
+
+    border-color:
+        rgba(255, 82, 82, 0.65);
+
+}
+
+
+.rotatorStop:hover:not(:disabled) {
+
+    color:
+        var(--red);
+
+    border-color:
+        var(--red);
+
+    background:
+        rgba(255, 82, 82, 0.09);
+
+}
+
+
+.rotatorCommandGrid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap:
+        8px;
+
+    margin-bottom:
+        18px;
+
+}
+
+
+.rotatorStateGrid {
+
+    display:
+        grid;
+
+    gap:
+        7px;
+
+    margin-bottom:
+        14px;
+
+}
+
+
+.rotatorStateGrid > div {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        130px minmax(0, 1fr);
+
+    gap:
+        10px;
+
+    padding:
+        8px 10px;
+
+    background:
+        rgba(7, 11, 22, 0.46);
+
+    border:
+        1px solid rgba(32, 53, 82, 0.72);
+
+    border-radius:
+        6px;
+
+}
+
+
+.rotatorStateGrid span {
+
+    color:
+        var(--text-secondary);
+
+    font-size:
+        10px;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+.rotatorStateGrid strong {
+
+    overflow:
+        hidden;
+
+    color:
+        var(--text);
+
+    font-family:
+        "Consolas",
+        monospace;
+
+    font-size:
+        11px;
+
+    text-align:
+        right;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+
+}
+
+
+.rotatorSimulation {
+
+    padding-top:
+        12px;
+
+    border-top:
+        1px solid rgba(32, 53, 82, 0.7);
+
+}
+
+
+.rotatorSimulation label {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+    color:
+        var(--text-secondary);
+
+    font-size:
+        11px;
+
+    cursor:
+        pointer;
+
+}
+
+
+.rotatorSimulation input {
+
+    accent-color:
+        var(--cyan);
+
+}
+
+
+@media (max-width: 650px) {
+
+    .rotatorConnectionRow,
+    .rotatorAngles,
+    .rotatorTargetGrid,
+    .rotatorCommandGrid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .rotatorStateGrid > div {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .rotatorStateGrid strong {
+
+        text-align:
+            left;
+
+    }
+
+}
