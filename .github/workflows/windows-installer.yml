@@ -1,0 +1,52 @@
+name: Windows installer
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install desktop build dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build Windows installer
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        run: npm run dist:win
+
+      - name: Build and publish tagged release
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        run: npm run release:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Windows installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenMCC-Windows-Installer
+          path: |
+            release/*.exe
+            release/*.yml
+            release/*.blockmap
+          if-no-files-found: error
+          retention-days: 30
