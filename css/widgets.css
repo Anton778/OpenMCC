@@ -1,0 +1,259 @@
+/* OpenMCC v0.2 — widgets, controls, help tooltips */
+
+button,
+input,
+select {
+    font: inherit;
+}
+
+button {
+    transition: border-color .18s ease, color .18s ease, background .18s ease, box-shadow .18s ease, transform .12s ease;
+}
+
+button:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+button:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 2px solid rgba(0, 217, 255, .72);
+    outline-offset: 2px;
+}
+
+.iconButton,
+.smallButton {
+    width: auto;
+    margin: 0;
+}
+
+.iconButton {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border-radius: 10px;
+    color: #cbefff;
+    background: rgba(0, 217, 255, .055);
+}
+
+.smallButton {
+    min-height: 30px;
+    padding: 6px 9px;
+    border-color: rgba(70, 99, 132, .7);
+    color: #9eb4c8;
+    font-size: 10px;
+}
+
+.primaryAction {
+    min-height: 42px;
+    margin: 0 0 12px;
+    color: #07121d;
+    border-color: #21dfff;
+    background: linear-gradient(135deg, #14d9ff, #62e8ff);
+    font-weight: 750;
+    box-shadow: 0 8px 24px rgba(0, 217, 255, .10);
+}
+
+.primaryAction:hover:not(:disabled) {
+    color: #041019;
+    background: linear-gradient(135deg, #43e2ff, #81efff);
+    box-shadow: 0 10px 28px rgba(0, 217, 255, .18);
+}
+
+select,
+input[type="text"],
+input[type="number"] {
+    border-color: rgba(45, 75, 109, .85) !important;
+    background: #14223a !important;
+}
+
+select:hover,
+input:hover {
+    border-color: rgba(0, 217, 255, .45) !important;
+}
+
+.telemetryGrid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.telemetryCard {
+    position: relative;
+    min-height: 118px;
+    padding: 14px 12px;
+    text-align: left;
+    background: linear-gradient(180deg, rgba(22, 38, 64, .88), rgba(12, 23, 40, .9));
+}
+
+.telemetryCard::after {
+    content: "";
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 10px;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, rgba(0, 217, 255, .7), transparent);
+    opacity: .25;
+}
+
+.telemetryCard .label {
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    font-size: 10px;
+}
+
+.telemetryCard .value {
+    margin-top: 12px;
+    font: 700 clamp(24px, 2.3vw, 34px)/1 Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 18px rgba(0, 217, 255, .12);
+}
+
+.telemetryCard .unit {
+    display: block;
+    margin-top: 7px;
+    color: #66829e;
+    font: 700 9px/1 Consolas, monospace;
+    text-transform: uppercase;
+}
+
+.commandButton,
+.commandSendButton,
+.rotatorCommandButton,
+.rotatorMainButton,
+.chartToolbarButton,
+.satelliteToolbarButton,
+.rotatorModeButton {
+    border-color: rgba(54, 84, 117, .82);
+    background: rgba(17, 31, 52, .72);
+    box-shadow: none;
+}
+
+.commandButton:hover:not(:disabled),
+.rotatorCommandButton:hover:not(:disabled),
+.chartToolbarButton:hover:not(:disabled),
+.satelliteToolbarButton:hover:not(:disabled),
+.rotatorModeButton:hover:not(:disabled) {
+    background: rgba(0, 217, 255, .07);
+    box-shadow: 0 0 0 1px rgba(0, 217, 255, .08) inset;
+}
+
+.commandDanger,
+.rotatorStop {
+    border-color: rgba(255, 82, 82, .62) !important;
+}
+
+.commandSuccess,
+.rotatorMove {
+    border-color: rgba(0, 230, 118, .48) !important;
+}
+
+.chartGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.chartCard {
+    border-radius: 11px;
+    background: rgba(6, 14, 26, .56);
+}
+
+.chartCanvasContainer {
+    height: 205px;
+}
+
+.chartSummaryCard {
+    min-height: 205px;
+}
+
+#satelliteViewport {
+    height: 430px;
+    border-style: solid;
+    border-radius: 12px;
+    background: radial-gradient(circle at center, #10233a, #050a12 72%);
+}
+
+.rotatorAngleCard {
+    background: linear-gradient(180deg, rgba(8, 18, 32, .8), rgba(5, 12, 23, .76));
+}
+
+.rotatorAngleCard strong {
+    text-shadow: 0 0 18px rgba(0, 217, 255, .16);
+}
+
+#openmccTooltip {
+    position: fixed;
+    z-index: 9999;
+    pointer-events: none;
+    max-width: 310px;
+    padding: 8px 10px;
+    border: 1px solid rgba(74, 110, 145, .85);
+    border-radius: 8px;
+    color: #d8e8f6;
+    background: rgba(5, 12, 22, .97);
+    box-shadow: 0 12px 34px rgba(0, 0, 0, .35);
+    font-size: 11px;
+    line-height: 1.45;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity .12s ease, transform .12s ease;
+}
+
+#openmccTooltip.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+[data-tip] { cursor: help; }
+button[data-tip],
+select[data-tip],
+input[data-tip] { cursor: pointer; }
+
+.openmccToast {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 9000;
+    width: min(380px, calc(100vw - 36px));
+    padding: 12px 14px;
+    border: 1px solid rgba(0, 217, 255, .4);
+    border-radius: 11px;
+    color: #bcd6e7;
+    background: rgba(6, 15, 27, .96);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .4);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.openmccToast strong {
+    display: block;
+    margin-bottom: 3px;
+    color: #e4f5ff;
+}
+
+.openmccToast button {
+    width: auto;
+    min-height: 28px;
+    margin: 9px 0 0;
+    padding: 5px 9px;
+    font-size: 10px;
+}
+
+@media (max-width: 1180px) {
+    .telemetryGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .chartGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+    .telemetryGrid,
+    .chartGrid { grid-template-columns: 1fr; }
+    .telemetryCard { min-height: 98px; }
+    .chartCanvasContainer { height: 190px; }
+}
