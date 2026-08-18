@@ -20,6 +20,81 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PlatformIO
+        run: python -m pip install --upgrade platformio
+
+      - name: Compile ESP32 radio gateway
+        run: pio run -d firmware/radio_gateway_esp32
+
+      - name: Prepare bundled ESP32 firmware
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $buildDir = "firmware/radio_gateway_esp32/.pio/build/esp32dev"
+          $sourceCode = Get-Content "firmware/radio_gateway_esp32/src/main.cpp" -Raw
+
+          if ($sourceCode -notmatch 'constexpr\s+char\s+FW_VERSION\[\]\s*=\s*"([^"]+)"') {
+            throw "Unable to read FW_VERSION from ESP32 gateway source."
+          }
+          $firmwareVersion = $Matches[1]
+
+          $bootApp0 = Get-ChildItem "$env:USERPROFILE/.platformio/packages" -Recurse -Filter "boot_app0.bin" | Select-Object -First 1
+          if (-not $bootApp0) {
+            throw "boot_app0.bin was not found in the installed ESP32 Arduino framework."
+          }
+
+          New-Item -ItemType Directory -Force "bundled_firmware" | Out-Null
+
+          $images = @(
+            @{ Source = "$buildDir/bootloader.bin";   File = "gateway-bootloader.bin";  Label = "Bootloader";       Address = 4096 },
+            @{ Source = "$buildDir/partitions.bin";   File = "gateway-partitions.bin";  Label = "Partition table"; Address = 32768 },
+            @{ Source = $bootApp0.FullName;            File = "gateway-boot_app0.bin";   Label = "boot_app0";       Address = 57344 },
+            @{ Source = "$buildDir/firmware.bin";     File = "gateway-firmware.bin";    Label = "Radio gateway";   Address = 65536 }
+          )
+
+          $manifestImages = @()
+          foreach ($image in $images) {
+            if (-not (Test-Path $image.Source)) {
+              throw "Firmware image not found: $($image.Source)"
+            }
+
+            $target = Join-Path "bundled_firmware" $image.File
+            Copy-Item $image.Source $target -Force
+            $fileInfo = Get-Item $target
+            $md5 = (Get-FileHash -Algorithm MD5 $target).Hash.ToLowerInvariant()
+
+            $manifestImages += [ordered]@{
+              file = $image.File
+              label = $image.Label
+              address = $image.Address
+              size = $fileInfo.Length
+              md5 = $md5
+            }
+          }
+
+          $appVersion = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $manifest = [ordered]@{
+            schemaVersion = 1
+            targetBoard = "ESP32-WROOM-32 / esp32dev"
+            targetChip = "ESP32"
+            firmwareVersion = $firmwareVersion
+            applicationVersion = $appVersion
+            buildLabel = "OpenMCC v$appVersion CI"
+            flashMode = "dio"
+            flashFreq = "40m"
+            flashSize = "4MB"
+            eraseAll = $false
+            images = $manifestImages
+          }
+
+          $manifest | ConvertTo-Json -Depth 6 | Set-Content "bundled_firmware/manifest.json" -Encoding utf8
+          Get-Content "bundled_firmware/manifest.json"
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -39,6 +114,8 @@ jobs:
             release/*.exe
             release/*.yml
             release/*.blockmap
+            bundled_firmware/*.json
+            bundled_firmware/*.bin
           if-no-files-found: error
           retention-days: 30
 
