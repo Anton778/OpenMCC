@@ -1,0 +1,70 @@
+{
+  "name": "openmcc",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Open Mission Control Center desktop application for educational CubeSat ground stations",
+  "main": "desktop/main.cjs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Anton778/OpenMCC.git"
+  },
+  "scripts": {
+    "start": "electron .",
+    "pack:win": "electron-builder --win dir --x64 --publish never",
+    "dist:win": "electron-builder --win nsis --x64 --publish never",
+    "release:win": "electron-builder --win nsis --x64 --publish always"
+  },
+  "devDependencies": {
+    "electron": "43.2.0",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "org.openmcc.desktop",
+    "productName": "OpenMCC",
+    "asar": true,
+    "compression": "normal",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "index.html",
+      "css/**/*",
+      "js/**/*",
+      "libraries/**/*",
+      "examples/**/*",
+      "docs/**/*",
+      "desktop/**/*",
+      "README.md",
+      "CHANGELOG.md",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "OpenMCC-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "OpenMCC",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Anton778",
+        "repo": "OpenMCC",
+        "releaseType": "release"
+      }
+    ]
+  }
+}
