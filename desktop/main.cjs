@@ -23,7 +23,8 @@ const MIME_TYPES = Object.freeze({
     ".woff": "font/woff",
     ".woff2": "font/woff2",
     ".txt": "text/plain; charset=utf-8",
-    ".md": "text/markdown; charset=utf-8"
+    ".md": "text/markdown; charset=utf-8",
+    ".bin": "application/octet-stream"
 });
 
 let mainWindow = null;
@@ -79,9 +80,15 @@ async function serveFile(request, response) {
 
         response.writeHead(200, {
             "Content-Type": getMimeType(filePath),
+            "Content-Length": stat.size,
             "Cache-Control": "no-store",
             "X-Content-Type-Options": "nosniff"
         });
+
+        if (request.method === "HEAD") {
+            response.end();
+            return;
+        }
 
         fs.createReadStream(filePath).pipe(response);
     }
@@ -191,6 +198,19 @@ function configureSerialAccess(window) {
     );
 }
 
+async function loadDesktopModules(window) {
+    try {
+        await window.webContents.executeJavaScript(`
+            import("/js/flasher.js").catch(error => {
+                console.error("OpenMCC flasher module failed to load", error);
+            });
+        `);
+    }
+    catch (error) {
+        console.error("Unable to inject OpenMCC desktop modules", error);
+    }
+}
+
 async function createMainWindow() {
     mainWindow = new BrowserWindow({
         width: 1600,
@@ -232,6 +252,7 @@ async function createMainWindow() {
     });
 
     await mainWindow.loadURL(`${applicationOrigin}/`);
+    await loadDesktopModules(mainWindow);
 }
 
 const singleInstanceLock = app.requestSingleInstanceLock();
