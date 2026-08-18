@@ -1,0 +1,247 @@
+/* OpenMCC v0.3 — radio configuration and command presets */
+
+#radioAdvancedControls {
+    display: grid;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.radioEmptyState {
+    display: grid;
+    gap: 5px;
+    padding: 14px;
+    border: 1px dashed rgba(71, 103, 137, .75);
+    border-radius: 10px;
+    background: rgba(5, 12, 23, .38);
+}
+
+.radioEmptyState strong { color: #d8e9f7; font-size: 12px; }
+.radioEmptyState span { color: #7893ac; font-size: 11px; line-height: 1.5; }
+
+.radioDetails {
+    overflow: hidden;
+    border: 1px solid rgba(43, 73, 108, .72);
+    border-radius: 11px;
+    background: rgba(5, 12, 23, .45);
+}
+
+.radioDetails summary {
+    padding: 11px 13px;
+    cursor: pointer;
+    color: #cfe8f5;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    background: rgba(15, 29, 49, .7);
+}
+
+.radioDetails[open] summary { border-bottom: 1px solid rgba(43, 73, 108, .62); }
+.radioDetailsBody { padding: 12px; }
+
+.radioPinTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+}
+
+.radioPinTable th,
+.radioPinTable td {
+    padding: 7px 8px;
+    border-bottom: 1px solid rgba(39, 66, 98, .52);
+    text-align: left;
+    vertical-align: top;
+}
+
+.radioPinTable th {
+    color: #7fa1bd;
+    font-size: 9px;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+}
+
+.radioPinTable td:first-child,
+.radioPinTable td:nth-child(2) {
+    color: #d9eef8;
+    font-family: Consolas, monospace;
+    white-space: nowrap;
+}
+
+.radioPinTable td:last-child { color: #829bb2; }
+
+.radioSafetyNote,
+.radioRegulatoryNote {
+    margin: 10px 0 0;
+    color: #8da5bb;
+    font-size: 10px;
+    line-height: 1.55;
+}
+
+.radioRegulatoryNote {
+    padding: 9px 10px;
+    border-left: 2px solid rgba(255, 193, 7, .68);
+    background: rgba(255, 193, 7, .035);
+}
+
+.radioConfigCard {
+    padding: 13px;
+    border: 1px solid rgba(43, 73, 108, .75);
+    border-radius: 11px;
+    background: linear-gradient(180deg, rgba(9, 20, 35, .78), rgba(5, 12, 23, .72));
+}
+
+.radioConfigHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.radioConfigHeader > div { display: grid; gap: 3px; }
+.radioConfigHeader span { color: #6f8ca8; font-size: 9px; letter-spacing: .09em; text-transform: uppercase; }
+.radioConfigHeader strong { color: #dcecf8; font-size: 13px; }
+
+.radioLocalBadge {
+    padding: 4px 7px;
+    border: 1px solid rgba(73, 112, 148, .6);
+    border-radius: 999px;
+    color: #7898b4 !important;
+    font-size: 8px !important;
+    white-space: nowrap;
+}
+
+.radioControlGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.radioControlGrid > label:not(.radioCheck) {
+    display: grid;
+    gap: 6px;
+}
+
+.radioControlGrid label > span {
+    color: #8099b0;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+}
+
+.radioControlGrid select,
+.radioControlGrid input[type="number"] {
+    width: 100%;
+    min-height: 38px;
+    padding: 0 10px;
+    color: #e4f1fb;
+    border: 1px solid rgba(45, 75, 109, .85);
+    border-radius: 8px;
+    background: #14223a;
+}
+
+.radioCheck {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 1px solid rgba(45, 75, 109, .72);
+    border-radius: 8px;
+    background: rgba(20, 34, 58, .62);
+}
+
+.radioCheck input { accent-color: #00d9ff; }
+.radioCheck span { margin: 0; }
+
+.radioCommandPreview {
+    display: grid;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 10px;
+    border: 1px solid rgba(42, 70, 102, .65);
+    border-radius: 9px;
+    background: rgba(3, 9, 17, .72);
+}
+
+.radioCommandPreview span {
+    color: #6d89a3;
+    font-size: 9px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.radioCommandPreview code {
+    overflow-wrap: anywhere;
+    color: #8feaff;
+    font: 600 10px/1.5 Consolas, monospace;
+}
+
+.radioActionRow {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.radioApplyButton,
+.radioSecondaryButton {
+    min-height: 40px;
+    margin: 0;
+    border-radius: 8px;
+    font-size: 11px;
+}
+
+.radioApplyButton {
+    color: #041019;
+    border-color: #21dfff;
+    background: linear-gradient(135deg, #14d9ff, #62e8ff);
+    font-weight: 750;
+}
+
+.radioSecondaryButton {
+    color: #b4c9da;
+    border-color: rgba(56, 86, 119, .85);
+    background: rgba(17, 31, 52, .72);
+}
+
+.radioApplyStatus {
+    margin-top: 9px;
+    color: #7f98ae;
+    font-size: 10px;
+    line-height: 1.45;
+}
+
+.radioApplyStatus[data-state="saved"] { color: #8fd6b3; }
+.radioApplyStatus[data-state="sent"] { color: #77e5ff; }
+.radioApplyStatus[data-state="error"] { color: #ff8d8d; }
+
+.commandPresetGroup { margin-top: 2px; }
+
+.commandPresetRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(150px, .8fr);
+    gap: 8px;
+}
+
+.commandPresetRow select {
+    width: 100%;
+    min-height: 42px;
+    padding: 0 10px;
+    color: #e3f0fb;
+    border: 1px solid rgba(45, 75, 109, .85);
+    border-radius: 8px;
+    background: #14223a;
+}
+
+.commandPresetRow button { margin: 0; }
+.commandPresetNote { margin-top: 8px; color: #7892a8; font-size: 10px; line-height: 1.45; }
+
+@media (max-width: 720px) {
+    .radioControlGrid,
+    .radioActionRow,
+    .commandPresetRow { grid-template-columns: 1fr; }
+    .radioPinTable { font-size: 9px; }
+    .radioPinTable th,
+    .radioPinTable td { padding: 6px; }
+}
