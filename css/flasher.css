@@ -1,0 +1,264 @@
+/* OpenMCC v0.4 — integrated ESP32 firmware flasher */
+
+#firmwarePanel {
+    grid-column: span 12;
+}
+
+.flasherIntro {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(320px, .85fr);
+    gap: 16px;
+    align-items: start;
+}
+
+.flasherSummary,
+.flasherControls,
+.flasherLogCard {
+    border: 1px solid rgba(43, 73, 108, .72);
+    border-radius: 12px;
+    background: rgba(4, 10, 19, .56);
+}
+
+.flasherSummary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    padding: 10px;
+}
+
+.flasherSummary > div {
+    min-width: 0;
+    padding: 10px 11px;
+    border: 1px solid rgba(39, 66, 98, .62);
+    border-radius: 9px;
+    background: rgba(7, 16, 29, .76);
+}
+
+.flasherSummary span,
+.flasherStageLabel,
+.flasherField > span,
+.flasherLogHeader span {
+    display: block;
+    color: #6f8ba4;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+}
+
+.flasherSummary strong {
+    display: block;
+    overflow: hidden;
+    margin-top: 6px;
+    color: #dcecff;
+    font: 650 12px/1.35 Consolas, monospace;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.flasherControls {
+    padding: 13px;
+}
+
+.flasherControls h3,
+.flasherLogHeader strong {
+    margin: 0;
+    color: #dbeeff;
+    font-size: 13px;
+}
+
+.flasherControlGrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.flasherField {
+    display: grid;
+    gap: 6px;
+}
+
+.flasherField select {
+    width: 100%;
+    min-height: 38px;
+}
+
+.flasherSafety {
+    margin-top: 12px;
+    padding: 10px 11px;
+    border-left: 2px solid rgba(255, 193, 7, .72);
+    border-radius: 0 8px 8px 0;
+    background: rgba(255, 193, 7, .045);
+    color: #9eb1c2;
+    font-size: 11px;
+    line-height: 1.55;
+}
+
+.flasherSafety strong {
+    color: #ffd06a;
+}
+
+.flasherActions {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.6fr) minmax(180px, .8fr);
+    gap: 10px;
+    margin-top: 13px;
+}
+
+.flasherPrimary,
+.flasherSecondary {
+    width: 100%;
+    min-height: 46px;
+    margin: 0;
+    border-radius: 9px;
+}
+
+.flasherPrimary {
+    border-color: rgba(0, 230, 118, .68);
+    color: #9dffd0;
+    background: linear-gradient(135deg, rgba(0, 230, 118, .12), rgba(0, 217, 255, .06));
+    font-weight: 750;
+}
+
+.flasherPrimary:hover:not(:disabled) {
+    border-color: rgba(0, 230, 118, .9);
+    background: linear-gradient(135deg, rgba(0, 230, 118, .18), rgba(0, 217, 255, .10));
+}
+
+.flasherSecondary {
+    border-color: rgba(65, 101, 137, .85);
+    background: rgba(17, 31, 52, .72);
+}
+
+.flasherProgressWrap {
+    margin-top: 15px;
+}
+
+.flasherProgressHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 7px;
+}
+
+.flasherProgressHeader strong {
+    color: #8fe9ff;
+    font: 700 12px/1 Consolas, monospace;
+}
+
+.flasherProgressTrack {
+    position: relative;
+    height: 11px;
+    overflow: hidden;
+    border: 1px solid rgba(48, 81, 116, .72);
+    border-radius: 999px;
+    background: rgba(3, 9, 17, .82);
+}
+
+.flasherProgressBar {
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #00d9ff, #00e676);
+    box-shadow: 0 0 18px rgba(0, 217, 255, .22);
+    transition: width .15s linear;
+}
+
+.flasherStageText {
+    margin-top: 7px;
+    color: #839bb0;
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.flasherLogCard {
+    margin-top: 16px;
+    overflow: hidden;
+}
+
+.flasherLogHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(39, 66, 98, .62);
+}
+
+.flasherLogHeader button {
+    width: auto;
+    min-height: 28px;
+    margin: 0;
+    padding: 5px 9px;
+    font-size: 10px;
+}
+
+#firmwareLog {
+    height: 180px;
+    overflow: auto;
+    margin: 0;
+    padding: 11px 12px;
+    color: #9eb6ca;
+    background: rgba(2, 7, 13, .82);
+    font: 11px/1.55 Consolas, monospace;
+    white-space: pre-wrap;
+}
+
+.flasherState {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 24px;
+    padding: 4px 8px;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    color: #7f9bb6;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .08em;
+}
+
+.flasherState.ready {
+    color: #00e676;
+    background: rgba(0, 230, 118, .055);
+}
+
+.flasherState.busy {
+    color: #00d9ff;
+    background: rgba(0, 217, 255, .055);
+}
+
+.flasherState.error {
+    color: #ff7777;
+    background: rgba(255, 82, 82, .055);
+}
+
+.flasherState.warning {
+    color: #ffcc62;
+    background: rgba(255, 193, 7, .055);
+}
+
+.flasherUnavailable {
+    padding: 14px;
+    border: 1px dashed rgba(255, 193, 7, .45);
+    border-radius: 10px;
+    color: #9eb1c2;
+    background: rgba(255, 193, 7, .035);
+    font-size: 11px;
+    line-height: 1.55;
+}
+
+@media (max-width: 1050px) {
+    #firmwarePanel { grid-column: span 2 !important; }
+    .flasherIntro { grid-template-columns: 1fr; }
+    .flasherSummary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+    #firmwarePanel { grid-column: 1 !important; }
+    .flasherSummary,
+    .flasherControlGrid,
+    .flasherActions { grid-template-columns: 1fr; }
+}

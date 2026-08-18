@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.4.0 — Integrated ESP32 firmware flasher
+
+- добавлен встроенный раздел **«Прошивка ESP32»** в desktop-приложение OpenMCC;
+- добавлен официальный `esptool-js 0.6.1` как production dependency;
+- прошивка `ESP32-WROOM-32` выполняется прямо из OpenMCC без Arduino IDE, PlatformIO и Python на компьютере оператора;
+- перед записью определяется тип чипа; комплект радиошлюза разрешено записывать только в классический ESP32;
+- основной Serial-канал OpenMCC автоматически освобождается перед прошивкой;
+- добавлены прогресс, диагностический журнал и подсказки по ручному входу в BOOT mode;
+- после записи выполняется MD5-проверка каждой области Flash;
+- полный `erase-all` по умолчанию не выполняется, NVS не стирается целиком;
+- после успешной прошивки можно одной кнопкой подключить ESP32 как радиошлюз и запросить `GATEWAY_INFO` / `RADIO_STATUS`;
+- Windows workflow теперь компилирует ESP32 radio gateway перед сборкой установщика и включает bootloader, partitions, boot_app0 и application внутрь `.exe`;
+- добавлена документация `docs/FIRMWARE_FLASHER.md`;
+- версия Windows-приложения повышена до 0.4.0.
+
 ## Radio gateway firmware v0.1.0
 
 - добавлен отдельный PlatformIO-проект `firmware/radio_gateway_esp32` для ESP32-WROOM-32;

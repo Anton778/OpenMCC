@@ -37,16 +37,26 @@ jobs:
       - name: Prepare firmware artifact
         shell: bash
         run: |
+          set -euo pipefail
           mkdir -p firmware-artifact
-          cp firmware/radio_gateway_esp32/.pio/build/esp32dev/firmware.bin firmware-artifact/openmcc-radio-gateway-firmware.bin
-          cp firmware/radio_gateway_esp32/.pio/build/esp32dev/bootloader.bin firmware-artifact/openmcc-radio-gateway-bootloader.bin
-          cp firmware/radio_gateway_esp32/.pio/build/esp32dev/partitions.bin firmware-artifact/openmcc-radio-gateway-partitions.bin
+          BUILD_DIR="firmware/radio_gateway_esp32/.pio/build/esp32dev"
+          BOOT_APP0="$(find "$HOME/.platformio/packages" -name boot_app0.bin -print -quit)"
+          test -n "$BOOT_APP0"
+
+          cp "$BUILD_DIR/firmware.bin" firmware-artifact/openmcc-radio-gateway-firmware.bin
+          cp "$BUILD_DIR/bootloader.bin" firmware-artifact/openmcc-radio-gateway-bootloader.bin
+          cp "$BUILD_DIR/partitions.bin" firmware-artifact/openmcc-radio-gateway-partitions.bin
+          cp "$BOOT_APP0" firmware-artifact/openmcc-radio-gateway-boot_app0.bin
+
           cat > firmware-artifact/flash-layout.txt <<'EOF'
           ESP32-WROOM-32 / esp32dev flash layout
           0x1000  openmcc-radio-gateway-bootloader.bin
           0x8000  openmcc-radio-gateway-partitions.bin
+          0xE000  openmcc-radio-gateway-boot_app0.bin
           0x10000 openmcc-radio-gateway-firmware.bin
           EOF
+
+          md5sum firmware-artifact/*.bin > firmware-artifact/md5sums.txt
 
       - name: Upload compiled firmware
         uses: actions/upload-artifact@v4
