@@ -1,6 +1,6 @@
 {
   "name": "openmcc",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Open Mission Control Center desktop application for educational CubeSat ground stations",
   "main": "desktop/main.cjs",
