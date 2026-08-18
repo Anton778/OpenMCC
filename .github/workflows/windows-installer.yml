@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    tags:
-      - "v*"
   pull_request:
     branches:
       - main
@@ -31,14 +29,7 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Build Windows installer
-        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
         run: npm run dist:win
-
-      - name: Build and publish tagged release
-        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
-        run: npm run release:win
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Windows installer artifact
         uses: actions/upload-artifact@v4
@@ -50,3 +41,37 @@ jobs:
             release/*.blockmap
           if-no-files-found: error
           retention-days: 30
+
+      - name: Read application version
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        id: app_version
+        shell: pwsh
+        run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "tag=v$version" >> $env:GITHUB_OUTPUT
+
+      - name: Publish GitHub Release when this version is new
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.app_version.outputs.tag }}
+          RELEASE_VERSION: ${{ steps.app_version.outputs.version }}
+        run: |
+          gh release view $env:RELEASE_TAG *> $null
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "Release $env:RELEASE_TAG already exists. Installer artifact was built, but the published release was not replaced."
+            exit 0
+          }
+
+          $installer = Get-ChildItem -Path release -Filter "OpenMCC-Setup-*.exe" | Select-Object -First 1
+          if (-not $installer) {
+            throw "Windows installer was not found in release/."
+          }
+
+          gh release create $env:RELEASE_TAG $installer.FullName `
+            --target $env:GITHUB_SHA `
+            --title "OpenMCC $env:RELEASE_TAG" `
+            --generate-notes `
+            --latest
