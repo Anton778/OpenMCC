@@ -1,0 +1,57 @@
+name: ESP32 radio gateway firmware
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "firmware/radio_gateway_esp32/**"
+      - ".github/workflows/esp32-radio-gateway.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "firmware/radio_gateway_esp32/**"
+      - ".github/workflows/esp32-radio-gateway.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PlatformIO
+        run: python -m pip install --upgrade platformio
+
+      - name: Compile ESP32 radio gateway
+        run: pio run -d firmware/radio_gateway_esp32
+
+      - name: Prepare firmware artifact
+        shell: bash
+        run: |
+          mkdir -p firmware-artifact
+          cp firmware/radio_gateway_esp32/.pio/build/esp32dev/firmware.bin firmware-artifact/openmcc-radio-gateway-firmware.bin
+          cp firmware/radio_gateway_esp32/.pio/build/esp32dev/bootloader.bin firmware-artifact/openmcc-radio-gateway-bootloader.bin
+          cp firmware/radio_gateway_esp32/.pio/build/esp32dev/partitions.bin firmware-artifact/openmcc-radio-gateway-partitions.bin
+          cat > firmware-artifact/flash-layout.txt <<'EOF'
+          ESP32-WROOM-32 / esp32dev flash layout
+          0x1000  openmcc-radio-gateway-bootloader.bin
+          0x8000  openmcc-radio-gateway-partitions.bin
+          0x10000 openmcc-radio-gateway-firmware.bin
+          EOF
+
+      - name: Upload compiled firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenMCC-ESP32-Radio-Gateway
+          path: firmware-artifact/*
+          if-no-files-found: error
+          retention-days: 30
