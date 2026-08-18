@@ -1,0 +1,377 @@
+/* OpenMCC v0.2 — panel layer */
+
+.panel {
+    position: relative;
+    overflow: visible;
+    padding: 18px;
+    border: 1px solid rgba(43, 73, 108, .75);
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(15, 26, 45, .96), rgba(8, 16, 29, .96));
+    box-shadow: 0 16px 40px rgba(0, 0, 0, .18), 0 0 0 1px rgba(255, 255, 255, .015) inset;
+}
+
+.panel::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto auto 18px;
+    width: 72px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--cyan), transparent);
+    opacity: .55;
+}
+
+.panel:hover { border-color: rgba(66, 106, 148, .9); }
+
+.panelTitleRow {
+    align-items: center;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(47, 77, 111, .58);
+}
+
+.panelTitleRow h2,
+.panel h2 {
+    margin: 1px 0 0;
+    padding: 0;
+    border: 0;
+    color: #eaf5ff;
+    font-size: 17px;
+    font-weight: 650;
+    letter-spacing: .01em;
+}
+
+.panelEyebrow {
+    display: block;
+    color: #6f8ca8;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+}
+
+.panelLead {
+    margin: -2px 0 14px;
+    color: #8ea5bc;
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.panelState,
+.buildBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 24px;
+    padding: 4px 8px;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    white-space: nowrap;
+}
+
+.panelState.neutral,
+.buildBadge {
+    color: #7f9bb6;
+    border-color: rgba(80, 112, 145, .6);
+    background: rgba(78, 110, 144, .07);
+}
+
+.panelState.live {
+    color: var(--green);
+    background: rgba(0, 230, 118, .06);
+}
+
+.panelState.planned {
+    color: #ffcb63;
+    background: rgba(255, 193, 7, .06);
+}
+
+.infoTable,
+.radioHintGrid {
+    display: grid;
+    gap: 7px;
+}
+
+.infoTable > div,
+.radioHintGrid > div,
+.rotatorStateGrid > div {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: center;
+    min-height: 34px;
+    padding: 8px 10px;
+    border: 1px solid rgba(39, 66, 98, .68);
+    border-radius: 9px;
+    background: rgba(5, 12, 23, .48);
+}
+
+.infoTable span,
+.radioHintGrid span {
+    color: #6f89a2;
+    font-size: 10px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.infoTable strong,
+.radioHintGrid strong {
+    color: #dbeaff;
+    font: 600 11px/1.2 Consolas, monospace;
+    text-align: right;
+}
+
+.systemList {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.systemList li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 11px;
+    border: 1px solid rgba(39, 66, 98, .64);
+    border-radius: 9px;
+    background: rgba(5, 12, 23, .42);
+    color: #afc3d6;
+    font-size: 12px;
+}
+
+.systemFootnote,
+.telemetryNote {
+    margin-top: 12px;
+    color: #718aa3;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.telemetryNote code { color: #a9dcea; }
+
+.radioArchitecture {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow-x: auto;
+    margin: 6px 0 14px;
+    padding: 10px;
+    border: 1px solid rgba(39, 66, 98, .68);
+    border-radius: 10px;
+    background: rgba(4, 10, 19, .6);
+}
+
+.radioArchitecture span {
+    flex: 0 0 auto;
+    padding: 6px 8px;
+    border-radius: 7px;
+    background: rgba(0, 217, 255, .07);
+    color: #dceeff;
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.radioArchitecture i {
+    flex: 0 0 auto;
+    color: #55718d;
+    font: 700 9px/1 Consolas, monospace;
+    font-style: normal;
+}
+
+.radioHintGrid { margin-top: 12px; }
+
+.noticeBox {
+    margin-top: 12px;
+    padding: 11px 12px;
+    border-left: 2px solid rgba(0, 217, 255, .65);
+    border-radius: 0 8px 8px 0;
+    background: rgba(0, 217, 255, .045);
+    color: #88a6bf;
+    font-size: 11px;
+    line-height: 1.55;
+}
+
+#mapViewport {
+    position: relative;
+    isolation: isolate;
+    height: 430px;
+    overflow: hidden;
+    border: 1px solid rgba(43, 73, 108, .72);
+    border-radius: 12px;
+    background: radial-gradient(circle at center, rgba(0, 217, 255, .045), transparent 52%), linear-gradient(180deg, #07111f, #050a12);
+}
+
+.mapGrid {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(rgba(61, 98, 133, .12) 1px, transparent 1px), linear-gradient(90deg, rgba(61, 98, 133, .12) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(circle at center, black 35%, transparent 88%);
+}
+
+.mapGrid::after {
+    content: "";
+    position: absolute;
+    width: 58%;
+    aspect-ratio: 2 / 1;
+    left: 21%;
+    top: 24%;
+    border: 1px solid rgba(0, 217, 255, .18);
+    border-radius: 50%;
+    box-shadow: 0 0 90px rgba(0, 217, 255, .04) inset;
+}
+
+.mapCenterMark {
+    position: absolute;
+    left: 50%;
+    top: 47%;
+    transform: translate(-50%, -50%);
+    color: rgba(0, 217, 255, .45);
+    font: 300 36px/1 Consolas, monospace;
+}
+
+.mapMessage {
+    position: absolute;
+    left: 50%;
+    bottom: 28px;
+    transform: translateX(-50%);
+    width: min(88%, 620px);
+    padding: 12px 14px;
+    border: 1px solid rgba(64, 91, 120, .7);
+    border-radius: 10px;
+    background: rgba(5, 12, 23, .86);
+    text-align: center;
+}
+
+.mapMessage strong {
+    display: block;
+    color: #c9e8f2;
+    font: 700 12px/1.2 Consolas, monospace;
+}
+
+.mapMessage span {
+    display: block;
+    margin-top: 5px;
+    color: #7892ab;
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.projectStatusGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 9px;
+}
+
+.projectItem {
+    min-height: 82px;
+    padding: 12px;
+    border: 1px solid rgba(42, 69, 100, .72);
+    border-radius: 10px;
+    background: rgba(5, 12, 23, .48);
+}
+
+.projectItem span {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.projectItem strong {
+    color: #d4e3f2;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.projectItem.done span { color: var(--green); }
+.projectItem.test span { color: #ffca57; }
+.projectItem.planned span { color: #84a0ba; }
+
+#eventLog {
+    height: 220px;
+    padding: 6px;
+    border: 1px solid rgba(39, 66, 98, .62);
+    border-radius: 10px;
+    background: rgba(3, 9, 17, .62);
+}
+
+.helpDialog {
+    width: min(760px, calc(100vw - 28px));
+    max-height: min(760px, calc(100vh - 28px));
+    padding: 0;
+    color: var(--text);
+    border: 1px solid rgba(59, 95, 131, .82);
+    border-radius: 16px;
+    background: #0a1424;
+    box-shadow: 0 30px 100px rgba(0, 0, 0, .55);
+}
+
+.helpDialog::backdrop {
+    background: rgba(0, 4, 10, .72);
+    backdrop-filter: blur(6px);
+}
+
+.helpDialogHeader {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 18px;
+    border-bottom: 1px solid rgba(47, 77, 111, .62);
+    background: rgba(10, 20, 36, .96);
+}
+
+.helpDialogHeader h2 {
+    margin: 2px 0 0;
+    color: #e9f4ff;
+    font-size: 19px;
+}
+
+.helpDialogBody {
+    display: grid;
+    gap: 12px;
+    padding: 18px;
+    overflow-y: auto;
+}
+
+.helpDialogBody section {
+    padding: 13px 14px;
+    border: 1px solid rgba(39, 66, 98, .68);
+    border-radius: 10px;
+    background: rgba(4, 10, 19, .46);
+}
+
+.helpDialogBody h3 {
+    margin: 0 0 8px;
+    color: #cde8f5;
+    font-size: 13px;
+}
+
+.helpDialogBody p,
+.helpDialogBody li {
+    color: #8ea6bd;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.helpDialogBody ol { margin: 0; padding-left: 20px; }
+.helpDialogBody code { color: #8de9ff; }
+
+@media (max-width: 900px) {
+    .projectStatusGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 560px) {
+    .projectStatusGrid { grid-template-columns: 1fr; }
+    #mapViewport { height: 340px; }
+}

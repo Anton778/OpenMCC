@@ -1,1200 +1,442 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
-
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#07111f">
     <title>OpenMCC — Mission Control Center</title>
 
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/panels.css">
     <link rel="stylesheet" href="css/widgets.css">
-
 </head>
-
 <body>
-
 <div id="app">
-
-    <!-- ===================================================== -->
-    <!-- HEADER -->
-    <!-- ===================================================== -->
-
     <header id="topBar">
-
         <div class="logo">
-
-            <h1>OpenMCC</h1>
-
-            <span class="subtitle">
-                Open Mission Control Center
-            </span>
-
+            <div class="logoMark" aria-hidden="true">◈</div>
+            <div>
+                <h1>OpenMCC</h1>
+                <span class="subtitle">Open Mission Control Center</span>
+            </div>
         </div>
 
-        <div class="mission">
-
+        <div class="topMetric mission">
             <div class="caption">MISSION</div>
-
-            <div id="missionName">
-                CubeSat-1
-            </div>
-
+            <div id="missionName">CubeSat-1</div>
         </div>
 
-        <div class="utc">
-
+        <div class="topMetric utc">
             <div class="caption">UTC</div>
-
-            <div id="utcClock">
-                --:--:--
-            </div>
-
+            <div id="utcClock">--:--:--</div>
         </div>
 
-        <div class="connection">
-
-            <div class="caption">STATUS</div>
-
+        <div class="topMetric connection">
+            <div class="caption">GROUND LINK</div>
             <div id="connectionState">
-
                 <span class="offlineLed"></span>
-
                 OFFLINE
-
             </div>
-
         </div>
 
+        <div class="topActions">
+            <span class="buildBadge">v0.2 · LAB</span>
+            <button type="button" id="helpButton" class="iconButton" data-help-open aria-label="Открыть справку OpenMCC">?</button>
+        </div>
     </header>
 
-
-    <!-- ===================================================== -->
-    <!-- MAIN GRID -->
-    <!-- ===================================================== -->
+    <nav id="quickNav" aria-label="Навигация по ЦУП">
+        <button type="button" data-scroll-target="serialPanel">Соединение</button>
+        <button type="button" data-scroll-target="telemetryPanel">Телеметрия</button>
+        <button type="button" data-scroll-target="commandPanel">Команды</button>
+        <button type="button" data-scroll-target="rotatorPanel">Антенна</button>
+        <button type="button" data-scroll-target="radioPanel">Радиоканал</button>
+        <button type="button" data-scroll-target="chartPanel">Графики</button>
+        <button type="button" data-scroll-target="satellitePanel">3D</button>
+        <button type="button" data-scroll-target="projectPanel">Статус проекта</button>
+        <button type="button" data-scroll-target="logPanel">Журнал</button>
+    </nav>
 
     <main id="dashboard">
-
-        <!-- ========================================= -->
-        <!-- LEFT COLUMN -->
-        <!-- ========================================= -->
-
         <section class="panel" id="serialPanel">
+            <div class="panelTitleRow">
+                <div>
+                    <span class="panelEyebrow">USB / WEB SERIAL</span>
+                    <h2>Соединение с устройством</h2>
+                </div>
+                <span class="panelState neutral">ОСНОВНОЙ ПОРТ</span>
+            </div>
 
-            <h2>Соединение</h2>
+            <p class="panelLead">Подключение платы телеметрии или будущего радиошлюза ESP32-WROOM-32 к OpenMCC.</p>
 
+            <div class="connectionSettings">
+                <label class="settingField">
+                    <span>Тип устройства</span>
+                    <select id="deviceProfile">
+                        <option value="auto">Автоматическое определение</option>
+                        <option value="stm32">STM32</option>
+                        <option value="arduino-uno">Arduino Uno</option>
+                        <option value="arduino-nano">Arduino Nano</option>
+                        <option value="esp32">ESP32</option>
+                    </select>
+                </label>
 
-<div class="connectionSettings">
+                <label class="settingField">
+                    <span>Скорость порта</span>
+                    <select id="serialBaudRate">
+                        <option value="9600">9600 бод</option>
+                        <option value="19200">19200 бод</option>
+                        <option value="38400">38400 бод</option>
+                        <option value="57600">57600 бод</option>
+                        <option value="115200" selected>115200 бод</option>
+                        <option value="230400">230400 бод</option>
+                        <option value="460800">460800 бод</option>
+                        <option value="921600">921600 бод</option>
+                    </select>
+                </label>
+            </div>
 
-    <label class="settingField">
+            <button id="connectButton" class="primaryAction">Подключить устройство</button>
 
-        <span>
-            Тип устройства
-        </span>
-
-        <select id="deviceProfile">
-
-            <option value="auto">
-                Автоматическое определение
-            </option>
-
-            <option value="stm32">
-                STM32
-            </option>
-
-            <option value="arduino-uno">
-                Arduino Uno
-            </option>
-
-            <option value="arduino-nano">
-                Arduino Nano
-            </option>
-
-            <option value="esp32">
-                ESP32
-            </option>
-
-        </select>
-
-    </label>
-
-
-    <label class="settingField">
-
-        <span>
-            Скорость порта
-        </span>
-
-        <select id="serialBaudRate">
-
-            <option value="9600">
-                9600 бод
-            </option>
-
-            <option value="19200">
-                19200 бод
-            </option>
-
-            <option value="38400">
-                38400 бод
-            </option>
-
-            <option value="57600">
-                57600 бод
-            </option>
-
-            <option value="115200" selected>
-                115200 бод
-            </option>
-
-            <option value="230400">
-                230400 бод
-            </option>
-
-            <option value="460800">
-                460800 бод
-            </option>
-
-            <option value="921600">
-                921600 бод
-            </option>
-
-        </select>
-
-    </label>
-
-</div>
-
-
-
-            <button id="connectButton">
-                Подключить устройство
-            </button>
-
-            <table>
-
-                <tr>
-                    <td>Порт</td>
-                    <td id="serialPort">---</td>
-                </tr>
-
-                <tr>
-                    <td>Скорость</td>
-                    <td id="baudRate">115200</td>
-                </tr>
-
-                <tr>
-                    <td>Пакеты</td>
-                    <td id="packetCounter">0</td>
-                </tr>
-
-                <tr>
-                    <td>CRC</td>
-                    <td id="crcCounter">0</td>
-                </tr>
-
-            </table>
-
+            <div class="infoTable" role="group" aria-label="Параметры соединения">
+                <div><span>Порт</span><strong id="serialPort">---</strong></div>
+                <div><span>Скорость</span><strong id="baudRate">115200</strong></div>
+                <div><span>Пакеты</span><strong id="packetCounter">0</strong></div>
+                <div><span>CRC / ошибки</span><strong id="crcCounter">0</strong></div>
+            </div>
         </section>
-
-
-        <!-- ========================================= -->
-        <!-- TELEMETRY -->
-        <!-- ========================================= -->
 
         <section class="panel" id="telemetryPanel">
-
-            <h2>Телеметрия</h2>
+            <div class="panelTitleRow">
+                <div>
+                    <span class="panelEyebrow">LIVE DATA</span>
+                    <h2>Телеметрия</h2>
+                </div>
+                <span class="panelState live">ПРИЁМ</span>
+            </div>
 
             <div class="telemetryGrid">
-
-                <div class="card">
-
-                    <span class="label">
-                        Температура
-                    </span>
-
-                    <span id="TEMP"
-                          class="value">
-                        --
-                    </span>
-
-                </div>
-
-                <div class="card">
-
-                    <span class="label">
-                        Напряжение
-                    </span>
-
-                    <span id="VOLT"
-                          class="value">
-                        --
-                    </span>
-
-                </div>
-
-                <div class="card">
-
-                    <span class="label">
-                        Ток
-                    </span>
-
-                    <span id="CURR"
-                          class="value">
-                        --
-                    </span>
-
-                </div>
-
-                <div class="card">
-
-                    <span class="label">
-                        RSSI
-                    </span>
-
-                    <span id="RSSI"
-                          class="value">
-                        --
-                    </span>
-
-                </div>
-
-                <div class="card">
-
-                    <span class="label">
-                        SNR
-                    </span>
-
-                    <span id="SNR"
-                          class="value">
-                        --
-                    </span>
-
-                </div>
-
+                <div class="card telemetryCard" data-telemetry="TEMP"><span class="label">Температура</span><span id="TEMP" class="value">--</span><span class="unit">°C</span></div>
+                <div class="card telemetryCard" data-telemetry="VOLT"><span class="label">Напряжение</span><span id="VOLT" class="value">--</span><span class="unit">В</span></div>
+                <div class="card telemetryCard" data-telemetry="CURR"><span class="label">Ток</span><span id="CURR" class="value">--</span><span class="unit">мА</span></div>
+                <div class="card telemetryCard" data-telemetry="RSSI"><span class="label">RSSI</span><span id="RSSI" class="value">--</span><span class="unit">dBm</span></div>
+                <div class="card telemetryCard" data-telemetry="SNR"><span class="label">SNR</span><span id="SNR" class="value">--</span><span class="unit">dB</span></div>
             </div>
 
+            <div class="telemetryNote">Поддерживаемый базовый пакет: <code>$TEL,TEMP=...,VOLT=...,CURR=...,RSSI=...,SNR=...</code></div>
         </section>
-
-
-        <!-- ========================================= -->
-        <!-- SYSTEM -->
-        <!-- ========================================= -->
 
         <section class="panel" id="systemPanel">
+            <div class="panelTitleRow">
+                <div>
+                    <span class="panelEyebrow">HEALTH</span>
+                    <h2>Состояние системы</h2>
+                </div>
+                <span class="panelState neutral">СВОДКА</span>
+            </div>
 
-            <h2>Состояние системы</h2>
-
-            <ul>
-
-                <li>
-                    Питание
-                    <span class="ok">●</span>
-                </li>
-
-                <li>
-                    Передатчик
-                    <span class="ok">●</span>
-                </li>
-
-                <li>
-                    Приёмник
-                    <span class="ok">●</span>
-                </li>
-
-                <li>
-                    Телеметрия
-                    <span class="warn">○</span>
-                </li>
-
+            <ul class="systemList">
+                <li>Питание <span class="ok">●</span></li>
+                <li>Передатчик <span class="ok">●</span></li>
+                <li>Приёмник <span class="ok">●</span></li>
+                <li>Телеметрия <span class="warn">○</span></li>
             </ul>
 
+            <div class="systemFootnote">Четвёртый индикатор связан с фактическим потоком телеметрии и обновляется программно.</div>
         </section>
 
-
-
-
-<!-- ========================================= -->
-<!-- COMMAND CENTER -->
-<!-- ========================================= -->
-
-<section class="panel" id="commandPanel">
-
-    <div class="panelTitleRow">
-
-        <h2>
-            Центр команд
-        </h2>
-
-        <span id="commandAvailability"
-              class="commandAvailability offline">
-            НЕДОСТУПЕН
-        </span>
-
-    </div>
-
-
-    <div class="commandGroup">
-
-        <div class="commandGroupTitle">
-            Связь
-        </div>
-
-        <div class="commandButtonGrid">
-
-            <button type="button"
-                    class="commandButton commandPrimary"
-                    data-command="PING">
-                <span class="commandIcon">↔</span>
-
-                <span>
-                    Проверка связи
-                </span>
-            </button>
-
-            <button type="button"
-                    class="commandButton"
-                    data-command="INFO">
-                <span class="commandIcon">i</span>
-
-                <span>
-                    Информация
-                </span>
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <div class="commandGroup">
-
-        <div class="commandGroupTitle">
-            Телеметрия
-        </div>
-
-        <div class="commandButtonGrid">
-
-            <button type="button"
-                    class="commandButton commandSuccess"
-                    data-command="START">
-                <span class="commandIcon">▶</span>
-
-                <span>
-                    Запустить
-                </span>
-            </button>
-
-            <button type="button"
-                    class="commandButton commandDanger"
-                    data-command="STOP">
-                <span class="commandIcon">■</span>
-
-                <span>
-                    Остановить
-                </span>
-            </button>
-
-        </div>
-
-
-        <label class="commandField">
-
-            <span>
-                Период передачи
-            </span>
-
-            <select id="telemetryRate">
-
-                <option value="100">
-                    100 мс
-                </option>
-
-                <option value="250">
-                    250 мс
-                </option>
-
-                <option value="500">
-                    500 мс
-                </option>
-
-                <option value="1000" selected>
-                    1000 мс
-                </option>
-
-                <option value="2000">
-                    2000 мс
-                </option>
-
-                <option value="5000">
-                    5000 мс
-                </option>
-
-                <option value="10000">
-                    10000 мс
-                </option>
-
-            </select>
-
-        </label>
-
-        <button type="button"
-                id="applyTelemetryRate"
-                class="commandButton commandWide">
-            Установить период
-        </button>
-
-    </div>
-
-
-    <div class="commandGroup">
-
-        <div class="commandGroupTitle">
-            Встроенный светодиод
-        </div>
-
-        <div class="commandButtonGrid">
-
-            <button type="button"
-                    class="commandButton commandSuccess"
-                    data-command="LED"
-                    data-value="1">
-                <span class="commandIcon">●</span>
-
-                <span>
-                    Включить
-                </span>
-            </button>
-
-            <button type="button"
-                    class="commandButton"
-                    data-command="LED"
-                    data-value="0">
-                <span class="commandIcon">○</span>
-
-                <span>
-                    Выключить
-                </span>
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <div class="commandGroup">
-
-        <div class="commandGroupTitle">
-            Произвольная команда
-        </div>
-
-        <div class="customCommandRow">
-
-            <input type="text"
-                   id="customCommand"
-                   maxlength="120"
-                   autocomplete="off"
-                   spellcheck="false"
-                   placeholder="Например: RESET">
-
-            <button type="button"
-                    id="sendCustomCommand"
-                    class="commandSendButton">
-                Передать
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <div class="lastCommand">
-
-        <span>
-            Последняя команда
-        </span>
-
-        <strong id="lastCommandText">
-            ---
-        </strong>
-
-    </div>
-
-</section>
-
-
-
-
-
-<!-- ========================================= -->
-<!-- ANTENNA ROTATOR -->
-<!-- ========================================= -->
-
-<section class="panel" id="rotatorPanel">
-
-    <div class="panelTitleRow">
-
-        <h2>
-            Поворотное устройство антенны
-        </h2>
-
-        <span id="rotatorStatus"
-              class="rotatorStatus offline">
-            ОТКЛЮЧЕНО
-        </span>
-
-    </div>
-
-
-    <div class="rotatorConnectionRow">
-
-        <button type="button"
-                id="rotatorConnectButton"
-                class="rotatorMainButton">
-            Подключить поворотку
-        </button>
-
-        <select id="rotatorBaudRate"
-                aria-label="Скорость порта поворотки">
-
-            <option value="9600">
-                9600 бод
-            </option>
-
-            <option value="57600">
-                57600 бод
-            </option>
-
-            <option value="115200" selected>
-                115200 бод
-            </option>
-
-        </select>
-
-    </div>
-
-
-    <div class="rotatorModeRow">
-
-        <span class="rotatorSectionCaption">
-            Режим управления
-        </span>
-
-        <div class="rotatorModeSwitch">
-
-            <button type="button"
-                    id="rotatorManualMode"
-                    class="rotatorModeButton active">
-                Ручной
-            </button>
-
-            <button type="button"
-                    id="rotatorAutoMode"
-                    class="rotatorModeButton"
-                    disabled>
-                Автосопровождение
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <div class="rotatorAngles">
-
-        <div class="rotatorAngleCard">
-
-            <span>
-                Текущий азимут
-            </span>
-
-            <strong id="rotatorCurrentAz">
-                ---°
-            </strong>
-
-            <small>
-                AZ
-            </small>
-
-        </div>
-
-
-        <div class="rotatorAngleCard">
-
-            <span>
-                Текущий угол места
-            </span>
-
-            <strong id="rotatorCurrentEl">
-                ---°
-            </strong>
-
-            <small>
-                EL
-            </small>
-
-        </div>
-
-    </div>
-
-
-    <div class="rotatorTargetSection">
-
-        <span class="rotatorSectionCaption">
-            Заданное положение
-        </span>
-
-        <div class="rotatorTargetGrid">
-
-            <label class="rotatorInputField">
-
-                <span>
-                    Азимут, °
-                </span>
-
-                <input type="number"
-                       id="rotatorTargetAz"
-                       min="0"
-                       max="360"
-                       step="0.1"
-                       value="0">
-
+        <section class="panel" id="commandPanel">
+            <div class="panelTitleRow">
+                <div>
+                    <span class="panelEyebrow">UPLINK</span>
+                    <h2>Центр команд</h2>
+                </div>
+                <span id="commandAvailability" class="commandAvailability offline">НЕДОСТУПЕН</span>
+            </div>
+
+            <div class="commandGroup">
+                <div class="commandGroupTitle">Связь</div>
+                <div class="commandButtonGrid">
+                    <button type="button" class="commandButton commandPrimary" data-command="PING"><span class="commandIcon">↔</span><span>Проверка связи</span></button>
+                    <button type="button" class="commandButton" data-command="INFO"><span class="commandIcon">i</span><span>Информация</span></button>
+                </div>
+            </div>
+
+            <div class="commandGroup">
+                <div class="commandGroupTitle">Телеметрия</div>
+                <div class="commandButtonGrid">
+                    <button type="button" class="commandButton commandSuccess" data-command="START"><span class="commandIcon">▶</span><span>Запустить</span></button>
+                    <button type="button" class="commandButton commandDanger" data-command="STOP"><span class="commandIcon">■</span><span>Остановить</span></button>
+                </div>
+
+                <label class="commandField">
+                    <span>Период передачи</span>
+                    <select id="telemetryRate">
+                        <option value="100">100 мс</option>
+                        <option value="250">250 мс</option>
+                        <option value="500">500 мс</option>
+                        <option value="1000" selected>1000 мс</option>
+                        <option value="2000">2000 мс</option>
+                        <option value="5000">5000 мс</option>
+                        <option value="10000">10000 мс</option>
+                    </select>
+                </label>
+                <button type="button" id="applyTelemetryRate" class="commandButton commandWide">Установить период</button>
+            </div>
+
+            <div class="commandGroup">
+                <div class="commandGroupTitle">Встроенный светодиод</div>
+                <div class="commandButtonGrid">
+                    <button type="button" class="commandButton commandSuccess" data-command="LED" data-value="1"><span class="commandIcon">●</span><span>Включить</span></button>
+                    <button type="button" class="commandButton" data-command="LED" data-value="0"><span class="commandIcon">○</span><span>Выключить</span></button>
+                </div>
+            </div>
+
+            <div class="commandGroup">
+                <div class="commandGroupTitle">Произвольная команда</div>
+                <div class="customCommandRow">
+                    <input type="text" id="customCommand" maxlength="120" autocomplete="off" spellcheck="false" placeholder="Например: RESET">
+                    <button type="button" id="sendCustomCommand" class="commandSendButton">Передать</button>
+                </div>
+            </div>
+
+            <div class="lastCommand"><span>Последняя команда</span><strong id="lastCommandText">---</strong></div>
+        </section>
+
+        <section class="panel" id="rotatorPanel">
+            <div class="panelTitleRow">
+                <div>
+                    <span class="panelEyebrow">AZ / EL</span>
+                    <h2>Поворотное устройство антенны</h2>
+                </div>
+                <span id="rotatorStatus" class="rotatorStatus offline">ОТКЛЮЧЕНО</span>
+            </div>
+
+            <p class="panelLead">Отдельная Arduino Uno управляет SatNOGS Rotator v3. До сборки механики используйте симулятор.</p>
+
+            <div class="rotatorConnectionRow">
+                <button type="button" id="rotatorConnectButton" class="rotatorMainButton">Подключить поворотку</button>
+                <select id="rotatorBaudRate" aria-label="Скорость порта поворотки">
+                    <option value="9600">9600 бод</option>
+                    <option value="57600">57600 бод</option>
+                    <option value="115200" selected>115200 бод</option>
+                </select>
+            </div>
+
+            <div class="rotatorModeRow">
+                <span class="rotatorSectionCaption">Режим управления</span>
+                <div class="rotatorModeSwitch">
+                    <button type="button" id="rotatorManualMode" class="rotatorModeButton active">Ручной</button>
+                    <button type="button" id="rotatorAutoMode" class="rotatorModeButton" disabled>Автосопровождение</button>
+                </div>
+            </div>
+
+            <div class="rotatorAngles">
+                <div class="rotatorAngleCard"><span>Текущий азимут</span><strong id="rotatorCurrentAz">---°</strong><small>AZ</small></div>
+                <div class="rotatorAngleCard"><span>Текущий угол места</span><strong id="rotatorCurrentEl">---°</strong><small>EL</small></div>
+            </div>
+
+            <div class="rotatorTargetSection">
+                <span class="rotatorSectionCaption">Заданное положение</span>
+                <div class="rotatorTargetGrid">
+                    <label class="rotatorInputField"><span>Азимут, °</span><input type="number" id="rotatorTargetAz" min="0" max="360" step="0.1" value="0"></label>
+                    <label class="rotatorInputField"><span>Угол места, °</span><input type="number" id="rotatorTargetEl" min="0" max="90" step="0.1" value="0"></label>
+                </div>
+                <button type="button" id="rotatorMoveButton" class="rotatorCommandButton rotatorMove" disabled>Навести антенну</button>
+            </div>
+
+            <div class="rotatorCommandGrid">
+                <button type="button" id="rotatorStopButton" class="rotatorCommandButton rotatorStop" disabled>Аварийный стоп</button>
+                <button type="button" id="rotatorHomeButton" class="rotatorCommandButton" disabled>Поиск нуля</button>
+                <button type="button" id="rotatorParkButton" class="rotatorCommandButton" disabled>Парковка</button>
+                <button type="button" id="rotatorStatusButton" class="rotatorCommandButton" disabled>Запрос состояния</button>
+            </div>
+
+            <div class="rotatorStateGrid">
+                <div><span>Состояние</span><strong id="rotatorMotionState">НЕТ СВЯЗИ</strong></div>
+                <div><span>Нулевая точка</span><strong id="rotatorHomingState">НЕ ОПРЕДЕЛЕНА</strong></div>
+                <div><span>Последняя команда</span><strong id="rotatorLastCommand">---</strong></div>
+            </div>
+
+            <div class="rotatorSimulation">
+                <label><input type="checkbox" id="rotatorSimulationMode"><span>Симулятор поворотки</span></label>
+            </div>
+        </section>
+
+        <section class="panel" id="radioPanel">
+            <div class="panelTitleRow">
+                <div>
+                    <span class="panelEyebrow">RF GATEWAY</span>
+                    <h2>Радиоканал ЦУПа</h2>
+                </div>
+                <span class="panelState planned">ПЛАНИРУЕТСЯ</span>
+            </div>
+
+            <p class="panelLead">Наземный шлюз: ESP32-WROOM-32. Радиомодуль будет выбран после закупки.</p>
+
+            <div class="radioArchitecture" aria-label="Архитектура радиоканала">
+                <span>OpenMCC</span><i>USB</i><span>ESP32-WROOM-32</span><i id="radioInterfaceLabel">SPI / UART</i><span id="radioModuleLabel">CC1101 / E32</span><i>RF</i><span>МКА</span>
+            </div>
+
+            <label class="settingField radioSelector">
+                <span>Предполагаемый радиомодуль</span>
+                <select id="radioModuleType">
+                    <option value="unknown" selected>Пока неизвестно</option>
+                    <option value="cc1101">CC1101</option>
+                    <option value="e32">E32-433T30D</option>
+                </select>
             </label>
 
-
-            <label class="rotatorInputField">
-
-                <span>
-                    Угол места, °
-                </span>
-
-                <input type="number"
-                       id="rotatorTargetEl"
-                       min="0"
-                       max="90"
-                       step="0.1"
-                       value="0">
-
-            </label>
-
-        </div>
-
-
-        <button type="button"
-                id="rotatorMoveButton"
-                class="rotatorCommandButton rotatorMove"
-                disabled>
-            Навести антенну
-        </button>
-
-    </div>
-
-
-    <div class="rotatorCommandGrid">
-
-        <button type="button"
-                id="rotatorStopButton"
-                class="rotatorCommandButton rotatorStop"
-                disabled>
-            Аварийный стоп
-        </button>
-
-        <button type="button"
-                id="rotatorHomeButton"
-                class="rotatorCommandButton"
-                disabled>
-            Поиск нуля
-        </button>
-
-        <button type="button"
-                id="rotatorParkButton"
-                class="rotatorCommandButton"
-                disabled>
-            Парковка
-        </button>
-
-        <button type="button"
-                id="rotatorStatusButton"
-                class="rotatorCommandButton"
-                disabled>
-            Запрос состояния
-        </button>
-
-    </div>
-
-
-    <div class="rotatorStateGrid">
-
-        <div>
-
-            <span>
-                Состояние
-            </span>
-
-            <strong id="rotatorMotionState">
-                НЕТ СВЯЗИ
-            </strong>
-
-        </div>
-
-        <div>
-
-            <span>
-                Нулевая точка
-            </span>
-
-            <strong id="rotatorHomingState">
-                НЕ ОПРЕДЕЛЕНА
-            </strong>
-
-        </div>
-
-        <div>
-
-            <span>
-                Последняя команда
-            </span>
-
-            <strong id="rotatorLastCommand">
-                ---
-            </strong>
-
-        </div>
-
-    </div>
-
-
-    <div class="rotatorSimulation">
-
-        <label>
-
-            <input type="checkbox"
-                   id="rotatorSimulationMode">
-
-            <span>
-                Симулятор поворотки
-            </span>
-
-        </label>
-
-    </div>
-
-</section>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <!-- ========================================= -->
-        <!-- CHARTS -->
-        <!-- ========================================= -->
-
-        <section class="panel wide"
-         id="chartPanel">
-
-    <div class="panelTitleRow">
-
-        <h2>
-            Графики телеметрии
-        </h2>
-
-        <div class="chartToolbar">
-
-            <span id="chartStatus"
-                  class="chartStatus">
-                ОЖИДАНИЕ ДАННЫХ
-            </span>
-
-            <button type="button"
-                    id="pauseChartsButton"
-                    class="chartToolbarButton">
-                Пауза
-            </button>
-
-            <button type="button"
-                    id="clearChartsButton"
-                    class="chartToolbarButton">
-                Очистить
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <div class="chartGrid">
-
-        <article class="chartCard">
-
-            <div class="chartHeader">
-
+            <div class="radioHintGrid">
+                <div><span>Плата шлюза</span><strong>ESP32-WROOM-32</strong></div>
+                <div><span>Интерфейс</span><strong id="radioInterfaceValue">SPI или UART</strong></div>
+                <div><span>Питание</span><strong id="radioPowerValue">Уточнить после закупки</strong></div>
+                <div><span>Статус ПО</span><strong>Драйвер ещё не реализован</strong></div>
+            </div>
+
+            <div id="radioConfigHint" class="noticeBox">OpenMCC уже подготовлен архитектурно: радиомодуль будет скрыт за ESP32-шлюзом, а формат телеметрии и команд сохранится.</div>
+        </section>
+
+        <section class="panel wide" id="chartPanel">
+            <div class="panelTitleRow">
                 <div>
-
-                    <span class="chartName">
-                        Температура
-                    </span>
-
-                    <span class="chartUnit">
-                        °C
-                    </span>
-
+                    <span class="panelEyebrow">TRENDS</span>
+                    <h2>Графики телеметрии</h2>
                 </div>
-
-                <strong id="chartValueTEMP"
-                        class="chartCurrentValue">
-                    --
-                </strong>
-
+                <div class="chartToolbar">
+                    <span id="chartStatus" class="chartStatus">ОЖИДАНИЕ ДАННЫХ</span>
+                    <button type="button" id="pauseChartsButton" class="chartToolbarButton">Пауза</button>
+                    <button type="button" id="clearChartsButton" class="chartToolbarButton">Очистить</button>
+                </div>
             </div>
 
-            <div class="chartCanvasContainer">
-
-                <canvas id="chartTEMP"></canvas>
-
+            <div class="chartGrid">
+                <article class="chartCard"><div class="chartHeader"><div><span class="chartName">Температура</span><span class="chartUnit">°C</span></div><strong id="chartValueTEMP" class="chartCurrentValue">--</strong></div><div class="chartCanvasContainer"><canvas id="chartTEMP"></canvas></div></article>
+                <article class="chartCard"><div class="chartHeader"><div><span class="chartName">Напряжение</span><span class="chartUnit">В</span></div><strong id="chartValueVOLT" class="chartCurrentValue">--</strong></div><div class="chartCanvasContainer"><canvas id="chartVOLT"></canvas></div></article>
+                <article class="chartCard"><div class="chartHeader"><div><span class="chartName">Ток</span><span class="chartUnit">мА</span></div><strong id="chartValueCURR" class="chartCurrentValue">--</strong></div><div class="chartCanvasContainer"><canvas id="chartCURR"></canvas></div></article>
+                <article class="chartCard"><div class="chartHeader"><div><span class="chartName">RSSI</span><span class="chartUnit">dBm</span></div><strong id="chartValueRSSI" class="chartCurrentValue">--</strong></div><div class="chartCanvasContainer"><canvas id="chartRSSI"></canvas></div></article>
+                <article class="chartCard"><div class="chartHeader"><div><span class="chartName">SNR</span><span class="chartUnit">dB</span></div><strong id="chartValueSNR" class="chartCurrentValue">--</strong></div><div class="chartCanvasContainer"><canvas id="chartSNR"></canvas></div></article>
+                <article class="chartCard chartSummaryCard"><div class="chartSummary"><div><span>Точек в буфере</span><strong id="chartPointCount">0</strong></div><div><span>Интервал наблюдения</span><strong id="chartTimeWindow">120 с</strong></div><div><span>Состояние</span><strong id="chartRecordingState">ЗАПИСЬ</strong></div></div></article>
             </div>
+        </section>
 
-        </article>
-
-
-        <article class="chartCard">
-
-            <div class="chartHeader">
-
+        <section class="panel" id="satellitePanel">
+            <div class="panelTitleRow">
                 <div>
-
-                    <span class="chartName">
-                        Напряжение
-                    </span>
-
-                    <span class="chartUnit">
-                        В
-                    </span>
-
+                    <span class="panelEyebrow">ATTITUDE</span>
+                    <h2>3D-модель спутника</h2>
                 </div>
-
-                <strong id="chartValueVOLT"
-                        class="chartCurrentValue">
-                    --
-                </strong>
-
+                <div class="satelliteToolbar">
+                    <span id="satelliteStatus" class="satelliteStatus">ИНИЦИАЛИЗАЦИЯ</span>
+                    <button type="button" id="resetSatelliteView" class="satelliteToolbarButton">Сброс вида</button>
+                    <button type="button" id="toggleSatelliteRotation" class="satelliteToolbarButton">Автовращение</button>
+                </div>
             </div>
 
-            <div class="chartCanvasContainer">
-
-                <canvas id="chartVOLT"></canvas>
-
+            <div id="satelliteViewport">
+                <canvas id="satelliteCanvas"></canvas>
+                <div class="satelliteOverlay">
+                    <div class="orientationValue"><span>ROLL</span><strong id="orientationRoll">0.0°</strong></div>
+                    <div class="orientationValue"><span>PITCH</span><strong id="orientationPitch">0.0°</strong></div>
+                    <div class="orientationValue"><span>YAW</span><strong id="orientationYaw">0.0°</strong></div>
+                </div>
+                <div class="satelliteAxisLegend"><span class="axisX">X</span><span class="axisY">Y</span><span class="axisZ">Z</span></div>
             </div>
+        </section>
 
-        </article>
-
-
-        <article class="chartCard">
-
-            <div class="chartHeader">
-
+        <section class="panel" id="mapPanel">
+            <div class="panelTitleRow">
                 <div>
-
-                    <span class="chartName">
-                        Ток
-                    </span>
-
-                    <span class="chartUnit">
-                        мА
-                    </span>
-
+                    <span class="panelEyebrow">ORBIT</span>
+                    <h2>Карта Земли и сопровождение</h2>
                 </div>
-
-                <strong id="chartValueCURR"
-                        class="chartCurrentValue">
-                    --
-                </strong>
-
+                <span class="panelState planned">НЕ РЕАЛИЗОВАНО</span>
             </div>
-
-            <div class="chartCanvasContainer">
-
-                <canvas id="chartCURR"></canvas>
-
-            </div>
-
-        </article>
-
-
-        <article class="chartCard">
-
-            <div class="chartHeader">
-
-                <div>
-
-                    <span class="chartName">
-                        RSSI
-                    </span>
-
-                    <span class="chartUnit">
-                        dBm
-                    </span>
-
-                </div>
-
-                <strong id="chartValueRSSI"
-                        class="chartCurrentValue">
-                    --
-                </strong>
-
-            </div>
-
-            <div class="chartCanvasContainer">
-
-                <canvas id="chartRSSI"></canvas>
-
-            </div>
-
-        </article>
-
-
-        <article class="chartCard">
-
-            <div class="chartHeader">
-
-                <div>
-
-                    <span class="chartName">
-                        SNR
-                    </span>
-
-                    <span class="chartUnit">
-                        dB
-                    </span>
-
-                </div>
-
-                <strong id="chartValueSNR"
-                        class="chartCurrentValue">
-                    --
-                </strong>
-
-            </div>
-
-            <div class="chartCanvasContainer">
-
-                <canvas id="chartSNR"></canvas>
-
-            </div>
-
-        </article>
-
-
-        <article class="chartCard chartSummaryCard">
-
-            <div class="chartSummary">
-
-                <div>
-
-                    <span>
-                        Точек в буфере
-                    </span>
-
-                    <strong id="chartPointCount">
-                        0
-                    </strong>
-
-                </div>
-
-                <div>
-
-                    <span>
-                        Интервал наблюдения
-                    </span>
-
-                    <strong id="chartTimeWindow">
-                        120 с
-                    </strong>
-
-                </div>
-
-                <div>
-
-                    <span>
-                        Состояние
-                    </span>
-
-                    <strong id="chartRecordingState">
-                        ЗАПИСЬ
-                    </strong>
-
-                </div>
-
-            </div>
-
-        </article>
-
-    </div>
-
-</section>
-
-
-        <!-- ========================================= -->
-        <!-- SATELLITE -->
-        <!-- ========================================= -->
-
-<section class="panel"
-         id="satellitePanel">
-
-    <div class="panelTitleRow">
-
-        <h2>
-            3D-модель спутника
-        </h2>
-
-        <div class="satelliteToolbar">
-
-            <span id="satelliteStatus"
-                  class="satelliteStatus">
-                ИНИЦИАЛИЗАЦИЯ
-            </span>
-
-            <button type="button"
-                    id="resetSatelliteView"
-                    class="satelliteToolbarButton">
-                Сброс вида
-            </button>
-
-            <button type="button"
-                    id="toggleSatelliteRotation"
-                    class="satelliteToolbarButton">
-                Автовращение
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <div id="satelliteViewport">
-
-        <canvas id="satelliteCanvas"></canvas>
-
-        <div class="satelliteOverlay">
-
-            <div class="orientationValue">
-
-                <span>ROLL</span>
-
-                <strong id="orientationRoll">
-                    0.0°
-                </strong>
-
-            </div>
-
-            <div class="orientationValue">
-
-                <span>PITCH</span>
-
-                <strong id="orientationPitch">
-                    0.0°
-                </strong>
-
-            </div>
-
-            <div class="orientationValue">
-
-                <span>YAW</span>
-
-                <strong id="orientationYaw">
-                    0.0°
-                </strong>
-
-            </div>
-
-        </div>
-
-
-        <div class="satelliteAxisLegend">
-
-            <span class="axisX">
-                X
-            </span>
-
-            <span class="axisY">
-                Y
-            </span>
-
-            <span class="axisZ">
-                Z
-            </span>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-        <!-- ========================================= -->
-        <!-- MAP -->
-        <!-- ========================================= -->
-
-        <section class="panel"
-                 id="mapPanel">
-
-            <h2>Карта Земли</h2>
 
             <div id="mapViewport">
-
-                Coming soon
-
-            </div>
-
-        </section>
-
-
-        <!-- ========================================= -->
-        <!-- LOG -->
-        <!-- ========================================= -->
-
-        <section class="panel wide"
-                 id="logPanel">
-
-            <h2>Журнал событий</h2>
-
-            <div id="eventLog">
-
-                <div>
-
-                    OpenMCC запущен.
-
+                <div class="mapGrid" aria-hidden="true"></div>
+                <div class="mapCenterMark" aria-hidden="true">＋</div>
+                <div class="mapMessage">
+                    <strong>TLE / SGP4</strong>
+                    <span>Здесь появятся трасса орбиты, положение ЦУПа, радиогоризонт и расчёт AZ/EL для автосопровождения.</span>
                 </div>
-
             </div>
-
         </section>
 
-    </main>
+        <section class="panel" id="projectPanel">
+            <div class="panelTitleRow">
+                <div>
+                    <span class="panelEyebrow">ROADMAP</span>
+                    <h2>Статус проекта</h2>
+                </div>
+                <button type="button" class="smallButton" data-help-open>Что здесь работает?</button>
+            </div>
 
+            <div class="projectStatusGrid">
+                <div class="projectItem done"><span>Готово</span><strong>Web Serial и парсер телеметрии</strong></div>
+                <div class="projectItem done"><span>Готово</span><strong>Команды и журнал событий</strong></div>
+                <div class="projectItem done"><span>Готово</span><strong>Графики Chart.js</strong></div>
+                <div class="projectItem done"><span>Готово</span><strong>3D CubeSat на Three.js</strong></div>
+                <div class="projectItem done"><span>Готово</span><strong>Панель и симулятор AZ/EL</strong></div>
+                <div class="projectItem test"><span>На проверку</span><strong>Arduino Uno + SatNOGS v3</strong></div>
+                <div class="projectItem planned"><span>Следующее</span><strong>ESP32 + CC1101 / E32 радиошлюз</strong></div>
+                <div class="projectItem planned"><span>Следующее</span><strong>TLE / SGP4 и автосопровождение</strong></div>
+            </div>
+        </section>
+
+        <section class="panel wide" id="logPanel">
+            <div class="panelTitleRow">
+                <div>
+                    <span class="panelEyebrow">EVENTS</span>
+                    <h2>Журнал событий</h2>
+                </div>
+                <span class="panelState neutral">ЛОКАЛЬНО</span>
+            </div>
+            <div id="eventLog"><div>OpenMCC запущен.</div></div>
+        </section>
+    </main>
 </div>
 
+<div id="openmccTooltip" role="tooltip" aria-hidden="true"></div>
+
+<dialog id="helpDialog" class="helpDialog">
+    <div class="helpDialogHeader">
+        <div>
+            <span class="panelEyebrow">OPENMCC QUICK GUIDE</span>
+            <h2>Как пользоваться ЦУПом</h2>
+        </div>
+        <button type="button" class="iconButton" data-help-close aria-label="Закрыть справку">×</button>
+    </div>
+
+    <div class="helpDialogBody">
+        <section>
+            <h3>Быстрый запуск</h3>
+            <ol>
+                <li>Запустите <code>start_openmcc.bat</code> или команду <code>py -m http.server 8000</code> из папки проекта.</li>
+                <li>Откройте <code>http://localhost:8000/</code> в Chrome или Edge.</li>
+                <li>Для теста подключите Arduino Uno с демонстратором телеметрии и выберите 115200 бод.</li>
+                <li>Поворотку до сборки механики проверяйте через флажок «Симулятор поворотки».</li>
+            </ol>
+        </section>
+
+        <section>
+            <h3>Что уже сделано</h3>
+            <p>Приём телеметрии, команды, логирование, графики, 3D-модель, ручное AZ/EL и симулятор поворотки.</p>
+        </section>
+
+        <section>
+            <h3>Что ещё предстоит</h3>
+            <p>Радиошлюз ESP32-WROOM-32 для CC1101 или E32-433T30D, TLE/SGP4, карта орбиты и автоматическое сопровождение.</p>
+        </section>
+
+        <section>
+            <h3>Документация</h3>
+            <p>Подробности находятся в <code>README.md</code> и <code>docs/TECHNICAL_MANUAL.md</code>. Статус разработки — в <code>docs/PROJECT_STATUS.md</code>.</p>
+        </section>
+    </div>
+</dialog>
 
 <script type="importmap">
 {
@@ -1205,9 +447,7 @@
 }
 </script>
 
-
 <script src="libraries/chart.umd.min.js"></script>
-
 <script src="js/parser.js"></script>
 <script src="js/logger.js"></script>
 <script src="js/serial.js"></script>
@@ -1215,11 +455,7 @@
 <script src="js/charts.js"></script>
 <script src="js/rotator.js"></script>
 <script src="js/app.js"></script>
-
-<script type="module"
-        src="js/satellite.js">
-</script>
-
+<script src="js/help.js"></script>
+<script type="module" src="js/satellite.js"></script>
 </body>
-
 </html>

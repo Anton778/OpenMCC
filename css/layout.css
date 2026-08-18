@@ -1,0 +1,195 @@
+/* OpenMCC v0.2 — layout layer */
+
+:root {
+    --page-max: 1880px;
+    --gap: 18px;
+    --topbar-h: 82px;
+}
+
+html {
+    scroll-behavior: smooth;
+    background: #050912;
+}
+
+body {
+    background:
+        radial-gradient(circle at 20% -10%, rgba(0, 217, 255, 0.08), transparent 34rem),
+        radial-gradient(circle at 92% 0%, rgba(82, 93, 255, 0.08), transparent 32rem),
+        #050912;
+}
+
+#app {
+    width: min(100%, var(--page-max));
+    margin: 0 auto;
+    padding: 14px 18px 28px;
+}
+
+#topBar {
+    position: sticky;
+    top: 10px;
+    z-index: 50;
+    min-height: var(--topbar-h);
+    height: auto;
+    display: grid;
+    grid-template-columns: minmax(260px, 2fr) repeat(3, minmax(120px, .75fr)) auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 18px;
+    border-radius: 16px;
+    background: rgba(9, 17, 31, 0.90);
+    backdrop-filter: blur(18px) saturate(130%);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .22), 0 0 0 1px rgba(81, 119, 163, .12) inset;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.logoMark {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 auto;
+    border: 1px solid rgba(0, 217, 255, .55);
+    border-radius: 12px;
+    color: var(--cyan);
+    background: rgba(0, 217, 255, .07);
+    box-shadow: 0 0 22px rgba(0, 217, 255, .12);
+    font-size: 22px;
+}
+
+.logo h1 {
+    font-size: clamp(24px, 2vw, 30px);
+    letter-spacing: .08em;
+}
+
+.topMetric {
+    min-width: 0;
+    padding-left: 14px;
+    border-left: 1px solid rgba(54, 82, 116, .55);
+}
+
+.topMetric > :last-child {
+    margin-top: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.topActions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+#quickNav {
+    position: sticky;
+    top: 106px;
+    z-index: 40;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    margin: 10px 0 0;
+    padding: 8px;
+    border: 1px solid rgba(41, 69, 103, .62);
+    border-radius: 13px;
+    background: rgba(5, 10, 19, .84);
+    backdrop-filter: blur(14px);
+    scrollbar-width: thin;
+}
+
+#quickNav button {
+    width: auto;
+    flex: 0 0 auto;
+    min-height: 32px;
+    margin: 0;
+    padding: 7px 11px;
+    border-color: rgba(54, 82, 116, .8);
+    border-radius: 8px;
+    color: #a9bdd3;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+#dashboard {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-auto-rows: minmax(100px, auto);
+    gap: var(--gap);
+    margin-top: var(--gap);
+    align-items: start;
+}
+
+#serialPanel { grid-column: span 3; }
+#telemetryPanel { grid-column: span 6; }
+#systemPanel { grid-column: span 3; }
+#commandPanel { grid-column: span 3; }
+#rotatorPanel { grid-column: span 5; }
+#radioPanel { grid-column: span 4; }
+#chartPanel { grid-column: span 12; }
+#satellitePanel { grid-column: span 5; }
+#mapPanel { grid-column: span 7; }
+#projectPanel { grid-column: span 12; }
+#logPanel { grid-column: span 12; }
+
+.panel {
+    min-width: 0;
+    scroll-margin-top: 160px;
+}
+
+.wide {
+    grid-column: span 12;
+}
+
+@media (max-width: 1450px) {
+    #topBar {
+        grid-template-columns: minmax(240px, 1.7fr) repeat(2, minmax(120px, .7fr)) auto;
+    }
+    .topMetric.connection {
+        display: none;
+    }
+    #serialPanel { grid-column: span 4; }
+    #telemetryPanel { grid-column: span 8; }
+    #systemPanel { grid-column: span 4; }
+    #commandPanel { grid-column: span 4; }
+    #rotatorPanel { grid-column: span 8; }
+    #radioPanel { grid-column: span 8; }
+    #satellitePanel { grid-column: span 6; }
+    #mapPanel { grid-column: span 6; }
+}
+
+@media (max-width: 1050px) {
+    #app { padding-inline: 12px; }
+    #topBar {
+        position: relative;
+        top: auto;
+        grid-template-columns: 1fr 1fr auto;
+    }
+    .topMetric.mission { display: none; }
+    #quickNav {
+        top: 8px;
+    }
+    #dashboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    #dashboard > .panel { grid-column: span 1; }
+    #telemetryPanel,
+    #chartPanel,
+    #projectPanel,
+    #logPanel { grid-column: span 2 !important; }
+}
+
+@media (max-width: 720px) {
+    #topBar {
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+    }
+    .topMetric { display: none; }
+    .buildBadge { display: none; }
+    #dashboard { grid-template-columns: 1fr; }
+    #dashboard > .panel { grid-column: 1 !important; }
+    #quickNav { position: relative; top: auto; }
+}
