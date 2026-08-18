@@ -201,7 +201,7 @@ function configureSerialAccess(window) {
 async function loadDesktopModules(window) {
     try {
         await window.webContents.executeJavaScript(`
-            import("/js/flasher.js").catch(error => {
+            import("/js/flasher-v2.js").catch(error => {
                 console.error("OpenMCC flasher module failed to load", error);
             });
         `);
