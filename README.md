@@ -18,6 +18,7 @@ OpenMCC можно запускать двумя способами:
 - отдельный интерфейс двухосевой поворотки AZ/EL;
 - симулятор поворотного устройства без реальной механики;
 - демонстрационная прошивка Arduino Uno/Nano для телеметрии;
+- прошивка Arduino Uno для двухосевой поворотки SatNOGS/CNC Shield V3;
 - Windows desktop-host на Electron с нативным выбором последовательного порта;
 - автоматическая сборка установщика через GitHub Actions;
 - интерфейс выбора CC1101 или E32-433T30D;
@@ -33,12 +34,12 @@ OpenMCC можно запускать двумя способами:
 
 - аппаратная проверка встроенного прошивальщика на конкретной ESP32-WROOM-32;
 - аппаратная проверка прошивки шлюза с реальным CC1101/E32;
+- аппаратная проверка прошивки поворотки на собранной механике SatNOGS Rotator v3;
 - бортовая часть радиоканала на МКА;
 - расширенный радиопакет с собственным номером пакета/ACK/повторами поверх возможностей модулей;
 - TLE/SGP4;
 - карта орбиты и радиогоризонт;
 - автоматическое сопровождение спутника;
-- проверка реальной механики SatNOGS Rotator v3;
 - цифровая подпись Windows-установщика.
 
 ## Установка Windows-приложения
@@ -121,6 +122,26 @@ examples/arduino_avr_demo/OpenMCC_Arduino_AVR/OpenMCC_Arduino_AVR.ino
 
 Загрузите его в Arduino Uno/Nano, подключите плату к ПК, выберите в OpenMCC `Arduino Uno` и `115200 бод`, затем нажмите **«Подключить устройство»**.
 
+## Поворотка — Arduino Uno
+
+Контроллер двухосевой поворотки находится здесь:
+
+```text
+firmware/rotator_arduino_uno/OpenMCC_Rotator_Uno/OpenMCC_Rotator_Uno.ino
+```
+
+Прошивка рассчитана на Arduino Uno + CNC Shield V3 + два шаговых двигателя AZ/EL и понимает команды интерфейса OpenMCC:
+
+```text
+$ROT,SET,AZ=120.00,EL=35.00
+$ROT,STOP
+$ROT,HOME
+$ROT,PARK
+$ROT,STATUS
+```
+
+Перед первым механическим испытанием обязательно задайте реальные передаточные отношения и проверьте микрошаг, направления двигателей и концевики. Подробно: `firmware/rotator_arduino_uno/README.md`.
+
 ## Радиоканал
 
 Наземный шлюз реализован на `ESP32-WROOM-32` как отдельный PlatformIO-проект:
@@ -174,6 +195,7 @@ firmware/radio_gateway_esp32/
 - `docs/FIRMWARE_FLASHER.md` — прошивка ESP32 непосредственно из desktop OpenMCC;
 - `docs/DESKTOP_APP.md` — сборка, установка и публикация Windows-приложения;
 - `firmware/radio_gateway_esp32/README.md` — наземный ESP32-радиошлюз;
+- `firmware/rotator_arduino_uno/README.md` — Arduino Uno и поворотка AZ/EL;
 - `CHANGELOG.md` — история заметных изменений.
 
 ## Основные модули
@@ -197,6 +219,7 @@ js/help.js                         подсказки, RF UI и готовые �
 js/flasher.js                      прошивка ESP32 через esptool-js
 desktop/main.cjs                   Electron-host и загрузка desktop-модулей
 firmware/radio_gateway_esp32/      исходники прошивки радиошлюза
+firmware/rotator_arduino_uno/      прошивка Arduino Uno для поворотки
 bundled_firmware/                  бинарные образы, создаваемые при сборке
 package.json                       конфигурация desktop-сборки
 ```
