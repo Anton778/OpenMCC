@@ -1,0 +1,38 @@
+name: Arduino Uno rotator firmware
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "firmware/rotator_arduino_uno/**"
+      - ".github/workflows/arduino-uno-rotator.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "firmware/rotator_arduino_uno/**"
+      - ".github/workflows/arduino-uno-rotator.yml"
+  workflow_dispatch:
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Arduino CLI
+        uses: arduino/setup-arduino-cli@v2
+
+      - name: Install Arduino AVR core
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install arduino:avr
+
+      - name: Compile OpenMCC rotator for Arduino Uno
+        run: |
+          arduino-cli compile \
+            --fqbn arduino:avr:uno \
+            firmware/rotator_arduino_uno/OpenMCC_Rotator_Uno
