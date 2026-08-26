@@ -31,6 +31,9 @@ jobs:
       - name: Compile ESP32 radio gateway
         run: pio run -d firmware/radio_gateway_esp32
 
+      - name: Compile STM32 v6 transmitter reference
+        run: pio run -d firmware/transmitter_stm32_v6
+
       - name: Prepare bundled ESP32 firmware
         shell: pwsh
         run: |
@@ -44,12 +47,9 @@ jobs:
           $firmwareVersion = $Matches[1]
 
           $bootApp0 = Get-ChildItem "$env:USERPROFILE/.platformio/packages" -Recurse -Filter "boot_app0.bin" | Select-Object -First 1
-          if (-not $bootApp0) {
-            throw "boot_app0.bin was not found in the installed ESP32 Arduino framework."
-          }
+          if (-not $bootApp0) { throw "boot_app0.bin was not found." }
 
           New-Item -ItemType Directory -Force "bundled_firmware" | Out-Null
-
           $images = @(
             @{ Source = "$buildDir/bootloader.bin"; File = "gateway-bootloader.bin"; Label = "Bootloader"; Address = 4096 },
             @{ Source = "$buildDir/partitions.bin"; File = "gateway-partitions.bin"; Label = "Partition table"; Address = 32768 },
@@ -59,22 +59,12 @@ jobs:
 
           $manifestImages = @()
           foreach ($image in $images) {
-            if (-not (Test-Path $image.Source)) {
-              throw "Firmware image not found: $($image.Source)"
-            }
-
+            if (-not (Test-Path $image.Source)) { throw "Firmware image not found: $($image.Source)" }
             $target = Join-Path "bundled_firmware" $image.File
             Copy-Item $image.Source $target -Force
             $fileInfo = Get-Item $target
             $md5 = (Get-FileHash -Algorithm MD5 $target).Hash.ToLowerInvariant()
-
-            $manifestImages += [ordered]@{
-              file = $image.File
-              label = $image.Label
-              address = $image.Address
-              size = $fileInfo.Length
-              md5 = $md5
-            }
+            $manifestImages += [ordered]@{ file=$image.File; label=$image.Label; address=$image.Address; size=$fileInfo.Length; md5=$md5 }
           }
 
           $appVersion = (Get-Content package.json -Raw | ConvertFrom-Json).version
@@ -91,9 +81,7 @@ jobs:
             eraseAll = $false
             images = $manifestImages
           }
-
           $manifest | ConvertTo-Json -Depth 6 | Set-Content "bundled_firmware/manifest.json" -Encoding utf8
-          Get-Content "bundled_firmware/manifest.json"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -138,17 +126,13 @@ jobs:
         run: |
           gh release view $env:RELEASE_TAG *> $null
           if ($LASTEXITCODE -eq 0) {
-            Write-Host "Release $env:RELEASE_TAG already exists. Installer artifact was built, but the published release was not replaced."
+            Write-Host "Release $env:RELEASE_TAG already exists."
             exit 0
           }
-
           $installer = Get-ChildItem -Path release -Filter "CUP-Altair-Setup-*.exe" | Select-Object -First 1
-          if (-not $installer) {
-            throw "Altair Windows installer was not found in release/."
-          }
-
+          if (-not $installer) { throw "Altair Windows installer was not found in release/." }
           gh release create $env:RELEASE_TAG $installer.FullName `
             --target $env:GITHUB_SHA `
-            --title "ЦУП Альтаир v5 ($env:RELEASE_TAG) — Технопром 2026. Миссия на Луну" `
-            --notes "ЦУП Альтаир v5: интерфейс Технопром 2026, телеметрия миссии без измерения тока, графики сразу под телеметрией, профиль CC1101 для передатчика 434.000 МГц, встроенная прошивка ESP32-радиошлюза и управление AZ/EL." `
+            --title "ЦУП Альтаир v6 ($env:RELEASE_TAG) — Технопром 2026. Миссия на Луну" `
+            --notes "ЦУП Альтаир v6: фиксированный 29-символьный пакет телеметрии с XOR, режимом 0/1, профиль CC1101 435.000 МГц, ESP32-приёмник с проверкой XOR, RSSI/SNR и STM32-скетч статического передатчика." `
             --latest
