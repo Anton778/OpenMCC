@@ -1,8 +1,8 @@
 {
-  "name": "openmcc",
-  "version": "0.4.0",
+  "name": "altair-mcc",
+  "version": "0.5.0",
   "private": true,
-  "description": "Open Mission Control Center desktop application for educational CubeSat ground stations",
+  "description": "ЦУП Альтаир — Центр управления полётами, Технопром 2026, Миссия на Луну",
   "main": "desktop/main.cjs",
   "repository": {
     "type": "git",
@@ -22,8 +22,8 @@
     "electron-builder": "26.15.3"
   },
   "build": {
-    "appId": "org.openmcc.desktop",
-    "productName": "OpenMCC",
+    "appId": "org.altair.mcc.desktop",
+    "productName": "ЦУП Альтаир",
     "asar": true,
     "compression": "normal",
     "directories": {
@@ -52,14 +52,14 @@
           ]
         }
       ],
-      "artifactName": "OpenMCC-Setup-${version}.${ext}"
+      "artifactName": "CUP-Altair-Setup-${version}.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "OpenMCC",
+      "shortcutName": "ЦУП Альтаир",
       "runAfterFinish": true,
       "deleteAppDataOnUninstall": false
     },
