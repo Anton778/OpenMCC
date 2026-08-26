@@ -23,7 +23,9 @@ jobs:
       - name: Compile v7 LaTeX manual
         uses: xu-cheng/latex-action@v4
         with:
-          root_file: docs/CUP_Altair_v7_Manual.tex
+          root_file: CUP_Altair_v7_Manual.tex
+          working_directory: docs
+          work_in_root_file_dir: true
           latexmk_use_xelatex: true
 
       - name: Upload PDF manual
