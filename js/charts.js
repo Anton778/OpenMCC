@@ -1,8 +1,8 @@
 "use strict";
 
-/* ЦУП Альтаир — telemetry charts, v6 / 0.6.0 */
+/* ЦУП Альтаир — telemetry charts, v7 / 0.7.0 */
 (() => {
-    const CONFIG = Object.freeze({ version: "0.6.0", maximumPoints: 120, tension: 0.24 });
+    const CONFIG = Object.freeze({ version: "0.7.0", maximumPoints: 120, tension: 0.24 });
     const PARAMETERS = Object.freeze({
         VOLT: { title: "Напряжение аккумулятора", unit: "В", decimals: 2, canvasId: "chartVOLT", valueId: "chartValueVOLT" },
         PANEL_POWER: { title: "Мощность солнечных панелей", unit: "Вт", decimals: 2, canvasId: "chartPANEL_POWER", valueId: "chartValuePANEL_POWER" },
@@ -34,7 +34,26 @@
         const gradient = ctx.createLinearGradient(0, 0, 0, 190);
         gradient.addColorStop(0, "rgba(0,217,255,.24)");
         gradient.addColorStop(1, "rgba(0,217,255,.01)");
-        return new Chart(ctx, { type: "line", data: { labels: [], datasets: [{ label: parameter.title, data: [], borderColor: "#00d9ff", backgroundColor: gradient, borderWidth: 1.6, pointRadius: 0, pointHoverRadius: 3, tension: CONFIG.tension, fill: true }] }, options: options(parameter) });
+        return new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: [],
+                datasets: [{
+                    label: parameter.title,
+                    data: [],
+                    borderColor: "#00d9ff",
+                    backgroundColor: gradient,
+                    borderWidth: 1.6,
+                    pointRadius: 2.6,
+                    pointHoverRadius: 5,
+                    pointBorderWidth: 1,
+                    tension: CONFIG.tension,
+                    fill: true,
+                    showLine: true,
+                }],
+            },
+            options: options(parameter),
+        });
     }
 
     function append(key, value, ts) {
@@ -94,9 +113,13 @@
         elements.pauseButton?.addEventListener("click", () => { state.paused = !state.paused; elements.pauseButton.textContent = state.paused ? "Продолжить" : "Пауза"; setStatus(state.paused ? "paused" : "active"); updateStats(); });
         elements.clearButton?.addEventListener("click", clearCharts);
         updateStats(); setStatus("waiting"); state.initialized = true;
-        log("Графики телеметрии v0.6.0 готовы", "success");
+        log("Графики телеметрии v0.7.0 готовы: точки на каждом отсчёте", "success");
     }
 
     window.OpenMCCCharts = Object.freeze({ config: CONFIG, processTelemetry, clear: clearCharts, getState: () => ({ ...state, chartKeys: Object.keys(state.charts) }) });
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initialize, { once: true }); else initialize();
 })();
+
+// v7 runtime patch загружается после регистрации графиков. Внутри он ждёт
+// завершения инициализации app.js/help.js, поэтому не зависит от порядка DOMContentLoaded.
+import("/js/v7.js").catch(error => console.error("Altair v7 patch failed", error));

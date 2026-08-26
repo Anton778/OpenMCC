@@ -1,4 +1,4 @@
-name: Altair v6 checks
+name: Altair v7 checks
 
 on:
   push:
@@ -25,6 +25,7 @@ jobs:
           node --check js/parser.js
           node --check js/app.js
           node --check js/charts.js
+          node --check js/v7.js
           node --check js/help.js
           node --check js/flasher-v5.js
           node --check js/serial.js
@@ -34,33 +35,28 @@ jobs:
           node - <<'NODE'
           const fs = require('fs');
           const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-          if (pkg.version !== '0.6.1') throw new Error(`Expected 0.6.1, got ${pkg.version}`);
+          if (pkg.version !== '0.7.0') throw new Error(`Expected 0.7.0, got ${pkg.version}`);
           const prefix = '02,00001,00015,3.00,4.20,1,';
           let xor = 0;
           for (const ch of prefix) xor ^= ch.charCodeAt(0);
           if (xor !== 0x33) throw new Error(`Expected XOR 0x33, got 0x${xor.toString(16)}`);
           if ((prefix + '33').length !== 29) throw new Error('Canonical packet must contain 29 ASCII characters');
-          console.log('v6.1 package and canonical telemetry packet OK');
+          console.log('v7 package and canonical telemetry packet OK');
           NODE
 
-      - name: Validate v6 telemetry and RF profile
+      - name: Validate v7 radio profile and UI patch
         shell: bash
         run: |
-          grep -Fq 'fixedPacketLength: 29' js/parser.js
-          grep -Fq '02,00001,00015,3.00,4.20,1,33' js/parser.js
-          grep -Fq 'xorAscii' js/parser.js
-          grep -Fq '"MODE"' js/app.js
-          grep -Fq '"CHECKSUM"' js/app.js
-          grep -Fq '435.000' js/app.js
-          grep -Fq '435.000f' firmware/radio_gateway_esp32/src/main.cpp
-          grep -Fq 'digitalRead(CC_GDO0)' firmware/radio_gateway_esp32/src/main_fixed.cpp
-          grep -Fq 'setSyncWord(0x12, 0xAD' firmware/radio_gateway_esp32/src/main_fixed.cpp
-          grep -Fq 'RADIOLIB_ENCODING_NRZ' firmware/radio_gateway_esp32/src/main_fixed.cpp
-          grep -Fq 'variablePacketLengthMode' firmware/radio_gateway_esp32/src/main_fixed.cpp
-          grep -Fq '+<main_fixed.cpp>' firmware/radio_gateway_esp32/platformio.ini
-          grep -Fq '02,00001,00015,3.00,4.20,1,33' firmware/transmitter_stm32_v6/Transmit_v6_static/Transmit_v6_static.ino
-          grep -Fq 'radio.begin(435.000f' firmware/transmitter_stm32_v6/Transmit_v6_static/Transmit_v6_static.ino
+          grep -Fq 'bandwidth: 203' js/v7.js
+          grep -Fq '"ANTENNA", "RSSI", "SNR"' js/v7.js
+          grep -Fq 'pointRadius: 2.6' js/charts.js
+          grep -Fq 'V7_BW = 203.0f' firmware/radio_gateway_esp32/src/main_v7.cpp
+          grep -Fq '203.0' firmware/radio_gateway_esp32/Altair_Gateway_v7/Altair_Gateway_v7.ino
+          grep -Fq '02,00001,00015,3.00,4.20,1,33' firmware/transmitter_stm32_v7/Transmit_v7_static/Transmit_v7_static.ino
+          grep -Fq '+<main_v7.cpp>' firmware/radio_gateway_esp32/platformio.ini
+          test -f docs/CUP_Altair_v7_Manual.tex
+          test -f docs/RELEASE_V7.md
           if grep -Fq 'id="CURR"' index.html; then
-            echo 'CURR must not be present in the v6 main interface'
+            echo 'CURR must not be present in the v7 main interface'
             exit 1
           fi
