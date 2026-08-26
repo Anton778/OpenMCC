@@ -51,7 +51,11 @@
             const value = tempCard.querySelector(".value");
             const unit = tempCard.querySelector(".unit");
             if (label) label.textContent = "Режим работы спутника";
-            if (value) { value.id = "MODE"; value.textContent = "--"; value.classList.add("telemetryTextValue"); }
+            if (value) {
+                value.id = "MODE";
+                value.textContent = "--";
+                value.classList.add("telemetryTextValue");
+            }
             if (unit) unit.textContent = "1 — штатный · 0 — аварийный";
         }
 
@@ -62,10 +66,11 @@
             card.dataset.tip = "Контрольная сумма XOR. Рассчитывается по ASCII-символам пакета до контрольной суммы, включая последнюю запятую.";
             card.innerHTML = '<span class="label">Контрольная сумма XOR</span><span id="CHECKSUM" class="value telemetryTextValue">--</span><span class="unit">HEX · 2 символа</span>';
             const rssiCard = grid.querySelector('[data-telemetry="RSSI"]');
-            if (rssiCard) grid.insertBefore(card, rssiCard); else grid.appendChild(card);
+            if (rssiCard) grid.insertBefore(card, rssiCard);
+            else grid.appendChild(card);
         }
 
-        // Сохраняем поле антенны из v5 как дополнительную телеметрию. В основной 29-символьный пакет v6 оно не входит.
+        // Поле антенны сохранено из v5 как дополнительное. В основной 29-символьный пакет v6 оно не входит.
         if (!document.getElementById("ANTENNA")) {
             const card = document.createElement("div");
             card.className = "card telemetryCard telemetryAntenna antenna-unknown";
@@ -90,6 +95,45 @@
         });
     }
 
+    function forceV6RadioValues() {
+        const values = {
+            radioFrequency: "435.000",
+            radioTxPower: "5",
+            radioDataRate: "4.8",
+            radioModulation: "2FSK",
+            radioBandwidth: "58",
+        };
+        Object.entries(values).forEach(([id, value]) => {
+            const input = document.getElementById(id);
+            if (input) input.value = value;
+        });
+        const crc = document.getElementById("radioCrc");
+        const cca = document.getElementById("radioCca");
+        if (crc) crc.checked = true;
+        if (cca) cca.checked = true;
+    }
+
+    function storeV6RadioValues() {
+        try {
+            // Сохраняем старый ключ intentionally: help.js использует его и таким образом остаётся совместимым с обновлением v5 → v6.
+            const key = "altair-v5-radio-settings";
+            const settings = JSON.parse(localStorage.getItem(key) || "{}");
+            settings.cc1101 = {
+                ...(settings.cc1101 || {}),
+                frequency: 435.000,
+                power: 5,
+                rate: 4.8,
+                modulation: "2FSK",
+                bandwidth: "58",
+                crc: true,
+                cca: true,
+            };
+            localStorage.setItem(key, JSON.stringify(settings));
+        } catch {
+            // localStorage может быть недоступен в нестандартном режиме браузера.
+        }
+    }
+
     function applyV6BrandingAndRadioProfile() {
         const badge = document.querySelector(".buildBadge");
         if (badge) badge.textContent = "v6 · 0.6.0";
@@ -98,47 +142,54 @@
         if (projectEyebrow) projectEyebrow.textContent = "RELEASE V6";
 
         const radioLead = document.querySelector("#radioPanel .panelLead");
-        if (radioLead) radioLead.innerHTML = 'Основной профиль v6: <strong>435.000 МГц · 4.8 kbps · 2-FSK · Δf 5 кГц · RX BW 58 кГц · 5 dBm</strong>.';
-
-        try {
-            const key = "altair-v5-radio-settings"; // help.js v5 uses this storage key; keep compatibility.
-            const settings = JSON.parse(localStorage.getItem(key) || "{}");
-            settings.cc1101 = { ...(settings.cc1101 || {}), frequency: 435.000, power: 5, rate: 4.8, modulation: "2FSK", bandwidth: "58", crc: true, cca: true };
-            localStorage.setItem(key, JSON.stringify(settings));
-        } catch { /* localStorage can be unavailable in unusual browser modes */ }
-
-        const freq = document.getElementById("radioFrequency");
-        if (freq) freq.value = "435.000";
-        const preview = document.getElementById("radioCommandPreview");
-        if (preview && /CC1101/i.test(preview.textContent || "")) {
-            preview.textContent = "$CMD,RADIO,TYPE=CC1101,FREQ=435.000,POWER=5,RATE=4.8,MOD=2FSK,BW=58,CRC=1,CCA=1";
+        if (radioLead) {
+            radioLead.innerHTML = 'Основной профиль v6: <strong>435.000 МГц · 4.8 kbps · 2-FSK · Δf 5 кГц · RX BW 58 кГц · 5 dBm</strong>.';
         }
 
-        const oldPreset = document.getElementById("radioTechnopromPreset");
-        if (oldPreset && !oldPreset.dataset.v6patched) {
-            const preset = oldPreset.cloneNode(true);
-            preset.dataset.v6patched = "1";
-            preset.textContent = "Применить профиль v6 · 435 МГц";
-            oldPreset.replaceWith(preset);
-            preset.addEventListener("click", () => {
-                const values = {
-                    radioFrequency: "435.000", radioTxPower: "5", radioDataRate: "4.8",
-                    radioModulation: "2FSK", radioBandwidth: "58",
-                };
-                Object.entries(values).forEach(([id, value]) => {
-                    const el = document.getElementById(id);
-                    if (el) { el.value = value; el.dispatchEvent(new Event("change", { bubbles: true })); }
-                });
-                const crc = document.getElementById("radioCrc"); if (crc) crc.checked = true;
-                const cca = document.getElementById("radioCca"); if (cca) cca.checked = true;
-                try {
-                    const key = "altair-v5-radio-settings";
-                    const all = JSON.parse(localStorage.getItem(key) || "{}");
-                    all.cc1101 = { frequency: 435.000, power: 5, rate: 4.8, modulation: "2FSK", bandwidth: "58", crc: true, cca: true };
-                    localStorage.setItem(key, JSON.stringify(all));
-                } catch {}
-                writeLog("Выбран профиль v6: CC1101 435.000 МГц", "success");
+        storeV6RadioValues();
+
+        const selector = document.getElementById("radioModuleType");
+        if (selector && !selector.dataset.v6watch) {
+            selector.dataset.v6watch = "1";
+            selector.addEventListener("change", () => {
+                // Сначала help.js перерисует панель выбранного радиомодуля, затем мы снова применим профиль v6.
+                setTimeout(applyV6BrandingAndRadioProfile, 70);
             });
+        }
+
+        if (!selector || selector.value === "cc1101") {
+            forceV6RadioValues();
+
+            const preview = document.getElementById("radioCommandPreview");
+            if (preview) {
+                preview.textContent = "$CMD,RADIO,TYPE=CC1101,FREQ=435.000,POWER=5,RATE=4.8,MOD=2FSK,BW=58,CRC=1,CCA=1";
+            }
+
+            document.querySelectorAll("#radioControlContainer .radioMiniNote").forEach(note => {
+                if (/434|Transmit\.ino|Технопром/i.test(note.textContent || "")) {
+                    note.textContent = "Профиль v6 для стенда: 435.000 МГц, 4.8 kbps, 2-FSK, девиация 5 кГц, RX BW 58 кГц, мощность 5 dBm.";
+                }
+            });
+
+            const oldPreset = document.getElementById("radioTechnopromPreset");
+            if (oldPreset && !oldPreset.dataset.v6patched) {
+                const preset = oldPreset.cloneNode(true);
+                preset.dataset.v6patched = "1";
+                preset.textContent = "Применить профиль v6 · 435 МГц";
+                oldPreset.replaceWith(preset);
+                preset.addEventListener("click", () => {
+                    forceV6RadioValues();
+                    storeV6RadioValues();
+                    ["radioFrequency", "radioTxPower", "radioDataRate", "radioModulation", "radioBandwidth"].forEach(id => {
+                        document.getElementById(id)?.dispatchEvent(new Event("change", { bubbles: true }));
+                    });
+                    const commandPreview = document.getElementById("radioCommandPreview");
+                    if (commandPreview) {
+                        commandPreview.textContent = "$CMD,RADIO,TYPE=CC1101,FREQ=435.000,POWER=5,RATE=4.8,MOD=2FSK,BW=58,CRC=1,CCA=1";
+                    }
+                    writeLog("Выбран профиль v6: CC1101 435.000 МГц", "success");
+                });
+            }
         }
 
         const help = document.getElementById("helpDialog");
@@ -146,8 +197,12 @@
             const eyebrow = help.querySelector(".panelEyebrow");
             if (eyebrow) eyebrow.textContent = "ЦУП АЛЬТАИР · V6";
             const sections = help.querySelectorAll("section");
-            if (sections[1]) sections[1].innerHTML = '<h3>Телеметрия v6</h3><p>Основной пакет — ровно 29 ASCII-символов: <code>02,00001,00015,3.00,4.20,1,33</code>. Поля: ID, номер пакета, uptime, мощность панелей, напряжение аккумулятора, режим и XOR.</p>';
-            if (sections[2]) sections[2].innerHTML = '<h3>Радиоканал</h3><p>Профиль v6 для CC1101: 435.000 МГц, 4.8 kbps, 2-FSK, девиация 5 кГц, полоса 58 кГц, мощность 5 dBm. Наземный ESP32-шлюз проверяет XOR и добавляет RSSI/SNR.</p>';
+            if (sections[1]) {
+                sections[1].innerHTML = '<h3>Телеметрия v6</h3><p>Основной пакет — ровно 29 ASCII-символов: <code>02,00001,00015,3.00,4.20,1,33</code>. Поля: ID, номер пакета, uptime, мощность панелей, напряжение аккумулятора, режим и XOR.</p>';
+            }
+            if (sections[2]) {
+                sections[2].innerHTML = '<h3>Радиоканал</h3><p>Профиль v6 для CC1101: 435.000 МГц, 4.8 kbps, 2-FSK, девиация 5 кГц, полоса 58 кГц, мощность 5 dBm. Наземный ESP32-шлюз проверяет XOR и добавляет RSSI/SNR.</p>';
+            }
         }
     }
 
@@ -157,9 +212,17 @@
         UPTIME: value => Number.isFinite(Number(value)) ? String(Math.trunc(Number(value))).padStart(5, "0") : "--",
         PANEL_POWER: value => Number.isFinite(Number(value)) ? Number(value).toFixed(2) : "--",
         VOLT: value => Number.isFinite(Number(value)) ? Number(value).toFixed(2) : "--",
-        MODE(value) { const n = Number(value); return n === 1 ? "1 · ШТАТНЫЙ" : n === 0 ? "0 · АВАРИЙНЫЙ" : "--"; },
-        CHECKSUM(value) { return String(value ?? "--").toUpperCase(); },
-        ANTENNA(value) { const n = Number(value); return n === 1 ? "1 · РАСКРЫТА" : n === 0 ? "0 · СЛОЖЕНА" : "--"; },
+        MODE(value) {
+            const numeric = Number(value);
+            return numeric === 1 ? "1 · ШТАТНЫЙ" : numeric === 0 ? "0 · АВАРИЙНЫЙ" : "--";
+        },
+        CHECKSUM(value) {
+            return String(value ?? "--").toUpperCase();
+        },
+        ANTENNA(value) {
+            const numeric = Number(value);
+            return numeric === 1 ? "1 · РАСКРЫТА" : numeric === 0 ? "0 · СЛОЖЕНА" : "--";
+        },
         RSSI: value => Number.isFinite(Number(value)) ? Number(value).toFixed(1) : "--",
         SNR: value => Number.isFinite(Number(value)) ? Number(value).toFixed(1) : "--",
     });
@@ -176,7 +239,9 @@
         elements.telemetryStatus = document.querySelector("#systemPanel li:nth-child(4) span");
         elements.portStatus = document.querySelector("#systemPanel li:nth-child(2) span");
         elements.gatewayStatus = document.querySelector("#systemPanel li:nth-child(3) span");
-        TELEMETRY_FIELDS.forEach(key => { elements.telemetry[key] = document.getElementById(key); });
+        TELEMETRY_FIELDS.forEach(key => {
+            elements.telemetry[key] = document.getElementById(key);
+        });
     }
 
     function setIndicator(element, status) {
@@ -189,7 +254,9 @@
     function updateUtcClock() {
         if (!elements.utcClock) return;
         const now = new Date();
-        elements.utcClock.textContent = [now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds()].map(v => String(v).padStart(2, "0")).join(":");
+        elements.utcClock.textContent = [now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds()]
+            .map(value => String(value).padStart(2, "0"))
+            .join(":");
     }
 
     function setConnectionState(connected, label = connected ? "ONLINE" : "OFFLINE") {
@@ -208,6 +275,12 @@
     function setTelemetryStatus(status) {
         state.telemetryActive = status === "active";
         setIndicator(elements.telemetryStatus, status === "active" ? "ok" : status === "error" ? "error" : "warn");
+    }
+
+    function incrementErrorCounter(message = null, metadata = null) {
+        state.errorCount += 1;
+        if (elements.crcCounter) elements.crcCounter.textContent = state.errorCount.toLocaleString("ru-RU");
+        if (message) writeLog(message, "warning", metadata);
     }
 
     function updateCardAppearance(key, target, value) {
@@ -237,18 +310,40 @@
         if (!telemetry || typeof telemetry !== "object") return;
         let displayed = 0;
         TELEMETRY_FIELDS.forEach(key => {
-            if (Object.hasOwn(telemetry, key)) { updateTelemetryValue(key, telemetry[key]); displayed += 1; }
+            if (Object.hasOwn(telemetry, key)) {
+                updateTelemetryValue(key, telemetry[key]);
+                displayed += 1;
+            }
         });
         if (!displayed) return;
+
+        if (Object.hasOwn(telemetry, "CHECKSUM") && Number(telemetry.CHECKSUM_OK) === 1 && elements.telemetry.CHECKSUM) {
+            elements.telemetry.CHECKSUM.textContent = `${String(telemetry.CHECKSUM).toUpperCase()} · OK`;
+        }
+
         state.packetCount += 1;
         state.lastTelemetryTime = Date.now();
         if (elements.packetCounter) elements.packetCounter.textContent = state.packetCount.toLocaleString("ru-RU");
         setTelemetryStatus("active");
-        if (Object.hasOwn(telemetry, "RSSI") || Object.hasOwn(telemetry, "LQI")) setIndicator(elements.gatewayStatus, "ok");
+        if (Object.hasOwn(telemetry, "RSSI") || Object.hasOwn(telemetry, "LQI")) {
+            setIndicator(elements.gatewayStatus, "ok");
+        }
     }
 
     function createDemoTelemetry() {
-        return { ID: "02", PACKET: 1, UPTIME: 15, PANEL_POWER: 3.00, VOLT: 4.20, MODE: 1, CHECKSUM: "33", CHECKSUM_OK: 1, ANTENNA: 1, RSSI: -76.0, SNR: 16.0 };
+        return {
+            ID: "02",
+            PACKET: 1,
+            UPTIME: 15,
+            PANEL_POWER: 3.00,
+            VOLT: 4.20,
+            MODE: 1,
+            CHECKSUM: "33",
+            CHECKSUM_OK: 1,
+            ANTENNA: 1,
+            RSSI: -76.0,
+            SNR: 16.0,
+        };
     }
 
     function startDemoMode() {
@@ -272,15 +367,25 @@
     }
 
     async function handleConnectButtonClick() {
-        if (state.demoMode) { stopDemoMode(); return; }
+        if (state.demoMode) {
+            stopDemoMode();
+            return;
+        }
         if (window.OpenMCCSerial?.toggleConnection) {
-            try { await window.OpenMCCSerial.toggleConnection(); }
-            catch (error) { writeLog(`Ошибка соединения: ${error.message}`, "error"); setConnectionState(false); }
-        } else startDemoMode();
+            try {
+                await window.OpenMCCSerial.toggleConnection();
+            } catch (error) {
+                writeLog(`Ошибка соединения: ${error.message}`, "error");
+                setConnectionState(false);
+            }
+        } else {
+            startDemoMode();
+        }
     }
 
     function registerEvents() {
         elements.connectButton?.addEventListener("click", handleConnectButtonClick);
+
         window.addEventListener("openmcc:serial-connected", event => {
             state.demoMode = false;
             const detail = event.detail || {};
@@ -289,18 +394,31 @@
             if (elements.baudRate && detail.baudRate) elements.baudRate.textContent = String(detail.baudRate);
             setTelemetryStatus("waiting");
         });
+
         window.addEventListener("openmcc:serial-disconnected", () => {
-            setConnectionState(false); if (elements.serialPort) elements.serialPort.textContent = "---"; setTelemetryStatus("waiting"); state.lastTelemetryTime = 0;
+            setConnectionState(false);
+            if (elements.serialPort) elements.serialPort.textContent = "---";
+            setTelemetryStatus("waiting");
+            state.lastTelemetryTime = 0;
         });
+
         window.addEventListener("openmcc:telemetry", event => processTelemetry(event.detail));
+
         window.addEventListener("openmcc:telemetry-error", event => {
-            state.errorCount += 1;
-            if (elements.crcCounter) elements.crcCounter.textContent = state.errorCount.toLocaleString("ru-RU");
+            incrementErrorCounter(event.detail?.message || "Ошибка телеметрии", event.detail);
             setTelemetryStatus("error");
-            if (event.detail?.message) writeLog(event.detail.message, "warning", event.detail);
         });
+
+        window.addEventListener("openmcc:device-error", event => {
+            const payload = String(event.detail?.payload || event.detail?.line || "Ошибка устройства");
+            incrementErrorCounter(payload, event.detail);
+            if (/TELEMETRY_XOR|RADIO_RX_CRC/i.test(payload)) setTelemetryStatus("error");
+        });
+
         window.addEventListener("openmcc:device-info", event => {
-            if (/GATEWAY|RADIO_READY|RADIO,TYPE=/i.test(String(event.detail?.payload || ""))) setIndicator(elements.gatewayStatus, "ok");
+            if (/GATEWAY|RADIO_READY|RADIO,TYPE=/i.test(String(event.detail?.payload || ""))) {
+                setIndicator(elements.gatewayStatus, "ok");
+            }
         });
     }
 
@@ -312,19 +430,29 @@
         updateUtcClock();
         state.clockTimer = setInterval(updateUtcClock, 250);
         state.watchdogTimer = setInterval(() => {
-            if (state.connected && state.lastTelemetryTime && state.telemetryActive && Date.now() - state.lastTelemetryTime > APP_CONFIG.telemetryTimeoutMs) setTelemetryStatus("lost");
+            if (state.connected && state.lastTelemetryTime && state.telemetryActive && Date.now() - state.lastTelemetryTime > APP_CONFIG.telemetryTimeoutMs) {
+                setTelemetryStatus("lost");
+            }
         }, 500);
         registerEvents();
         setConnectionState(Boolean(window.OpenMCCSerial?.getState?.().connected));
         setTelemetryStatus("waiting");
         state.initialized = true;
-        // help.js initializes after app.js. Apply v6 branding/profile after its DOMContentLoaded handler.
+
+        // help.js и RF-контролы инициализируются после app.js.
         setTimeout(applyV6BrandingAndRadioProfile, 80);
         setTimeout(applyV6BrandingAndRadioProfile, 500);
         writeLog("ЦУП Альтаир v0.6.0 готов. Протокол v6: фиксированный пакет 29 символов, 435.000 МГц.", "success");
     }
 
-    window.OpenMCCApp = Object.freeze({ config: APP_CONFIG, processTelemetry, startDemoMode, stopDemoMode, getState: () => ({ ...state }) });
+    window.OpenMCCApp = Object.freeze({
+        config: APP_CONFIG,
+        processTelemetry,
+        startDemoMode,
+        stopDemoMode,
+        getState: () => ({ ...state }),
+    });
+
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initialize, { once: true });
     else initialize();
 })();
