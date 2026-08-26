@@ -6,9 +6,10 @@
  *
  * Основа v7 — реально проверенная стендовая конфигурация:
  * STM32 + CC1101 IntroSat -> ESP32-WROOM-32 + обычный CC1101.
- * Канонический пакет 02,00001,00015,3.00,4.20,1,33 был устойчиво принят
- * только после расширения RX bandwidth до 203 кГц. Поэтому BW=203 кГц
- * зафиксирована как штатная настройка релиза v7.
+ * Пакет 02,00001,00015,3.00,4.20,1,33 устойчиво принимается при
+ * RX bandwidth 203 кГц. В v7 используется тот же blocking receive()
+ * путь RadioLib, который подтвердил приём на стенде, но с коротким
+ * таймаутом 250 мс, чтобы USB-интерфейс оставался отзывчивым.
  */
 
 #define setup altairLegacySetup
@@ -22,13 +23,12 @@ namespace AltairV7 {
 using namespace AltairGateway;
 
 constexpr char FW_VERSION_V7[] = "0.4.0";
-constexpr char RX_PROFILE[] = "v7-bw203-gdo0-poll";
+constexpr char RX_PROFILE[] = "v7-blocking-rx-bw203";
 constexpr float V7_FREQ = 435.000f;
 constexpr float V7_RATE = 4.8f;
 constexpr float V7_BW = 203.0f;
 constexpr int8_t V7_POWER = 5;
-
-bool profileApplied = false;
+constexpr RadioLibTime_t RX_SLICE_MS = 250;
 
 void forceConfig() {
   cc.frequency = V7_FREQ;
@@ -67,14 +67,6 @@ bool applyPacketProfile(bool verbose = true) {
     return false;
   }
 
-  state = cc1101.startReceive();
-  if (state != RADIOLIB_ERR_NONE) {
-    radioReady = false;
-    if (verbose) err("CC1101_V7_RX_START,CODE=" + String(state));
-    return false;
-  }
-
-  profileApplied = true;
   saveCc();
   if (verbose) {
     info("RADIO_RX_PROFILE=" + String(RX_PROFILE) +
@@ -103,14 +95,13 @@ void processUsbV7(String line) {
   if (upper.startsWith("$CMD,RADIO,")) {
     forceConfig();
     if (!startCc(true)) return;
-    profileApplied = false;
     if (!applyPacketProfile(true)) return;
     ack("RADIO_CONFIG_APPLIED,TYPE=CC1101,PROFILE=V7,BW=203");
     return;
   }
   if (upper.startsWith("$CMD,")) {
     forwardCommand(line);
-    profileApplied = false;
+    applyPacketProfile(false);
     return;
   }
   err("UNKNOWN_USB_LINE");
@@ -130,27 +121,27 @@ void pollUsbV7() {
   }
 }
 
-void pollCcV7() {
+void receiveCcV7() {
   if (!radioReady || activeType != RadioType::CC1101) return;
-  if (!profileApplied && !applyPacketProfile(true)) return;
-
-  if (digitalRead(CC_GDO0) != HIGH) return;
 
   String payload;
-  const int16_t result = cc1101.readData(payload);
+  // Тот же механизм RadioLib receive(), на котором пакет был реально принят.
+  // 250 мс ограничивает блокировку, после чего loop() снова обслуживает USB.
+  const int16_t result = cc1101.receive(payload, 0, RX_SLICE_MS);
+
+  if (result == RADIOLIB_ERR_RX_TIMEOUT) return;
+
   const float rssi = cc1101.getRSSI();
   const uint8_t lqi = cc1101.getLQI();
   const float snr = constrain(rssi - (-105.0f), -10.0f, 60.0f);
 
-  if (result == RADIOLIB_ERR_NONE) forwardCcPayload(payload, rssi, lqi, snr);
-  else if (result == RADIOLIB_ERR_CRC_MISMATCH) err("RADIO_RX_CRC");
-  else err("RADIO_RX,TYPE=CC1101,CODE=" + String(result));
-
-  const int16_t restart = cc1101.startReceive();
-  if (restart != RADIOLIB_ERR_NONE) {
-    radioReady = false;
-    profileApplied = false;
-    err("CC1101_RX_RESTART,CODE=" + String(restart));
+  if (result == RADIOLIB_ERR_NONE) {
+    payload.trim();
+    forwardCcPayload(payload, rssi, lqi, snr);
+  } else if (result == RADIOLIB_ERR_CRC_MISMATCH) {
+    err("RADIO_RX_CRC");
+  } else {
+    err("RADIO_RX,TYPE=CC1101,CODE=" + String(result));
   }
 }
 
@@ -173,21 +164,18 @@ void setup() {
   prefs.putUChar("type", static_cast<uint8_t>(RadioType::CC1101));
 
   info("GATEWAY=ALTAIR,DEVICE=ESP32-WROOM-32,FW=" + String(FW_VERSION_V7) +
-       ",BOOT=1,PROTOCOL=V7,FIXED_LEN=29,FREQ=435.000,BW=203");
+       ",BOOT=1,PROTOCOL=V7,FIXED_LEN=29,FREQ=435.000,BW=203,RX=" + String(RX_PROFILE));
 
   if (!startCc(false)) {
     err("CC1101_START_FAILED");
     return;
   }
-  profileApplied = false;
   applyPacketProfile(true);
 }
 
 void loop() {
-  using namespace AltairGateway;
   using namespace AltairV7;
-
   pollUsbV7();
-  pollCcV7();
+  receiveCcV7();
   delay(1);
 }
