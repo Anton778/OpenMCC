@@ -5,10 +5,15 @@
    Release v5 / 0.5.0
 
    Supported telemetry formats:
-   1) $TM,<ID>,<PACKET>,<UPTIME>,<VOLT>,<PANEL_POWER>,<TEMP>[*XX]
-   2) $TEL,ID=...,VOLT=...,PANEL_POWER=...,PACKET=...,UPTIME=...,TEMP=...
-   3) legacy $TM packet used in earlier IntroSat experiments
-   4) JSON and bare KEY=VALUE lists
+   1) $TM,<ID>,<PACKET>,<UPTIME>,<VOLT>,<PANEL_POWER>,<TEMP>[,<ANTENNA>][*XX]
+   2) $TM,ID=...,PACKET=...,UPTIME=...,VOLT=...,PANEL_POWER=...,TEMP=...,ANTENNA=...
+   3) $TEL,ID=...,VOLT=...,PANEL_POWER=...,PACKET=...,UPTIME=...,TEMP=...,ANTENNA=...
+   4) legacy $TM packet used in earlier IntroSat experiments
+   5) JSON and bare KEY=VALUE lists
+
+   ANTENNA:
+   1 — бортовая антенна раскрыта;
+   0 — бортовая антенна сложена.
    ============================================================ */
 
 (() => {
@@ -25,6 +30,7 @@
         PANEL_POWER: Object.freeze({ type: "number", unit: "W" }),
         PACKET: Object.freeze({ type: "number" }),
         UPTIME: Object.freeze({ type: "number", unit: "s" }),
+        ANTENNA: Object.freeze({ type: "number" }),
         TEMP: Object.freeze({ type: "number", unit: "°C" }),
         RSSI: Object.freeze({ type: "number", unit: "dBm" }),
         SNR: Object.freeze({ type: "number", unit: "dB" }),
@@ -58,6 +64,11 @@
         PACKET_COUNT: "PACKET",
         UP: "UPTIME",
         UPTIME_S: "UPTIME",
+        ANT: "ANTENNA",
+        ANTENNA_STATE: "ANTENNA",
+        ANTENNA_DEPLOYED: "ANTENNA",
+        DEPLOY: "ANTENNA",
+        DEPLOYED: "ANTENNA",
         T: "TEMP",
         TEMPERATURE: "TEMP",
     });
@@ -146,7 +157,7 @@
 
     function parseCanonicalTm(values) {
         if (values.length < 6) throw new Error("Пакет $TM v5 содержит недостаточно полей");
-        return {
+        const packet = {
             ID: String(values[0]).trim(),
             PACKET: parseValue("PACKET", values[1]),
             UPTIME: parseValue("UPTIME", values[2]),
@@ -154,6 +165,10 @@
             PANEL_POWER: parseValue("PANEL_POWER", values[4]),
             TEMP: parseValue("TEMP", values[5]),
         };
+        if (values.length >= 7 && String(values[6]).trim() !== "") {
+            packet.ANTENNA = parseValue("ANTENNA", values[6]);
+        }
+        return packet;
     }
 
     function parseLegacyTm(values) {
@@ -223,6 +238,13 @@
         }
         if (Object.keys(packet).length === 0) {
             throw new Error("Пакет телеметрии пуст");
+        }
+        if (Object.hasOwn(packet, "ANTENNA") && packet.ANTENNA !== null) {
+            const stateValue = Number(packet.ANTENNA);
+            if (stateValue !== 0 && stateValue !== 1) {
+                throw new Error("ANTENNA должен быть 0 (сложена) или 1 (раскрыта)");
+            }
+            packet.ANTENNA = stateValue;
         }
     }
 
