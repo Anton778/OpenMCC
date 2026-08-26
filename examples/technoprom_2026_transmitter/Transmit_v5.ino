@@ -11,9 +11,9 @@
  *   CC1101 + RadioLib
  *
  * ВАЖНО:
- * Функции readBatteryVoltage(), readPanelPower() и readTemperature()
- * пока содержат демонстрационные значения. Их нужно заменить чтением
- * фактических датчиков/АЦП конкретного спутника.
+ * Функции readBatteryVoltage(), readPanelPower(), readTemperature() и
+ * readAntennaDeployed() пока содержат демонстрационные значения. Их нужно
+ * заменить чтением фактических датчиков/состояния конкретного спутника.
  */
 
 #define CS   PA2
@@ -40,26 +40,41 @@ float readTemperature() {
   return 24.4f;
 }
 
+uint8_t readAntennaDeployed() {
+  // 1 — рулеточная антенна раскрыта; 0 — антенна сложена.
+  // TODO: заменить фактическим состоянием концевика/логики раскрытия.
+  return 1;
+}
+
 String makeTelemetryPacket() {
   const uint32_t uptimeSeconds = millis() / 1000UL;
   const float batteryVoltage = readBatteryVoltage();
   const float panelPower = readPanelPower();
   const float temperature = readTemperature();
+  const uint8_t antennaDeployed = readAntennaDeployed();
 
-  // Формат ЦУП Альтаир v5:
-  // $TM,<ID>,<PACKET>,<UPTIME>,<VOLT>,<PANEL_POWER>,<TEMP>
-  String packet = "$TM,";
+  /*
+   * Рекомендуемый формат ЦУП Альтаир v5 — KEY=VALUE.
+   * Он удобен тем, что новые поля можно добавлять без изменения порядка
+   * существующих параметров, а ESP32-шлюз передаёт их в ЦУП без потерь.
+   *
+   * ANTENNA=1 — антенна раскрыта.
+   * ANTENNA=0 — антенна сложена.
+   */
+  String packet = "$TM,ID=";
   packet += SATELLITE_ID;
-  packet += ",";
+  packet += ",PACKET=";
   packet += String(packetCounter);
-  packet += ",";
+  packet += ",UPTIME=";
   packet += String(uptimeSeconds);
-  packet += ",";
+  packet += ",VOLT=";
   packet += String(batteryVoltage, 2);
-  packet += ",";
+  packet += ",PANEL_POWER=";
   packet += String(panelPower, 3);
-  packet += ",";
+  packet += ",TEMP=";
   packet += String(temperature, 1);
+  packet += ",ANTENNA=";
+  packet += String(antennaDeployed);
 
   return packet;
 }
