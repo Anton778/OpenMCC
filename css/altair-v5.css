@@ -82,6 +82,33 @@
     font-size: clamp(24px, 2vw, 33px) !important;
 }
 
+.telemetryAntenna {
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.telemetryAntenna.antenna-open {
+    border-color: rgba(71, 235, 151, .55);
+    box-shadow: inset 0 0 0 1px rgba(71, 235, 151, .08);
+    background:
+        linear-gradient(145deg, rgba(71, 235, 151, .09), transparent 62%),
+        var(--panel-soft, rgba(8, 16, 29, .84));
+}
+
+.telemetryAntenna.antenna-open .value {
+    color: #7df0b3;
+}
+
+.telemetryAntenna.antenna-closed {
+    border-color: rgba(255, 190, 84, .48);
+    background:
+        linear-gradient(145deg, rgba(255, 190, 84, .075), transparent 62%),
+        var(--panel-soft, rgba(8, 16, 29, .84));
+}
+
+.telemetryAntenna.antenna-closed .value {
+    color: #ffd27e;
+}
+
 .altairPacketNote {
     display: flex;
     flex-wrap: wrap;
