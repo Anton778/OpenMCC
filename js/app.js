@@ -38,6 +38,7 @@
         "PANEL_POWER",
         "PACKET",
         "UPTIME",
+        "ANTENNA",
         "TEMP",
         "RSSI",
         "SNR",
@@ -63,6 +64,12 @@
             const numeric = Number(value);
             return Number.isFinite(numeric) ? Math.max(0, Math.trunc(numeric)).toLocaleString("ru-RU") : "--";
         },
+        ANTENNA(value) {
+            const numeric = Number(value);
+            if (numeric === 1) return "1 · РАСКРЫТА";
+            if (numeric === 0) return "0 · СЛОЖЕНА";
+            return "--";
+        },
         TEMP(value) {
             const numeric = Number(value);
             return Number.isFinite(numeric) ? numeric.toFixed(1) : "--";
@@ -83,6 +90,34 @@
             return;
         }
         console.log(`[ЦУП Альтаир] ${message}`, metadata || "");
+    }
+
+    function ensureAntennaTelemetryCard() {
+        const grid = document.querySelector("#telemetryPanel .altairTelemetryGrid");
+        if (!grid || document.getElementById("ANTENNA")) return;
+
+        const card = document.createElement("div");
+        card.className = "card telemetryCard telemetryAntenna";
+        card.dataset.telemetry = "ANTENNA";
+        card.dataset.tip = "Состояние раскрытия бортовой рулеточной антенны: 1 — раскрыта, 0 — сложена.";
+        card.innerHTML = `
+            <span class="label">Раскрытие антенны</span>
+            <span id="ANTENNA" class="value telemetryTextValue">--</span>
+            <span class="unit">1 — раскрыта · 0 — сложена</span>`;
+
+        const temperatureCard = grid.querySelector('[data-telemetry="TEMP"]');
+        if (temperatureCard) grid.insertBefore(card, temperatureCard);
+        else grid.appendChild(card);
+
+        const packetCode = document.querySelector(".altairPacketNote code");
+        if (packetCode) {
+            packetCode.textContent = "$TM,ID=<ID>,PACKET=<N>,UPTIME=<s>,VOLT=<V>,PANEL_POWER=<W>,TEMP=<°C>,ANTENNA=<0|1>";
+        }
+
+        const packetText = document.querySelector(".altairPacketNote span");
+        if (packetText) {
+            packetText.textContent = "ANTENNA: 1 — антенна раскрыта, 0 — сложена. RSSI и оценка SNR добавляются наземным CC1101-приёмником. Позиционный $TM и формат $TEL,KEY=VALUE,... также поддерживаются.";
+        }
     }
 
     function cacheElements() {
@@ -173,6 +208,16 @@
         target.classList.add("telemetry-updated");
     }
 
+    function updateAntennaAppearance(target, value) {
+        const card = target?.closest?.(".telemetryCard");
+        if (!card) return;
+        card.classList.remove("antenna-open", "antenna-closed", "antenna-unknown");
+        const numeric = Number(value);
+        if (numeric === 1) card.classList.add("antenna-open");
+        else if (numeric === 0) card.classList.add("antenna-closed");
+        else card.classList.add("antenna-unknown");
+    }
+
     function updateTelemetryValue(key, value) {
         const normalizedKey = String(key ?? "").trim().toUpperCase();
         const target = elements.telemetry[normalizedKey];
@@ -180,6 +225,7 @@
 
         const formatter = telemetryFormatters[normalizedKey];
         target.textContent = formatter ? formatter(value) : String(value ?? "--");
+        if (normalizedKey === "ANTENNA") updateAntennaAppearance(target, value);
         animateTelemetryTarget(target);
     }
 
@@ -237,6 +283,7 @@
             PANEL_POWER: Math.max(0, 1.85 + 0.28 * Math.sin(t / 7) + randomDeviation(0.02)),
             PACKET: state.packetCount + 1,
             UPTIME: Math.floor(t) % 100000,
+            ANTENNA: 1,
             TEMP: 24.4 + 1.1 * Math.sin(t / 12) + randomDeviation(0.06),
             RSSI: -76 + 4 * Math.sin(t / 8) + randomDeviation(0.6),
             SNR: 16 + 2 * Math.sin(t / 10) + randomDeviation(0.3),
@@ -315,6 +362,7 @@
 
     function initialize() {
         if (state.initialized) return;
+        ensureAntennaTelemetryCard();
         cacheElements();
         if (elements.missionName) elements.missionName.textContent = APP_CONFIG.missionName;
         startUtcClock();
