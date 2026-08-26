@@ -19,6 +19,8 @@
 
 namespace AltairV7 {
 
+using namespace AltairGateway;
+
 constexpr char FW_VERSION_V7[] = "0.4.0";
 constexpr char RX_PROFILE[] = "v7-bw203-gdo0-poll";
 constexpr float V7_FREQ = 435.000f;
