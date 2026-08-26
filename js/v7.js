@@ -1,12 +1,12 @@
 "use strict";
 
 /* ============================================================
-   ЦУП Альтаир v7 / 0.7.0
+   ЦУП Альтаир v7 / 0.7.1
    Финальная конфигурация Технопром 2026 — Миссия на Луну.
    ============================================================ */
 
 const V7 = Object.freeze({
-    version: "0.7.0",
+    version: "0.7.1",
     frequency: 435.000,
     bitRate: 4.8,
     deviation: 5,
@@ -137,21 +137,21 @@ function applyV7RadioProfile() {
 }
 
 function fixBrandingAndHelp() {
-    setText(".buildBadge", "v7 · 0.7.0");
-    setText("#projectPanel .panelEyebrow", "RELEASE V7");
+    setText(".buildBadge", "v7 · 0.7.1");
+    setText("#projectPanel .panelEyebrow", "RELEASE V7.1");
     const log = document.querySelector("#eventLog > div:first-child");
-    if (log && /v5|v6/i.test(log.textContent || "")) log.textContent = "ЦУП Альтаир v7 запущен.";
+    if (log && /v5|v6|v7/i.test(log.textContent || "")) log.textContent = "ЦУП Альтаир v7.1 запущен.";
 
     const radioLead = document.querySelector("#radioPanel .panelLead");
-    if (radioLead) radioLead.innerHTML = 'Рабочий профиль v7: <strong>435.000 МГц · 4.8 kbps · 2-FSK · Δf 5 кГц · широкая RX BW 203 кГц · 5 dBm</strong>.';
+    if (radioLead) radioLead.innerHTML = 'Рабочий профиль v7.1: <strong>435.000 МГц · 4.8 kbps · 2-FSK · Δf 5 кГц · широкая RX BW 203 кГц · 5 dBm</strong>.';
 
     const help = document.getElementById("helpDialog");
     if (help) {
-        setText("#helpDialog .panelEyebrow", "ЦУП АЛЬТАИР · V7");
+        setText("#helpDialog .panelEyebrow", "ЦУП АЛЬТАИР · V7.1");
         const sections = help.querySelectorAll("section");
-        if (sections[0]) sections[0].innerHTML = '<h3>Быстрый запуск v7</h3><p>Прошейте STM32 файлом <code>Transmit_v7_static.ino</code>, ESP32 — <code>Altair_Gateway_v7.ino</code> либо встроенной прошивкой v7. Закройте Serial Monitor, подключите ESP32 к ЦУПу на 115200 бод и включите передатчик.</p>';
+        if (sections[0]) sections[0].innerHTML = '<h3>Быстрый запуск v7.1</h3><p>Прошейте STM32 файлом <code>Transmit_v7_static.ino</code>, ESP32 — <code>Altair_Gateway_v7.ino</code> либо встроенной прошивкой v7.1. Закройте Serial Monitor, подключите ESP32 к ЦУПу на 115200 бод и включите передатчик.</p>';
         if (sections[1]) sections[1].innerHTML = '<h3>Телеметрия</h3><p>Карточки: ID, пакет, uptime, мощность панелей, напряжение, режим, XOR, раскрытие антенны, RSSI, SNR. RSSI и SNR находятся в самом конце. Пока поле антенны отсутствует в 29-символьном пакете, отображается «Н/Д».</p>';
-        if (sections[2]) sections[2].innerHTML = '<h3>Радиоканал</h3><p>Рабочий стендовый профиль: 435.000 МГц, 4.8 kbps, 2-FSK, девиация 5 кГц, RX BW 203 кГц, sync 0x12AD, NRZ, variable packet length, CRC.</p>';
+        if (sections[2]) sections[2].innerHTML = '<h3>Радиоканал</h3><p>Рабочий стендовый профиль: 435.000 МГц, 4.8 kbps, 2-FSK, девиация 5 кГц, RX BW 203 кГц, sync 0x12AD, NRZ, variable packet length, CRC. В v7.1 встроенная прошивка использует тот же <code>radio.receive(packet)</code>, который был подтверждён на реальном стенде.</p>';
         if (sections[3]) sections[3].innerHTML = '<h3>Документация</h3><p>Полное руководство находится в <code>docs/CUP_Altair_v7_Manual.pdf</code>. На главной странице GitHub есть прямые ссылки на установщик и оба скетча.</p>';
     }
 }
@@ -176,7 +176,7 @@ function applyV7() {
     }
 
     window.addEventListener("openmcc:telemetry", keepAntennaUnknownWhenAbsent);
-    window.OpenMCCLogger?.write?.("ЦУП Альтаир v7: рабочий профиль 435 МГц / RX BW 203 кГц активирован", "success", "V7");
+    window.OpenMCCLogger?.write?.("ЦУП Альтаир v7.1: профиль 435 МГц / RX BW 203 кГц, проверенный blocking receive", "success", "V7");
 }
 
 const start = () => setTimeout(applyV7, 250);
