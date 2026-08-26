@@ -1,6 +1,6 @@
 {
   "name": "altair-mcc",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "description": "ЦУП Альтаир — Центр управления полётами, Технопром 2026, Миссия на Луну",
   "main": "desktop/main.cjs",
@@ -47,9 +47,7 @@
       "target": [
         {
           "target": "nsis",
-          "arch": [
-            "x64"
-          ]
+          "arch": ["x64"]
         }
       ],
       "artifactName": "CUP-Altair-Setup-${version}.${ext}"
