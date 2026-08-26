@@ -47,6 +47,14 @@ jobs:
           }
           $firmwareVersion = $Matches[1]
 
+          $rxPatch = "legacy"
+          if (Test-Path "firmware/radio_gateway_esp32/src/main_fixed.cpp") {
+            $rxPatchSource = Get-Content "firmware/radio_gateway_esp32/src/main_fixed.cpp" -Raw
+            if ($rxPatchSource -match 'RX_PATCH_VERSION\[\]\s*=\s*"([^"]+)"') {
+              $rxPatch = $Matches[1]
+            }
+          }
+
           $bootApp0 = Get-ChildItem "$env:USERPROFILE/.platformio/packages" -Recurse -Filter "boot_app0.bin" | Select-Object -First 1
           if (-not $bootApp0) { throw "boot_app0.bin was not found." }
 
@@ -75,7 +83,7 @@ jobs:
             targetChip = "ESP32"
             firmwareVersion = $firmwareVersion
             applicationVersion = $appVersion
-            buildLabel = "Altair MCC v$appVersion CI"
+            buildLabel = "Altair MCC v$appVersion CI / $rxPatch"
             flashMode = "dio"
             flashFreq = "40m"
             flashSize = "4MB"
@@ -105,6 +113,8 @@ jobs:
             release/*.blockmap
             bundled_firmware/*.json
             bundled_firmware/*.bin
+            firmware/transmitter_stm32_v6/Transmit_v6_static/Transmit_v6_static.ino
+            docs/TELEMETRY_V6.md
           if-no-files-found: error
           retention-days: 30
 
@@ -132,8 +142,13 @@ jobs:
           }
           $installer = Get-ChildItem -Path release -Filter "CUP-Altair-Setup-*.exe" | Select-Object -First 1
           if (-not $installer) { throw "Altair Windows installer was not found in release/." }
-          gh release create $env:RELEASE_TAG $installer.FullName `
+          gh release create $env:RELEASE_TAG `
+            $installer.FullName `
+            "firmware/transmitter_stm32_v6/Transmit_v6_static/Transmit_v6_static.ino" `
+            "docs/TELEMETRY_V6.md" `
+            "bundled_firmware/gateway-firmware.bin" `
+            "bundled_firmware/manifest.json" `
             --target main `
-            --title "ЦУП Альтаир v6 ($env:RELEASE_TAG) — Технопром 2026. Миссия на Луну" `
-            --notes "ЦУП Альтаир v6: фиксированный 29-символьный пакет телеметрии с XOR, режимом 0/1, профиль CC1101 435.000 МГц, ESP32-приёмник с проверкой XOR, RSSI/SNR и STM32-скетч статического передатчика." `
+            --title "ЦУП Альтаир v6 исправленный ($env:RELEASE_TAG) — Технопром 2026. Миссия на Луну" `
+            --notes "Исправленный релиз v6. Приём ESP32+CC1101 переведён на проверенный стендом путь GDO0 polling; явно зафиксированы NRZ, sync 0x12AD, variable packet length и CRC. Профиль: 435.000 МГц, 4.8 kbps, 2-FSK, deviation 5 кГц, RX BW 58 кГц. Канонический пакет 02,00001,00015,3.00,4.20,1,33. В Release дополнительно приложены STM32-скетч, ESP32 firmware и документация." `
             --latest

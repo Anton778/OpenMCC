@@ -34,13 +34,13 @@ jobs:
           node - <<'NODE'
           const fs = require('fs');
           const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-          if (pkg.version !== '0.6.0') throw new Error(`Expected 0.6.0, got ${pkg.version}`);
+          if (pkg.version !== '0.6.1') throw new Error(`Expected 0.6.1, got ${pkg.version}`);
           const prefix = '02,00001,00015,3.00,4.20,1,';
           let xor = 0;
           for (const ch of prefix) xor ^= ch.charCodeAt(0);
           if (xor !== 0x33) throw new Error(`Expected XOR 0x33, got 0x${xor.toString(16)}`);
           if ((prefix + '33').length !== 29) throw new Error('Canonical packet must contain 29 ASCII characters');
-          console.log('v6 package and canonical telemetry packet OK');
+          console.log('v6.1 package and canonical telemetry packet OK');
           NODE
 
       - name: Validate v6 telemetry and RF profile
@@ -53,6 +53,11 @@ jobs:
           grep -Fq '"CHECKSUM"' js/app.js
           grep -Fq '435.000' js/app.js
           grep -Fq '435.000f' firmware/radio_gateway_esp32/src/main.cpp
+          grep -Fq 'digitalRead(CC_GDO0)' firmware/radio_gateway_esp32/src/main_fixed.cpp
+          grep -Fq 'setSyncWord(0x12, 0xAD' firmware/radio_gateway_esp32/src/main_fixed.cpp
+          grep -Fq 'RADIOLIB_ENCODING_NRZ' firmware/radio_gateway_esp32/src/main_fixed.cpp
+          grep -Fq 'variablePacketLengthMode' firmware/radio_gateway_esp32/src/main_fixed.cpp
+          grep -Fq '+<main_fixed.cpp>' firmware/radio_gateway_esp32/platformio.ini
           grep -Fq '02,00001,00015,3.00,4.20,1,33' firmware/transmitter_stm32_v6/Transmit_v6_static/Transmit_v6_static.ino
           grep -Fq 'radio.begin(435.000f' firmware/transmitter_stm32_v6/Transmit_v6_static/Transmit_v6_static.ino
           if grep -Fq 'id="CURR"' index.html; then
