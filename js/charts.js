@@ -1,1050 +1,253 @@
 "use strict";
 
 /* ============================================================
-   OpenMCC
-   Open Mission Control Center
-
-   Module: charts.js
-   Version: 0.1.0
-
-   Назначение:
-   - построение графиков телеметрии;
-   - обновление графиков в реальном времени;
-   - хранение ограниченного количества точек;
-   - пауза отображения;
-   - очистка буфера;
-   - поддержка демонстрационных и реальных данных.
+   ЦУП Альтаир — telemetry charts
+   Release v5 / 0.5.0
    ============================================================ */
 
-
 (() => {
-
-    const CHART_CONFIG = Object.freeze({
-
-        version:
-            "0.1.0",
-
-        maximumPoints:
-            120,
-
-        animationDuration:
-            0,
-
-        tension:
-            0.25,
-
-        pointRadius:
-            0,
-
-        borderWidth:
-            1.6
-
+    const CONFIG = Object.freeze({
+        version: "0.5.0",
+        maximumPoints: 120,
+        tension: 0.24,
     });
 
-
-    const PARAMETER_CONFIG = Object.freeze({
-
-        TEMP: Object.freeze({
-
-            title:
-                "Температура",
-
-            unit:
-                "°C",
-
-            decimals:
-                1,
-
-            canvasId:
-                "chartTEMP",
-
-            valueId:
-                "chartValueTEMP"
-
-        }),
-
-
-        VOLT: Object.freeze({
-
-            title:
-                "Напряжение",
-
-            unit:
-                "В",
-
-            decimals:
-                2,
-
-            canvasId:
-                "chartVOLT",
-
-            valueId:
-                "chartValueVOLT"
-
-        }),
-
-
-        CURR: Object.freeze({
-
-            title:
-                "Ток",
-
-            unit:
-                "мА",
-
-            decimals:
-                0,
-
-            canvasId:
-                "chartCURR",
-
-            valueId:
-                "chartValueCURR"
-
-        }),
-
-
-        RSSI: Object.freeze({
-
-            title:
-                "RSSI",
-
-            unit:
-                "dBm",
-
-            decimals:
-                0,
-
-            canvasId:
-                "chartRSSI",
-
-            valueId:
-                "chartValueRSSI"
-
-        }),
-
-
-        SNR: Object.freeze({
-
-            title:
-                "SNR",
-
-            unit:
-                "dB",
-
-            decimals:
-                1,
-
-            canvasId:
-                "chartSNR",
-
-            valueId:
-                "chartValueSNR"
-
-        })
-
+    const PARAMETERS = Object.freeze({
+        VOLT: Object.freeze({ title: "Напряжение аккумулятора", unit: "В", decimals: 2, canvasId: "chartVOLT", valueId: "chartValueVOLT" }),
+        PANEL_POWER: Object.freeze({ title: "Мощность солнечных панелей", unit: "Вт", decimals: 3, canvasId: "chartPANEL_POWER", valueId: "chartValuePANEL_POWER" }),
+        TEMP: Object.freeze({ title: "Температура", unit: "°C", decimals: 1, canvasId: "chartTEMP", valueId: "chartValueTEMP" }),
+        RSSI: Object.freeze({ title: "RSSI", unit: "dBm", decimals: 1, canvasId: "chartRSSI", valueId: "chartValueRSSI" }),
+        SNR: Object.freeze({ title: "SNR", unit: "dB", decimals: 1, canvasId: "chartSNR", valueId: "chartValueSNR" }),
     });
-
 
     const state = {
-
-        initialized:
-            false,
-
-        paused:
-            false,
-
-        totalPackets:
-            0,
-
-        charts:
-            {},
-
-        latestValues:
-            {},
-
-        startTime:
-            Date.now()
-
+        initialized: false,
+        paused: false,
+        totalPackets: 0,
+        charts: {},
     };
 
+    const elements = {};
 
-    const elements = {
-
-        chartStatus:
-            null,
-
-        pauseButton:
-            null,
-
-        clearButton:
-            null,
-
-        pointCount:
-            null,
-
-        timeWindow:
-            null,
-
-        recordingState:
-            null
-
-    };
-
-
-    function writeLog(
-        message,
-        type = "info",
-        metadata = null
-    ) {
-
-        if (
-            window.OpenMCCLogger &&
-            typeof window.OpenMCCLogger.write === "function"
-        ) {
-
-            window.OpenMCCLogger.write(
-                message,
-                type,
-                "CHARTS",
-                metadata
-            );
-
-            return;
-
+    function writeLog(message, type = "info", metadata = null) {
+        if (window.OpenMCCLogger?.write) {
+            window.OpenMCCLogger.write(message, type, "CHARTS", metadata);
         }
-
-        console.log(
-            `[OpenMCC Charts] ${message}`
-        );
-
     }
 
-
-    function formatTimeLabel(date) {
-
-        return date.toLocaleTimeString(
-            "ru-RU",
-            {
-                hour12:
-                    false,
-
-                minute:
-                    "2-digit",
-
-                second:
-                    "2-digit"
-            }
-        );
-
+    function timeLabel(timestamp) {
+        return new Date(timestamp).toLocaleTimeString("ru-RU", {
+            hour12: false,
+            minute: "2-digit",
+            second: "2-digit",
+        });
     }
 
-
-    function createChartOptions(parameter) {
-
+    function createOptions(parameter) {
         return {
-
-            responsive:
-                true,
-
-            maintainAspectRatio:
-                false,
-
-            animation:
-                {
-                    duration:
-                        CHART_CONFIG.animationDuration
-                },
-
-            normalized:
-                 true,
-
-            parsing:
-                 true,
-
-            interaction:
-                 {
-                    intersect:
-                        false,
-
-                    mode:
-                        "index"
-                },
-
-            plugins:
-                {
-
-                    legend:
-                        {
-                            display:
-                                false
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            normalized: true,
+            parsing: true,
+            interaction: { intersect: false, mode: "index" },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    displayColors: false,
+                    callbacks: {
+                        label(context) {
+                            const value = Number(context.parsed.y);
+                            return `${parameter.title}: ${value.toFixed(parameter.decimals)} ${parameter.unit}`;
                         },
-
-                    tooltip:
-                        {
-
-                            backgroundColor:
-                                "rgba(7, 11, 22, 0.95)",
-
-                            borderColor:
-                                "rgba(0, 217, 255, 0.35)",
-
-                            borderWidth:
-                                1,
-
-                            titleColor:
-                                "#91a4bd",
-
-                            bodyColor:
-                                "#eaf4ff",
-
-                            displayColors:
-                                false,
-
-                            callbacks:
-                                {
-
-                                    label(context) {
-
-                                        const value =
-                                            context.parsed.y;
-
-                                        return (
-                                            `${parameter.title}: ` +
-                                            `${Number(value).toFixed(
-                                                parameter.decimals
-                                            )} ${parameter.unit}`
-                                        );
-
-                                    }
-
-                                }
-
-                        }
-
-                },
-
-            scales:
-                {
-
-                    x:
-                        {
-
-                            grid:
-                                {
-                                    color:
-                                        "rgba(32, 53, 82, 0.30)"
-                                },
-
-                            border:
-                                {
-                                    color:
-                                        "rgba(32, 53, 82, 0.70)"
-                                },
-
-                            ticks:
-                                {
-
-                                    color:
-                                        "#71869f",
-
-                                    maxTicksLimit:
-                                        8,
-
-                                    font:
-                                        {
-                                            size:
-                                                9
-                                        }
-
-                                }
-
-                        },
-
-                    y:
-                        {
-
-                            grace:
-                                "10%",
-
-                            grid:
-                                {
-                                    color:
-                                        "rgba(32, 53, 82, 0.38)"
-                                },
-
-                            border:
-                                {
-                                    color:
-                                        "rgba(32, 53, 82, 0.70)"
-                                },
-
-                            ticks:
-                                {
-
-                                    color:
-                                        "#71869f",
-
-                                    font:
-                                        {
-                                            size:
-                                                9
-                                        },
-
-                                    callback(value) {
-
-                                        return Number(value)
-                                            .toFixed(
-                                                parameter.decimals
-                                            );
-
-                                    }
-
-                                }
-
-                        }
-
-                }
-
-        };
-
-    }
-
-
-    function createChart(
-        key,
-        parameter
-    ) {
-
-        const canvas =
-            document.getElementById(
-                parameter.canvasId
-            );
-
-        if (!canvas) {
-
-            writeLog(
-                `Canvas ${parameter.canvasId} не найден`,
-                "error"
-            );
-
-            return null;
-
-        }
-
-        const context =
-            canvas.getContext("2d");
-
-        const gradient =
-            context.createLinearGradient(
-                0,
-                0,
-                0,
-                190
-            );
-
-        gradient.addColorStop(
-            0,
-            "rgba(0, 217, 255, 0.26)"
-        );
-
-        gradient.addColorStop(
-            1,
-            "rgba(0, 217, 255, 0.01)"
-        );
-
-        return new Chart(
-            context,
-            {
-
-                type:
-                    "line",
-
-                data:
-                    {
-
-                        labels:
-                            [],
-
-                        datasets:
-                            [
-
-                                {
-
-                                    label:
-                                        parameter.title,
-
-                                    data:
-                                        [],
-
-                                    borderColor:
-                                        "#00d9ff",
-
-                                    backgroundColor:
-                                        gradient,
-
-                                    borderWidth:
-                                        CHART_CONFIG.borderWidth,
-
-                                    pointRadius:
-                                        CHART_CONFIG.pointRadius,
-
-                                    pointHoverRadius:
-                                        3,
-
-                                    tension:
-                                        CHART_CONFIG.tension,
-
-                                    fill:
-                                        true
-
-                                }
-
-                            ]
-
                     },
-
-                options:
-                    createChartOptions(
-                        parameter
-                    )
-
-            }
-        );
-
+                },
+            },
+            scales: {
+                x: {
+                    grid: { color: "rgba(32, 53, 82, 0.30)" },
+                    border: { color: "rgba(32, 53, 82, 0.70)" },
+                    ticks: { color: "#71869f", maxTicksLimit: 8, font: { size: 9 } },
+                },
+                y: {
+                    grace: "10%",
+                    grid: { color: "rgba(32, 53, 82, 0.38)" },
+                    border: { color: "rgba(32, 53, 82, 0.70)" },
+                    ticks: {
+                        color: "#71869f",
+                        font: { size: 9 },
+                        callback(value) { return Number(value).toFixed(parameter.decimals); },
+                    },
+                },
+            },
+        };
     }
 
-
-    function updateCurrentValue(
-        key,
-        value
-    ) {
-
-        const parameter =
-            PARAMETER_CONFIG[key];
-
-        const element =
-            document.getElementById(
-                parameter.valueId
-            );
-
-        if (!element) {
-
-            return;
-
+    function createChart(key, parameter) {
+        const canvas = document.getElementById(parameter.canvasId);
+        if (!canvas) {
+            writeLog(`Canvas ${parameter.canvasId} не найден`, "error");
+            return null;
         }
 
-        element.textContent =
-            `${value.toFixed(
-                parameter.decimals
-            )} ${parameter.unit}`;
+        const context = canvas.getContext("2d");
+        const gradient = context.createLinearGradient(0, 0, 0, 190);
+        gradient.addColorStop(0, "rgba(0, 217, 255, 0.24)");
+        gradient.addColorStop(1, "rgba(0, 217, 255, 0.01)");
 
+        return new Chart(context, {
+            type: "line",
+            data: {
+                labels: [],
+                datasets: [{
+                    label: parameter.title,
+                    data: [],
+                    borderColor: "#00d9ff",
+                    backgroundColor: gradient,
+                    borderWidth: 1.6,
+                    pointRadius: 0,
+                    pointHoverRadius: 3,
+                    tension: CONFIG.tension,
+                    fill: true,
+                }],
+            },
+            options: createOptions(parameter),
+        });
     }
 
+    function updateCurrentValue(key, numericValue) {
+        const parameter = PARAMETERS[key];
+        const element = document.getElementById(parameter.valueId);
+        if (!element) return;
+        element.textContent = `${numericValue.toFixed(parameter.decimals)} ${parameter.unit}`;
+    }
 
-    function appendValue(
-        key,
-        value,
-        timestamp
-    ) {
+    function appendValue(key, value, timestamp) {
+        const chart = state.charts[key];
+        if (!chart) return false;
+        const numericValue = Number(value);
+        if (!Number.isFinite(numericValue)) return false;
 
-        const chart =
-            state.charts[key];
+        chart.data.labels.push(timeLabel(timestamp));
+        chart.data.datasets[0].data.push(numericValue);
 
-        if (!chart) {
-
-            return;
-
-        }
-
-        const numericValue =
-            Number(value);
-
-        if (!Number.isFinite(numericValue)) {
-
-            return;
-
-        }
-
-        const label =
-            formatTimeLabel(
-                new Date(timestamp)
-            );
-
-        chart.data.labels.push(
-            label
-        );
-
-        chart.data.datasets[0].data.push(
-            numericValue
-        );
-
-        while (
-            chart.data.labels.length >
-            CHART_CONFIG.maximumPoints
-        ) {
-
+        while (chart.data.labels.length > CONFIG.maximumPoints) {
             chart.data.labels.shift();
-
             chart.data.datasets[0].data.shift();
-
         }
 
         chart.update("none");
-
-        state.latestValues[key] =
-            numericValue;
-
-        updateCurrentValue(
-            key,
-            numericValue
-        );
-
+        updateCurrentValue(key, numericValue);
+        return true;
     }
-
-
-    function processTelemetry(
-        telemetry
-    ) {
-
-        if (
-            state.paused ||
-            !telemetry ||
-            typeof telemetry !== "object"
-        ) {
-
-            return;
-
-        }
-
-        const timestamp =
-            Date.now();
-
-        let valuesAdded =
-            0;
-
-        Object.keys(
-            PARAMETER_CONFIG
-        ).forEach(key => {
-
-            if (
-                Object.hasOwn(
-                    telemetry,
-                    key
-                )
-            ) {
-
-                appendValue(
-                    key,
-                    telemetry[key],
-                    timestamp
-                );
-
-                valuesAdded += 1;
-
-            }
-
-        });
-
-        if (valuesAdded > 0) {
-
-            state.totalPackets += 1;
-
-            updateStatistics();
-
-            setStatus(
-                "active"
-            );
-
-        }
-
-    }
-
-
-    function updateStatistics() {
-
-        const lengths =
-            Object.values(
-                state.charts
-            )
-                .map(chart => {
-
-                    return chart.data.labels.length;
-
-                });
-
-        const pointCount =
-            lengths.length > 0
-                ? Math.max(...lengths)
-                : 0;
-
-        if (elements.pointCount) {
-
-            elements.pointCount.textContent =
-                String(pointCount);
-
-        }
-
-        if (elements.timeWindow) {
-
-            elements.timeWindow.textContent =
-                `${CHART_CONFIG.maximumPoints} отсчётов`;
-
-        }
-
-        if (elements.recordingState) {
-
-            elements.recordingState.textContent =
-                state.paused
-                    ? "ПАУЗА"
-                    : "ЗАПИСЬ";
-
-        }
-
-    }
-
 
     function setStatus(status) {
-
-        if (!elements.chartStatus) {
-
-            return;
-
+        if (!elements.status) return;
+        elements.status.classList.remove("active", "paused");
+        if (status === "active") {
+            elements.status.textContent = "ПРИЁМ ДАННЫХ";
+            elements.status.classList.add("active");
+        } else if (status === "paused") {
+            elements.status.textContent = "ПАУЗА";
+            elements.status.classList.add("paused");
+        } else {
+            elements.status.textContent = "ОЖИДАНИЕ ДАННЫХ";
         }
-
-        elements.chartStatus.classList.remove(
-            "active",
-            "paused"
-        );
-
-        switch (status) {
-
-            case "active":
-
-                elements.chartStatus.textContent =
-                    "ПРИЁМ ДАННЫХ";
-
-                elements.chartStatus.classList.add(
-                    "active"
-                );
-
-                break;
-
-
-            case "paused":
-
-                elements.chartStatus.textContent =
-                    "ПАУЗА";
-
-                elements.chartStatus.classList.add(
-                    "paused"
-                );
-
-                break;
-
-
-            default:
-
-                elements.chartStatus.textContent =
-                    "ОЖИДАНИЕ ДАННЫХ";
-
-                break;
-
-        }
-
     }
 
+    function updateStatistics() {
+        const lengths = Object.values(state.charts).map(chart => chart.data.labels.length);
+        const count = lengths.length ? Math.max(...lengths) : 0;
+        if (elements.pointCount) elements.pointCount.textContent = String(count);
+        if (elements.timeWindow) elements.timeWindow.textContent = `${CONFIG.maximumPoints} отсчётов`;
+        if (elements.recordingState) elements.recordingState.textContent = state.paused ? "ПАУЗА" : "ЗАПИСЬ";
+    }
+
+    function processTelemetry(telemetry) {
+        if (state.paused || !telemetry || typeof telemetry !== "object") return;
+        const timestamp = Date.now();
+        let added = 0;
+        Object.keys(PARAMETERS).forEach(key => {
+            if (Object.hasOwn(telemetry, key) && appendValue(key, telemetry[key], timestamp)) added += 1;
+        });
+        if (added > 0) {
+            state.totalPackets += 1;
+            updateStatistics();
+            setStatus("active");
+        }
+    }
 
     function togglePause() {
-
-        state.paused =
-            !state.paused;
-
-        if (elements.pauseButton) {
-
-            elements.pauseButton.textContent =
-                state.paused
-                    ? "Продолжить"
-                    : "Пауза";
-
-        }
-
-        setStatus(
-            state.paused
-                ? "paused"
-                : "active"
-        );
-
+        state.paused = !state.paused;
+        if (elements.pauseButton) elements.pauseButton.textContent = state.paused ? "Продолжить" : "Пауза";
+        setStatus(state.paused ? "paused" : "active");
         updateStatistics();
-
-        writeLog(
-            state.paused
-                ? "Обновление графиков приостановлено"
-                : "Обновление графиков продолжено",
-            "info"
-        );
-
+        writeLog(state.paused ? "Графики поставлены на паузу" : "Графики продолжены", "info");
     }
-
 
     function clearCharts() {
-
-        Object.values(
-            state.charts
-        ).forEach(chart => {
-
-            chart.data.labels.length =
-                0;
-
-            chart.data.datasets[0].data.length =
-                0;
-
+        Object.values(state.charts).forEach(chart => {
+            chart.data.labels.length = 0;
+            chart.data.datasets[0].data.length = 0;
             chart.update("none");
-
         });
-
-        Object.keys(
-            PARAMETER_CONFIG
-        ).forEach(key => {
-
-            const parameter =
-                PARAMETER_CONFIG[key];
-
-            const element =
-                document.getElementById(
-                    parameter.valueId
-                );
-
-            if (element) {
-
-                element.textContent =
-                    "--";
-
-            }
-
+        Object.values(PARAMETERS).forEach(parameter => {
+            const element = document.getElementById(parameter.valueId);
+            if (element) element.textContent = "--";
         });
-
-        state.latestValues =
-            {};
-
-        state.totalPackets =
-            0;
-
-        state.startTime =
-            Date.now();
-
+        state.totalPackets = 0;
         updateStatistics();
-
-        setStatus(
-            state.paused
-                ? "paused"
-                : "waiting"
-        );
-
-        writeLog(
-            "Графики телеметрии очищены",
-            "info"
-        );
-
+        setStatus(state.paused ? "paused" : "waiting");
+        writeLog("Графики телеметрии очищены", "info");
     }
-
-
-    function cacheElements() {
-
-        elements.chartStatus =
-            document.getElementById(
-                "chartStatus"
-            );
-
-        elements.pauseButton =
-            document.getElementById(
-                "pauseChartsButton"
-            );
-
-        elements.clearButton =
-            document.getElementById(
-                "clearChartsButton"
-            );
-
-        elements.pointCount =
-            document.getElementById(
-                "chartPointCount"
-            );
-
-        elements.timeWindow =
-            document.getElementById(
-                "chartTimeWindow"
-            );
-
-        elements.recordingState =
-            document.getElementById(
-                "chartRecordingState"
-            );
-
-    }
-
-
-    function registerEvents() {
-
-        window.addEventListener(
-            "openmcc:telemetry",
-            event => {
-
-                processTelemetry(
-                    event.detail
-                );
-
-            }
-        );
-
-
-        window.addEventListener(
-            "openmcc:serial-disconnected",
-            () => {
-
-                if (!state.paused) {
-
-                    setStatus(
-                        "waiting"
-                    );
-
-                }
-
-            }
-        );
-
-
-        elements.pauseButton?.addEventListener(
-            "click",
-            togglePause
-        );
-
-
-        elements.clearButton?.addEventListener(
-            "click",
-            clearCharts
-        );
-
-    }
-
 
     function initialize() {
-
-        if (state.initialized) {
-
+        if (state.initialized) return;
+        if (typeof Chart === "undefined") {
+            writeLog("Chart.js не загружен", "error");
             return;
-
         }
 
-        if (
-            typeof Chart ===
-            "undefined"
-        ) {
+        elements.status = document.getElementById("chartStatus");
+        elements.pauseButton = document.getElementById("pauseChartsButton");
+        elements.clearButton = document.getElementById("clearChartsButton");
+        elements.pointCount = document.getElementById("chartPointCount");
+        elements.timeWindow = document.getElementById("chartTimeWindow");
+        elements.recordingState = document.getElementById("chartRecordingState");
 
-            writeLog(
-                "Библиотека Chart.js не загружена",
-                "error"
-            );
+        Object.entries(PARAMETERS).forEach(([key, parameter]) => {
+            const chart = createChart(key, parameter);
+            if (chart) state.charts[key] = chart;
+        });
 
-            return;
-
-        }
-
-        cacheElements();
-
-        Object.entries(
-            PARAMETER_CONFIG
-        ).forEach(
-            ([key, parameter]) => {
-
-                const chart =
-                    createChart(
-                        key,
-                        parameter
-                    );
-
-                if (chart) {
-
-                    state.charts[key] =
-                        chart;
-
-                }
-
-            }
-        );
-
-        registerEvents();
+        window.addEventListener("openmcc:telemetry", event => processTelemetry(event.detail));
+        window.addEventListener("openmcc:serial-disconnected", () => { if (!state.paused) setStatus("waiting"); });
+        elements.pauseButton?.addEventListener("click", togglePause);
+        elements.clearButton?.addEventListener("click", clearCharts);
 
         updateStatistics();
-
-        setStatus(
-            "waiting"
-        );
-
-        state.initialized =
-            true;
-
-        writeLog(
-            `Модуль графиков v${CHART_CONFIG.version} загружен`,
-            "success"
-        );
-
+        setStatus("waiting");
+        state.initialized = true;
+        writeLog(`Графики телеметрии v${CONFIG.version} готовы`, "success");
     }
-
 
     window.OpenMCCCharts = Object.freeze({
-
+        config: CONFIG,
         processTelemetry,
-
-        clearCharts,
-
-        togglePause,
-
+        clear: clearCharts,
         getState() {
-
             return {
-
-                initialized:
-                    state.initialized,
-
-                paused:
-                    state.paused,
-
-                totalPackets:
-                    state.totalPackets,
-
-                latestValues:
-                    {
-                        ...state.latestValues
-                    },
-
-                chartCount:
-                    Object.keys(
-                        state.charts
-                    ).length
-
+                initialized: state.initialized,
+                paused: state.paused,
+                totalPackets: state.totalPackets,
+                chartKeys: Object.keys(state.charts),
             };
-
-        }
-
+        },
     });
 
-
     if (document.readyState === "loading") {
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            initialize,
-            {
-                once: true
-            }
-        );
-
-    }
-    else {
-
+        document.addEventListener("DOMContentLoaded", initialize, { once: true });
+    } else {
         initialize();
-
     }
-
 })();

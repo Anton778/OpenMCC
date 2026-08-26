@@ -1,4 +1,4 @@
-name: Windows installer
+name: ЦУП Альтаир — Windows installer
 
 on:
   push:
@@ -51,10 +51,10 @@ jobs:
           New-Item -ItemType Directory -Force "bundled_firmware" | Out-Null
 
           $images = @(
-            @{ Source = "$buildDir/bootloader.bin";   File = "gateway-bootloader.bin";  Label = "Bootloader";       Address = 4096 },
-            @{ Source = "$buildDir/partitions.bin";   File = "gateway-partitions.bin";  Label = "Partition table"; Address = 32768 },
-            @{ Source = $bootApp0.FullName;            File = "gateway-boot_app0.bin";   Label = "boot_app0";       Address = 57344 },
-            @{ Source = "$buildDir/firmware.bin";     File = "gateway-firmware.bin";    Label = "Radio gateway";   Address = 65536 }
+            @{ Source = "$buildDir/bootloader.bin"; File = "gateway-bootloader.bin"; Label = "Bootloader"; Address = 4096 },
+            @{ Source = "$buildDir/partitions.bin"; File = "gateway-partitions.bin"; Label = "Partition table"; Address = 32768 },
+            @{ Source = $bootApp0.FullName; File = "gateway-boot_app0.bin"; Label = "boot_app0"; Address = 57344 },
+            @{ Source = "$buildDir/firmware.bin"; File = "gateway-firmware.bin"; Label = "Altair radio gateway"; Address = 65536 }
           )
 
           $manifestImages = @()
@@ -84,7 +84,7 @@ jobs:
             targetChip = "ESP32"
             firmwareVersion = $firmwareVersion
             applicationVersion = $appVersion
-            buildLabel = "OpenMCC v$appVersion CI"
+            buildLabel = "Altair MCC v$appVersion CI"
             flashMode = "dio"
             flashFreq = "40m"
             flashSize = "4MB"
@@ -109,7 +109,7 @@ jobs:
       - name: Upload Windows installer artifact
         uses: actions/upload-artifact@v4
         with:
-          name: OpenMCC-Windows-Installer
+          name: CUP-Altair-Windows-Installer
           path: |
             release/*.exe
             release/*.yml
@@ -142,13 +142,13 @@ jobs:
             exit 0
           }
 
-          $installer = Get-ChildItem -Path release -Filter "OpenMCC-Setup-*.exe" | Select-Object -First 1
+          $installer = Get-ChildItem -Path release -Filter "CUP-Altair-Setup-*.exe" | Select-Object -First 1
           if (-not $installer) {
-            throw "Windows installer was not found in release/."
+            throw "Altair Windows installer was not found in release/."
           }
 
           gh release create $env:RELEASE_TAG $installer.FullName `
             --target $env:GITHUB_SHA `
-            --title "OpenMCC $env:RELEASE_TAG" `
-            --generate-notes `
+            --title "ЦУП Альтаир v5 ($env:RELEASE_TAG) — Технопром 2026. Миссия на Луну" `
+            --notes "ЦУП Альтаир v5: интерфейс Технопром 2026, телеметрия миссии без измерения тока, графики сразу под телеметрией, профиль CC1101 для передатчика 434.000 МГц, встроенная прошивка ESP32-радиошлюза и управление AZ/EL." `
             --latest

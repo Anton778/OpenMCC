@@ -1,4 +1,4 @@
-name: ESP32 radio gateway firmware
+name: ЦУП Альтаир — ESP32 radio gateway firmware
 
 on:
   push:
@@ -43,17 +43,17 @@ jobs:
           BOOT_APP0="$(find "$HOME/.platformio/packages" -name boot_app0.bin -print -quit)"
           test -n "$BOOT_APP0"
 
-          cp "$BUILD_DIR/firmware.bin" firmware-artifact/openmcc-radio-gateway-firmware.bin
-          cp "$BUILD_DIR/bootloader.bin" firmware-artifact/openmcc-radio-gateway-bootloader.bin
-          cp "$BUILD_DIR/partitions.bin" firmware-artifact/openmcc-radio-gateway-partitions.bin
-          cp "$BOOT_APP0" firmware-artifact/openmcc-radio-gateway-boot_app0.bin
+          cp "$BUILD_DIR/firmware.bin" firmware-artifact/altair-radio-gateway-firmware.bin
+          cp "$BUILD_DIR/bootloader.bin" firmware-artifact/altair-radio-gateway-bootloader.bin
+          cp "$BUILD_DIR/partitions.bin" firmware-artifact/altair-radio-gateway-partitions.bin
+          cp "$BOOT_APP0" firmware-artifact/altair-radio-gateway-boot_app0.bin
 
           cat > firmware-artifact/flash-layout.txt <<'EOF'
-          ESP32-WROOM-32 / esp32dev flash layout
-          0x1000  openmcc-radio-gateway-bootloader.bin
-          0x8000  openmcc-radio-gateway-partitions.bin
-          0xE000  openmcc-radio-gateway-boot_app0.bin
-          0x10000 openmcc-radio-gateway-firmware.bin
+          ЦУП Альтаир / ESP32-WROOM-32 / esp32dev
+          0x1000  altair-radio-gateway-bootloader.bin
+          0x8000  altair-radio-gateway-partitions.bin
+          0xE000  altair-radio-gateway-boot_app0.bin
+          0x10000 altair-radio-gateway-firmware.bin
           EOF
 
           md5sum firmware-artifact/*.bin > firmware-artifact/md5sums.txt
@@ -61,7 +61,7 @@ jobs:
       - name: Upload compiled firmware
         uses: actions/upload-artifact@v4
         with:
-          name: OpenMCC-ESP32-Radio-Gateway
+          name: Altair-ESP32-Radio-Gateway
           path: firmware-artifact/*
           if-no-files-found: error
           retention-days: 30

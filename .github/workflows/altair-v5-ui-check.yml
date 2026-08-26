@@ -1,0 +1,55 @@
+name: ЦУП Альтаир — v5 UI checks
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate package.json
+        run: node -e "JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('package.json OK')"
+
+      - name: Check browser JavaScript syntax
+        run: |
+          node --check js/parser.js
+          node --check js/app.js
+          node --check js/charts.js
+          node --check js/help.js
+          node --check js/flasher-v5.js
+          node --check js/serial.js
+          node --check js/ui.js
+          node --check js/rotator.js
+
+      - name: Check Electron host syntax
+        run: node --check desktop/main.cjs
+
+      - name: Check required v5 interface fields
+        shell: bash
+        run: |
+          for id in ID VOLT PANEL_POWER PACKET UPTIME TEMP RSSI SNR chartVOLT chartPANEL_POWER chartTEMP chartRSSI chartSNR; do
+            grep -q "id=\"$id\"" index.html || { echo "Missing interface id: $id"; exit 1; }
+          done
+          grep -q '"ANTENNA"' js/app.js || { echo "Missing ANTENNA field in application UI"; exit 1; }
+          grep -q 'ANTENNA: Object.freeze' js/parser.js || { echo "Missing ANTENNA parser definition"; exit 1; }
+          grep -q 'ANTENNA=' examples/technoprom_2026_transmitter/Transmit_v5.ino || { echo "Missing ANTENNA in transmitter example"; exit 1; }
+          grep -q '1 · РАСКРЫТА' js/app.js || { echo "Missing deployed antenna label"; exit 1; }
+          grep -q '0 · СЛОЖЕНА' js/app.js || { echo "Missing stowed antenna label"; exit 1; }
+          if grep -q 'id="CURR"' index.html; then
+            echo "CURR must not be present in the v5 main interface"
+            exit 1
+          fi
