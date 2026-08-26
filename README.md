@@ -10,7 +10,7 @@
 - **[Скачать ЦУП Альтаир v7 для Windows](https://github.com/Anton778/OpenMCC/releases/download/v0.7.0/CUP-Altair-Setup-0.7.0.exe)**
 - **[Скачать скетч ESP32 радиошлюза](firmware/radio_gateway_esp32/Altair_Gateway_v7/Altair_Gateway_v7.ino)**
 - **[Скачать скетч STM32 передатчика](firmware/transmitter_stm32_v7/Transmit_v7_static/Transmit_v7_static.ino)**
-- **[Открыть руководство PDF](docs/CUP_Altair_v7_Manual.pdf)**
+- **[Скачать руководство PDF](https://github.com/Anton778/OpenMCC/releases/download/v0.7.0/CUP_Altair_v7_Manual.pdf)**
 - [Исходник руководства LaTeX](docs/CUP_Altair_v7_Manual.tex)
 - [Описание релиза v7](docs/RELEASE_V7.md)
 
@@ -146,4 +146,4 @@ SPI  -> штатные SPI-выводы STM32
 
 Полное пошаговое руководство с подключениями, форматом пакета, XOR, прошивкой и диагностикой:
 
-**[CUP_Altair_v7_Manual.pdf](docs/CUP_Altair_v7_Manual.pdf)**
+**[Скачать CUP_Altair_v7_Manual.pdf](https://github.com/Anton778/OpenMCC/releases/download/v0.7.0/CUP_Altair_v7_Manual.pdf)**
