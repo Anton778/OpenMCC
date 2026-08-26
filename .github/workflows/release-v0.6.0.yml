@@ -1,8 +1,8 @@
 name: Publish Altair v0.6.0
 
 on:
-  issues:
-    types: [opened, edited, reopened]
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   release:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.issue.title == 'RELEASE_V0.6.0_TRIGGER' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release-v0.6.0]') }}
     runs-on: windows-latest
 
     steps:
