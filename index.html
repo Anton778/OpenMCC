@@ -5,27 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="dark">
     <meta name="theme-color" content="#07111f">
-    <title>OpenMCC — Mission Control Center</title>
+    <title>ЦУП Альтаир — Технопром 2026 · Миссия на Луну</title>
 
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/panels.css">
     <link rel="stylesheet" href="css/widgets.css">
+    <link rel="stylesheet" href="css/radio-controls.css">
+    <link rel="stylesheet" href="css/altair-v5.css">
 </head>
 <body>
 <div id="app">
     <header id="topBar">
-        <div class="logo">
+        <div class="logo altairLogo">
             <div class="logoMark" aria-hidden="true">◈</div>
-            <div>
-                <h1>OpenMCC</h1>
-                <span class="subtitle">Open Mission Control Center</span>
+            <div class="altairBrand">
+                <h1>ЦУП Альтаир</h1>
+                <span class="subtitle">Центр управления полётами</span>
             </div>
         </div>
 
         <div class="topMetric mission">
-            <div class="caption">MISSION</div>
-            <div id="missionName">CubeSat-1</div>
+            <div class="caption">ТЕХНОПРОМ 2026</div>
+            <div id="missionName">Миссия на Луну</div>
         </div>
 
         <div class="topMetric utc">
@@ -34,28 +36,34 @@
         </div>
 
         <div class="topMetric connection">
-            <div class="caption">GROUND LINK</div>
+            <div class="caption">НАЗЕМНЫЙ КАНАЛ</div>
             <div id="connectionState">
                 <span class="offlineLed"></span>
-                OFFLINE
+                <span>OFFLINE</span>
             </div>
         </div>
 
         <div class="topActions">
-            <span class="buildBadge">v0.2 · LAB</span>
-            <button type="button" id="helpButton" class="iconButton" data-help-open aria-label="Открыть справку OpenMCC">?</button>
+            <span class="buildBadge">v5 · 0.5.0</span>
+            <button type="button" id="helpButton" class="iconButton" data-help-open aria-label="Открыть справку ЦУП Альтаир">?</button>
         </div>
     </header>
+
+    <div class="missionRibbon">
+        <span class="missionRibbonTag">ТЕХНОПРОМ 2026</span>
+        <strong>Миссия на Луну</strong>
+        <span>учебная наземная станция · приём телеметрии · командный канал · управление антенной</span>
+    </div>
 
     <nav id="quickNav" aria-label="Навигация по ЦУП">
         <button type="button" data-scroll-target="serialPanel">Соединение</button>
         <button type="button" data-scroll-target="telemetryPanel">Телеметрия</button>
-        <button type="button" data-scroll-target="commandPanel">Команды</button>
-        <button type="button" data-scroll-target="rotatorPanel">Антенна</button>
-        <button type="button" data-scroll-target="radioPanel">Радиоканал</button>
         <button type="button" data-scroll-target="chartPanel">Графики</button>
+        <button type="button" data-scroll-target="commandPanel">Команды</button>
+        <button type="button" data-scroll-target="radioPanel">Радиоканал</button>
+        <button type="button" data-scroll-target="rotatorPanel">Поворотка</button>
         <button type="button" data-scroll-target="satellitePanel">3D</button>
-        <button type="button" data-scroll-target="projectPanel">Статус проекта</button>
+        <button type="button" data-scroll-target="projectPanel">Статус</button>
         <button type="button" data-scroll-target="logPanel">Журнал</button>
     </nav>
 
@@ -63,32 +71,29 @@
         <section class="panel" id="serialPanel">
             <div class="panelTitleRow">
                 <div>
-                    <span class="panelEyebrow">USB / WEB SERIAL</span>
-                    <h2>Соединение с устройством</h2>
+                    <span class="panelEyebrow">USB / SERIAL</span>
+                    <h2>Соединение с ЦУПом</h2>
                 </div>
                 <span class="panelState neutral">ОСНОВНОЙ ПОРТ</span>
             </div>
 
-            <p class="panelLead">Подключение платы телеметрии или будущего радиошлюза ESP32-WROOM-32 к OpenMCC.</p>
+            <p class="panelLead">Основное подключение к радиошлюзу ESP32-WROOM-32 либо к демонстрационной Arduino/STM32.</p>
 
             <div class="connectionSettings">
                 <label class="settingField">
                     <span>Тип устройства</span>
                     <select id="deviceProfile">
                         <option value="auto">Автоматическое определение</option>
+                        <option value="esp32" selected>ESP32 — радиошлюз</option>
                         <option value="stm32">STM32</option>
                         <option value="arduino-uno">Arduino Uno</option>
                         <option value="arduino-nano">Arduino Nano</option>
-                        <option value="esp32">ESP32</option>
                     </select>
                 </label>
 
                 <label class="settingField">
                     <span>Скорость порта</span>
                     <select id="serialBaudRate">
-                        <option value="9600">9600 бод</option>
-                        <option value="19200">19200 бод</option>
-                        <option value="38400">38400 бод</option>
                         <option value="57600">57600 бод</option>
                         <option value="115200" selected>115200 бод</option>
                         <option value="230400">230400 бод</option>
@@ -103,106 +108,210 @@
             <div class="infoTable" role="group" aria-label="Параметры соединения">
                 <div><span>Порт</span><strong id="serialPort">---</strong></div>
                 <div><span>Скорость</span><strong id="baudRate">115200</strong></div>
-                <div><span>Пакеты</span><strong id="packetCounter">0</strong></div>
-                <div><span>CRC / ошибки</span><strong id="crcCounter">0</strong></div>
+                <div><span>Принято пакетов</span><strong id="packetCounter">0</strong></div>
+                <div><span>Ошибки</span><strong id="crcCounter">0</strong></div>
             </div>
         </section>
 
         <section class="panel" id="telemetryPanel">
             <div class="panelTitleRow">
                 <div>
-                    <span class="panelEyebrow">LIVE DATA</span>
-                    <h2>Телеметрия</h2>
+                    <span class="panelEyebrow">LIVE TELEMETRY</span>
+                    <h2>Телеметрия аппарата</h2>
                 </div>
                 <span class="panelState live">ПРИЁМ</span>
             </div>
 
-            <div class="telemetryGrid">
-                <div class="card telemetryCard" data-telemetry="TEMP"><span class="label">Температура</span><span id="TEMP" class="value">--</span><span class="unit">°C</span></div>
-                <div class="card telemetryCard" data-telemetry="VOLT"><span class="label">Напряжение</span><span id="VOLT" class="value">--</span><span class="unit">В</span></div>
-                <div class="card telemetryCard" data-telemetry="CURR"><span class="label">Ток</span><span id="CURR" class="value">--</span><span class="unit">мА</span></div>
-                <div class="card telemetryCard" data-telemetry="RSSI"><span class="label">RSSI</span><span id="RSSI" class="value">--</span><span class="unit">dBm</span></div>
-                <div class="card telemetryCard" data-telemetry="SNR"><span class="label">SNR</span><span id="SNR" class="value">--</span><span class="unit">dB</span></div>
+            <div class="telemetryGrid altairTelemetryGrid">
+                <div class="card telemetryCard telemetryIdentity" data-telemetry="ID">
+                    <span class="label">ID спутника</span>
+                    <span id="ID" class="value telemetryTextValue">---</span>
+                    <span class="unit">идентификатор</span>
+                </div>
+                <div class="card telemetryCard" data-telemetry="VOLT">
+                    <span class="label">Напряжение аккумулятора</span>
+                    <span id="VOLT" class="value">--</span>
+                    <span class="unit">В</span>
+                </div>
+                <div class="card telemetryCard" data-telemetry="PANEL_POWER">
+                    <span class="label">Мощность солнечных панелей</span>
+                    <span id="PANEL_POWER" class="value">--</span>
+                    <span class="unit">Вт</span>
+                </div>
+                <div class="card telemetryCard" data-telemetry="PACKET">
+                    <span class="label">Отправлено пакетов</span>
+                    <span id="PACKET" class="value">--</span>
+                    <span class="unit">пак.</span>
+                </div>
+                <div class="card telemetryCard" data-telemetry="UPTIME">
+                    <span class="label">Время работы с запуска</span>
+                    <span id="UPTIME" class="value">--</span>
+                    <span class="unit">с</span>
+                </div>
+                <div class="card telemetryCard" data-telemetry="TEMP">
+                    <span class="label">Температура</span>
+                    <span id="TEMP" class="value">--</span>
+                    <span class="unit">°C</span>
+                </div>
+                <div class="card telemetryCard" data-telemetry="RSSI">
+                    <span class="label">RSSI</span>
+                    <span id="RSSI" class="value">--</span>
+                    <span class="unit">dBm</span>
+                </div>
+                <div class="card telemetryCard" data-telemetry="SNR">
+                    <span class="label">SNR</span>
+                    <span id="SNR" class="value">--</span>
+                    <span class="unit">dB</span>
+                </div>
             </div>
 
-            <div class="telemetryNote">Поддерживаемый базовый пакет: <code>$TEL,TEMP=...,VOLT=...,CURR=...,RSSI=...,SNR=...</code></div>
+            <div class="telemetryNote altairPacketNote">
+                <strong>Пакет миссии v5:</strong>
+                <code>$TM,&lt;ID&gt;,&lt;PACKET&gt;,&lt;UPTIME&gt;,&lt;VOLT&gt;,&lt;PANEL_POWER&gt;,&lt;TEMP&gt;</code>
+                <span>RSSI и оценка SNR добавляются наземным CC1101-приёмником. Формат <code>$TEL,KEY=VALUE,...</code> также поддерживается.</span>
+            </div>
         </section>
 
-        <section class="panel" id="systemPanel">
+        <section class="panel wide" id="chartPanel">
             <div class="panelTitleRow">
                 <div>
-                    <span class="panelEyebrow">HEALTH</span>
-                    <h2>Состояние системы</h2>
+                    <span class="panelEyebrow">LIVE TRENDS</span>
+                    <h2>Графики телеметрии</h2>
                 </div>
-                <span class="panelState neutral">СВОДКА</span>
+                <div class="chartToolbar">
+                    <span id="chartStatus" class="chartStatus">ОЖИДАНИЕ ДАННЫХ</span>
+                    <button type="button" id="pauseChartsButton" class="chartToolbarButton">Пауза</button>
+                    <button type="button" id="clearChartsButton" class="chartToolbarButton">Очистить</button>
+                </div>
             </div>
 
-            <ul class="systemList">
-                <li>Питание <span class="ok">●</span></li>
-                <li>Передатчик <span class="ok">●</span></li>
-                <li>Приёмник <span class="ok">●</span></li>
-                <li>Телеметрия <span class="warn">○</span></li>
-            </ul>
-
-            <div class="systemFootnote">Четвёртый индикатор связан с фактическим потоком телеметрии и обновляется программно.</div>
+            <div class="chartGrid altairChartGrid">
+                <article class="chartCard">
+                    <div class="chartHeader"><div><span class="chartName">Аккумулятор</span><span class="chartUnit">В</span></div><strong id="chartValueVOLT" class="chartCurrentValue">--</strong></div>
+                    <div class="chartCanvasContainer"><canvas id="chartVOLT"></canvas></div>
+                </article>
+                <article class="chartCard">
+                    <div class="chartHeader"><div><span class="chartName">Солнечные панели</span><span class="chartUnit">Вт</span></div><strong id="chartValuePANEL_POWER" class="chartCurrentValue">--</strong></div>
+                    <div class="chartCanvasContainer"><canvas id="chartPANEL_POWER"></canvas></div>
+                </article>
+                <article class="chartCard">
+                    <div class="chartHeader"><div><span class="chartName">Температура</span><span class="chartUnit">°C</span></div><strong id="chartValueTEMP" class="chartCurrentValue">--</strong></div>
+                    <div class="chartCanvasContainer"><canvas id="chartTEMP"></canvas></div>
+                </article>
+                <article class="chartCard">
+                    <div class="chartHeader"><div><span class="chartName">RSSI</span><span class="chartUnit">dBm</span></div><strong id="chartValueRSSI" class="chartCurrentValue">--</strong></div>
+                    <div class="chartCanvasContainer"><canvas id="chartRSSI"></canvas></div>
+                </article>
+                <article class="chartCard">
+                    <div class="chartHeader"><div><span class="chartName">SNR</span><span class="chartUnit">dB</span></div><strong id="chartValueSNR" class="chartCurrentValue">--</strong></div>
+                    <div class="chartCanvasContainer"><canvas id="chartSNR"></canvas></div>
+                </article>
+                <article class="chartCard chartSummaryCard">
+                    <div class="chartSummary">
+                        <div><span>Точек в буфере</span><strong id="chartPointCount">0</strong></div>
+                        <div><span>Окно</span><strong id="chartTimeWindow">120 отсчётов</strong></div>
+                        <div><span>Состояние</span><strong id="chartRecordingState">ЗАПИСЬ</strong></div>
+                    </div>
+                </article>
+            </div>
         </section>
 
         <section class="panel" id="commandPanel">
             <div class="panelTitleRow">
                 <div>
                     <span class="panelEyebrow">UPLINK</span>
-                    <h2>Центр команд</h2>
+                    <h2>Команды управления</h2>
                 </div>
                 <span id="commandAvailability" class="commandAvailability offline">НЕДОСТУПЕН</span>
             </div>
 
             <div class="commandGroup">
-                <div class="commandGroupTitle">Связь</div>
+                <div class="commandGroupTitle">Быстрые команды</div>
                 <div class="commandButtonGrid">
                     <button type="button" class="commandButton commandPrimary" data-command="PING"><span class="commandIcon">↔</span><span>Проверка связи</span></button>
                     <button type="button" class="commandButton" data-command="INFO"><span class="commandIcon">i</span><span>Информация</span></button>
+                    <button type="button" class="commandButton commandSuccess" data-command="START"><span class="commandIcon">▶</span><span>Запустить телеметрию</span></button>
+                    <button type="button" class="commandButton commandDanger" data-command="STOP"><span class="commandIcon">■</span><span>Остановить телеметрию</span></button>
                 </div>
             </div>
 
             <div class="commandGroup">
-                <div class="commandGroupTitle">Телеметрия</div>
-                <div class="commandButtonGrid">
-                    <button type="button" class="commandButton commandSuccess" data-command="START"><span class="commandIcon">▶</span><span>Запустить</span></button>
-                    <button type="button" class="commandButton commandDanger" data-command="STOP"><span class="commandIcon">■</span><span>Остановить</span></button>
-                </div>
-
+                <div class="commandGroupTitle">Период телеметрии</div>
                 <label class="commandField">
                     <span>Период передачи</span>
                     <select id="telemetryRate">
-                        <option value="100">100 мс</option>
-                        <option value="250">250 мс</option>
+                        <option value="200">200 мс</option>
                         <option value="500">500 мс</option>
                         <option value="1000" selected>1000 мс</option>
                         <option value="2000">2000 мс</option>
                         <option value="5000">5000 мс</option>
-                        <option value="10000">10000 мс</option>
                     </select>
                 </label>
                 <button type="button" id="applyTelemetryRate" class="commandButton commandWide">Установить период</button>
             </div>
 
             <div class="commandGroup">
-                <div class="commandGroupTitle">Встроенный светодиод</div>
-                <div class="commandButtonGrid">
-                    <button type="button" class="commandButton commandSuccess" data-command="LED" data-value="1"><span class="commandIcon">●</span><span>Включить</span></button>
-                    <button type="button" class="commandButton" data-command="LED" data-value="0"><span class="commandIcon">○</span><span>Выключить</span></button>
-                </div>
-            </div>
-
-            <div class="commandGroup">
                 <div class="commandGroupTitle">Произвольная команда</div>
                 <div class="customCommandRow">
-                    <input type="text" id="customCommand" maxlength="120" autocomplete="off" spellcheck="false" placeholder="Например: RESET">
+                    <input type="text" id="customCommand" maxlength="120" autocomplete="off" spellcheck="false" placeholder="Например: STATUS">
                     <button type="button" id="sendCustomCommand" class="commandSendButton">Передать</button>
                 </div>
             </div>
 
             <div class="lastCommand"><span>Последняя команда</span><strong id="lastCommandText">---</strong></div>
+        </section>
+
+        <section class="panel" id="systemPanel">
+            <div class="panelTitleRow">
+                <div>
+                    <span class="panelEyebrow">GROUND STATION</span>
+                    <h2>Состояние ЦУПа</h2>
+                </div>
+                <span class="panelState neutral">СВОДКА</span>
+            </div>
+
+            <ul class="systemList">
+                <li>Приложение <span class="ok">●</span></li>
+                <li>Основной порт <span class="warn">○</span></li>
+                <li>Радиошлюз <span class="warn">○</span></li>
+                <li>Телеметрия <span class="warn">○</span></li>
+            </ul>
+            <div class="systemFootnote">Индикатор телеметрии становится зелёным после первого корректно разобранного пакета.</div>
+        </section>
+
+        <section class="panel" id="radioPanel">
+            <div class="panelTitleRow">
+                <div>
+                    <span class="panelEyebrow">RF GATEWAY</span>
+                    <h2>Радиоканал ЦУПа</h2>
+                </div>
+                <span class="panelState live">ГОТОВ К НАСТРОЙКЕ</span>
+            </div>
+
+            <p class="panelLead">Основной профиль Технопрома настроен под CC1101 и загруженный передатчик: <strong>434.000 МГц · 4.8 kbps · 2-FSK · Δf 5 кГц · RX BW 58 кГц</strong>.</p>
+
+            <div class="radioArchitecture" aria-label="Архитектура радиоканала">
+                <span>ЦУП Альтаир</span><i>USB</i><span>ESP32-WROOM-32</span><i id="radioInterfaceLabel">SPI</i><span id="radioModuleLabel">CC1101</span><i>RF</i><span>МКА</span>
+            </div>
+
+            <label class="settingField radioSelector">
+                <span>Радиомодуль</span>
+                <select id="radioModuleType">
+                    <option value="cc1101" selected>CC1101 — профиль Технопром 2026</option>
+                    <option value="e32">E32-433T30D</option>
+                    <option value="unknown">Не выбран</option>
+                </select>
+            </label>
+
+            <div class="radioHintGrid">
+                <div><span>Плата шлюза</span><strong>ESP32-WROOM-32</strong></div>
+                <div><span>Интерфейс</span><strong id="radioInterfaceValue">SPI + GDO0/GDO2</strong></div>
+                <div><span>Питание</span><strong id="radioPowerValue">CC1101: 3,3 В</strong></div>
+                <div><span>Профиль</span><strong>Технопром 2026</strong></div>
+            </div>
+
+            <div id="radioConfigHint" class="noticeBox">После подключения ESP32 нажмите «Применить профиль Технопром 2026», чтобы приёмник совпал с параметрами передатчика.</div>
+            <div id="radioControlContainer"></div>
         </section>
 
         <section class="panel" id="rotatorPanel">
@@ -214,13 +323,11 @@
                 <span id="rotatorStatus" class="rotatorStatus offline">ОТКЛЮЧЕНО</span>
             </div>
 
-            <p class="panelLead">Отдельная Arduino Uno управляет SatNOGS Rotator v3. До сборки механики используйте симулятор.</p>
+            <p class="panelLead">Arduino Uno + CNC Shield V3 управляет двумя осями антенны. До аппаратной калибровки доступен симулятор.</p>
 
             <div class="rotatorConnectionRow">
                 <button type="button" id="rotatorConnectButton" class="rotatorMainButton">Подключить поворотку</button>
                 <select id="rotatorBaudRate" aria-label="Скорость порта поворотки">
-                    <option value="9600">9600 бод</option>
-                    <option value="57600">57600 бод</option>
                     <option value="115200" selected>115200 бод</option>
                 </select>
             </div>
@@ -265,68 +372,11 @@
             </div>
         </section>
 
-        <section class="panel" id="radioPanel">
-            <div class="panelTitleRow">
-                <div>
-                    <span class="panelEyebrow">RF GATEWAY</span>
-                    <h2>Радиоканал ЦУПа</h2>
-                </div>
-                <span class="panelState planned">ПЛАНИРУЕТСЯ</span>
-            </div>
-
-            <p class="panelLead">Наземный шлюз: ESP32-WROOM-32. Радиомодуль будет выбран после закупки.</p>
-
-            <div class="radioArchitecture" aria-label="Архитектура радиоканала">
-                <span>OpenMCC</span><i>USB</i><span>ESP32-WROOM-32</span><i id="radioInterfaceLabel">SPI / UART</i><span id="radioModuleLabel">CC1101 / E32</span><i>RF</i><span>МКА</span>
-            </div>
-
-            <label class="settingField radioSelector">
-                <span>Предполагаемый радиомодуль</span>
-                <select id="radioModuleType">
-                    <option value="unknown" selected>Пока неизвестно</option>
-                    <option value="cc1101">CC1101</option>
-                    <option value="e32">E32-433T30D</option>
-                </select>
-            </label>
-
-            <div class="radioHintGrid">
-                <div><span>Плата шлюза</span><strong>ESP32-WROOM-32</strong></div>
-                <div><span>Интерфейс</span><strong id="radioInterfaceValue">SPI или UART</strong></div>
-                <div><span>Питание</span><strong id="radioPowerValue">Уточнить после закупки</strong></div>
-                <div><span>Статус ПО</span><strong>Драйвер ещё не реализован</strong></div>
-            </div>
-
-            <div id="radioConfigHint" class="noticeBox">OpenMCC уже подготовлен архитектурно: радиомодуль будет скрыт за ESP32-шлюзом, а формат телеметрии и команд сохранится.</div>
-        </section>
-
-        <section class="panel wide" id="chartPanel">
-            <div class="panelTitleRow">
-                <div>
-                    <span class="panelEyebrow">TRENDS</span>
-                    <h2>Графики телеметрии</h2>
-                </div>
-                <div class="chartToolbar">
-                    <span id="chartStatus" class="chartStatus">ОЖИДАНИЕ ДАННЫХ</span>
-                    <button type="button" id="pauseChartsButton" class="chartToolbarButton">Пауза</button>
-                    <button type="button" id="clearChartsButton" class="chartToolbarButton">Очистить</button>
-                </div>
-            </div>
-
-            <div class="chartGrid">
-                <article class="chartCard"><div class="chartHeader"><div><span class="chartName">Температура</span><span class="chartUnit">°C</span></div><strong id="chartValueTEMP" class="chartCurrentValue">--</strong></div><div class="chartCanvasContainer"><canvas id="chartTEMP"></canvas></div></article>
-                <article class="chartCard"><div class="chartHeader"><div><span class="chartName">Напряжение</span><span class="chartUnit">В</span></div><strong id="chartValueVOLT" class="chartCurrentValue">--</strong></div><div class="chartCanvasContainer"><canvas id="chartVOLT"></canvas></div></article>
-                <article class="chartCard"><div class="chartHeader"><div><span class="chartName">Ток</span><span class="chartUnit">мА</span></div><strong id="chartValueCURR" class="chartCurrentValue">--</strong></div><div class="chartCanvasContainer"><canvas id="chartCURR"></canvas></div></article>
-                <article class="chartCard"><div class="chartHeader"><div><span class="chartName">RSSI</span><span class="chartUnit">dBm</span></div><strong id="chartValueRSSI" class="chartCurrentValue">--</strong></div><div class="chartCanvasContainer"><canvas id="chartRSSI"></canvas></div></article>
-                <article class="chartCard"><div class="chartHeader"><div><span class="chartName">SNR</span><span class="chartUnit">dB</span></div><strong id="chartValueSNR" class="chartCurrentValue">--</strong></div><div class="chartCanvasContainer"><canvas id="chartSNR"></canvas></div></article>
-                <article class="chartCard chartSummaryCard"><div class="chartSummary"><div><span>Точек в буфере</span><strong id="chartPointCount">0</strong></div><div><span>Интервал наблюдения</span><strong id="chartTimeWindow">120 с</strong></div><div><span>Состояние</span><strong id="chartRecordingState">ЗАПИСЬ</strong></div></div></article>
-            </div>
-        </section>
-
         <section class="panel" id="satellitePanel">
             <div class="panelTitleRow">
                 <div>
-                    <span class="panelEyebrow">ATTITUDE</span>
-                    <h2>3D-модель спутника</h2>
+                    <span class="panelEyebrow">SPACECRAFT</span>
+                    <h2>3D-модель аппарата</h2>
                 </div>
                 <div class="satelliteToolbar">
                     <span id="satelliteStatus" class="satelliteStatus">ИНИЦИАЛИЗАЦИЯ</span>
@@ -349,40 +399,39 @@
         <section class="panel" id="mapPanel">
             <div class="panelTitleRow">
                 <div>
-                    <span class="panelEyebrow">ORBIT</span>
-                    <h2>Карта Земли и сопровождение</h2>
+                    <span class="panelEyebrow">MOON MISSION</span>
+                    <h2>Навигация и сопровождение</h2>
                 </div>
-                <span class="panelState planned">НЕ РЕАЛИЗОВАНО</span>
+                <span class="panelState planned">СЛЕДУЮЩИЙ ЭТАП</span>
             </div>
-
             <div id="mapViewport">
                 <div class="mapGrid" aria-hidden="true"></div>
                 <div class="mapCenterMark" aria-hidden="true">＋</div>
                 <div class="mapMessage">
-                    <strong>TLE / SGP4</strong>
-                    <span>Здесь появятся трасса орбиты, положение ЦУПа, радиогоризонт и расчёт AZ/EL для автосопровождения.</span>
+                    <strong>Траектория / TLE / SGP4</strong>
+                    <span>Блок оставлен для дальнейшего развития навигации и автоматического наведения антенны.</span>
                 </div>
             </div>
         </section>
 
-        <section class="panel" id="projectPanel">
+        <section class="panel wide" id="projectPanel">
             <div class="panelTitleRow">
                 <div>
-                    <span class="panelEyebrow">ROADMAP</span>
-                    <h2>Статус проекта</h2>
+                    <span class="panelEyebrow">RELEASE V5</span>
+                    <h2>Готовность ЦУП Альтаир</h2>
                 </div>
-                <button type="button" class="smallButton" data-help-open>Что здесь работает?</button>
+                <button type="button" class="smallButton" data-help-open>Что умеет v5?</button>
             </div>
 
             <div class="projectStatusGrid">
-                <div class="projectItem done"><span>Готово</span><strong>Web Serial и парсер телеметрии</strong></div>
-                <div class="projectItem done"><span>Готово</span><strong>Команды и журнал событий</strong></div>
-                <div class="projectItem done"><span>Готово</span><strong>Графики Chart.js</strong></div>
-                <div class="projectItem done"><span>Готово</span><strong>3D CubeSat на Three.js</strong></div>
-                <div class="projectItem done"><span>Готово</span><strong>Панель и симулятор AZ/EL</strong></div>
-                <div class="projectItem test"><span>На проверку</span><strong>Arduino Uno + SatNOGS v3</strong></div>
-                <div class="projectItem planned"><span>Следующее</span><strong>ESP32 + CC1101 / E32 радиошлюз</strong></div>
-                <div class="projectItem planned"><span>Следующее</span><strong>TLE / SGP4 и автосопровождение</strong></div>
+                <div class="projectItem done"><span>Готово</span><strong>Телеметрия миссии v5 без тока</strong></div>
+                <div class="projectItem done"><span>Готово</span><strong>Графики VOLT / PANEL / TEMP / RSSI / SNR</strong></div>
+                <div class="projectItem done"><span>Готово</span><strong>ESP32 + CC1101 радиошлюз и встроенная прошивка</strong></div>
+                <div class="projectItem done"><span>Готово</span><strong>Командный канал и готовые команды</strong></div>
+                <div class="projectItem done"><span>Готово</span><strong>Arduino Uno поворотки + симулятор AZ/EL</strong></div>
+                <div class="projectItem test"><span>На проверку</span><strong>Реальный приём загруженного Transmit.ino на 434.000 МГц</strong></div>
+                <div class="projectItem test"><span>На проверку</span><strong>Калибровка SNR и механики поворотки</strong></div>
+                <div class="projectItem planned"><span>Позже</span><strong>Автосопровождение и навигация</strong></div>
             </div>
         </section>
 
@@ -394,7 +443,7 @@
                 </div>
                 <span class="panelState neutral">ЛОКАЛЬНО</span>
             </div>
-            <div id="eventLog"><div>OpenMCC запущен.</div></div>
+            <div id="eventLog"><div>ЦУП Альтаир v5 запущен.</div></div>
         </section>
     </main>
 </div>
@@ -404,36 +453,28 @@
 <dialog id="helpDialog" class="helpDialog">
     <div class="helpDialogHeader">
         <div>
-            <span class="panelEyebrow">OPENMCC QUICK GUIDE</span>
-            <h2>Как пользоваться ЦУПом</h2>
+            <span class="panelEyebrow">ЦУП АЛЬТАИР · V5</span>
+            <h2>Краткая инструкция</h2>
         </div>
         <button type="button" class="iconButton" data-help-close aria-label="Закрыть справку">×</button>
     </div>
 
     <div class="helpDialogBody">
         <section>
-            <h3>Быстрый запуск</h3>
-            <ol>
-                <li>Запустите <code>start_openmcc.bat</code> или команду <code>py -m http.server 8000</code> из папки проекта.</li>
-                <li>Откройте <code>http://localhost:8000/</code> в Chrome или Edge.</li>
-                <li>Для теста подключите Arduino Uno с демонстратором телеметрии и выберите 115200 бод.</li>
-                <li>Поворотку до сборки механики проверяйте через флажок «Симулятор поворотки».</li>
-            </ol>
+            <h3>Технопром 2026 — Миссия на Луну</h3>
+            <p>Основной рабочий сценарий: подключить ESP32-радиошлюз, выбрать профиль CC1101 «Технопром 2026», принять телеметрию аппарата и при необходимости передать команду обратно.</p>
         </section>
-
         <section>
-            <h3>Что уже сделано</h3>
-            <p>Приём телеметрии, команды, логирование, графики, 3D-модель, ручное AZ/EL и симулятор поворотки.</p>
+            <h3>Телеметрия v5</h3>
+            <p>На главном экране выводятся ID спутника, напряжение аккумулятора, мощность солнечных панелей, счётчик отправленных пакетов, время работы с запуска, температура, RSSI и SNR. Измерение тока в v5 полностью удалено.</p>
         </section>
-
         <section>
-            <h3>Что ещё предстоит</h3>
-            <p>Радиошлюз ESP32-WROOM-32 для CC1101 или E32-433T30D, TLE/SGP4, карта орбиты и автоматическое сопровождение.</p>
+            <h3>Совместимость с текущим передатчиком</h3>
+            <p>Загруженный Transmit.ino уже задаёт CC1101 на 434.000 МГц через RadioLib. Сейчас он передаёт тестовую текстовую строку, поэтому ЦУП покажет факт её приёма в журнале. Для заполнения карточек передатчик должен сформировать пакет миссии <code>$TM,...</code> или <code>$TEL,...</code>.</p>
         </section>
-
         <section>
             <h3>Документация</h3>
-            <p>Подробности находятся в <code>README.md</code> и <code>docs/TECHNICAL_MANUAL.md</code>. Статус разработки — в <code>docs/PROJECT_STATUS.md</code>.</p>
+            <p>Подробное описание релиза и формата пакета находится в <code>docs/TECHNOPROM_2026_MOON_MISSION.md</code>.</p>
         </section>
     </div>
 </dialog>
