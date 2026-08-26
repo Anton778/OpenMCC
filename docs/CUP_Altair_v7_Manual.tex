@@ -1,0 +1,295 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=18mm]{geometry}
+\usepackage{fontspec}
+\setmainfont{DejaVu Serif}
+\setsansfont{DejaVu Sans}
+\setmonofont{DejaVu Sans Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{russian}
+\usepackage{array,longtable,booktabs,tabularx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{listings}
+\usepackage{microtype}
+\usepackage{parskip}
+\definecolor{AltairBlue}{HTML}{0E5A88}
+\definecolor{AltairGray}{HTML}{4B5563}
+\hypersetup{colorlinks=true,linkcolor=AltairBlue,urlcolor=AltairBlue,pdftitle={ЦУП Альтаир v7 — руководство пользователя}}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{ЦУП Альтаир v7}
+\rhead{Технопром 2026 · Миссия на Луну}
+\cfoot{\thepage}
+\titleformat{\section}{\Large\bfseries\sffamily\color{AltairBlue}}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\large\bfseries\sffamily}{\thesubsection.}{0.5em}{}
+\lstset{basicstyle=\ttfamily\small,breaklines=true,frame=single,columns=fullflexible,showstringspaces=false}
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+
+\begin{document}
+
+\begin{center}
+{\Huge\bfseries\sffamily ЦУП Альтаир v7}\\[2mm]
+{\large Центр управления полётами}\\[3mm]
+{\Large\bfseries Технопром 2026 · Миссия на Луну}\\[8mm]
+{\large Руководство по установке, прошивке и работе с телеметрией}\\[8mm]
+\hrule
+\end{center}
+
+\vspace{6mm}
+
+\textbf{Назначение.} ЦУП Альтаир — локальное Windows-приложение учебной наземной станции. В рабочей конфигурации STM32 формирует и передаёт пакет телеметрии через CC1101, ESP32 с CC1101 принимает пакет на частоте 435 МГц и передаёт данные по USB в ЦУП.
+
+\textbf{Проверенная конфигурация v7.} На стенде устойчивый приём получен при широкой полосе приёмника \textbf{203 кГц}. Поэтому в v7 именно эта полоса установлена по умолчанию вместо 58 кГц.
+
+\section{Что скачать}
+
+На главной странице репозитория OpenMCC размещены прямые ссылки на четыре основных файла:
+
+\begin{enumerate}[leftmargin=7mm]
+\item \code{CUP-Altair-Setup-0.7.0.exe} — программа ЦУП Альтаир для Windows.
+\item \code{Altair_Gateway_v7.ino} — скетч для ESP32-WROOM-32 + CC1101.
+\item \code{Transmit_v7_static.ino} — тестовый скетч передатчика для STM32 + CC1101.
+\item \code{CUP_Altair_v7_Manual.pdf} — настоящее руководство.
+\end{enumerate}
+
+\section{Архитектура системы}
+
+\begin{center}
+\fbox{\parbox{0.92\linewidth}{\centering
+\textbf{STM32 + CC1101} \quad $\longrightarrow$ \quad \textbf{435.000 МГц} \quad $\longrightarrow$ \quad \textbf{CC1101 + ESP32-WROOM-32} \quad $\longrightarrow$ \quad \textbf{USB 115200} \quad $\longrightarrow$ \quad \textbf{ЦУП Альтаир v7}
+}}
+\end{center}
+
+Передатчик и приёмник используют одинаковые параметры пакетного режима CC1101. Отличие полосы приёма не мешает передаче: широкая полоса 203 кГц применяется на наземном приёмнике для устойчивой работы при заметном частотном уходе модулей.
+
+\section{Подключение CC1101 к ESP32}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{CC1101} & \textbf{ESP32-WROOM-32} & \textbf{Назначение}\\
+\midrule
+VCC & 3V3 & питание 3.3 В\\
+GND & GND & общий провод\\
+SCK & GPIO18 & SPI clock\\
+MISO / SO & GPIO19 & SPI MISO\\
+MOSI / SI & GPIO23 & SPI MOSI\\
+CSN / CS & GPIO21 & chip select\\
+GDO0 & GPIO4 & окончание принятого пакета\\
+GDO2 & GPIO27 & служебный вывод CC1101\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Важно:} питание CC1101 — только 3.3 В. Перед включением необходимо проверить общий GND и правильность SPI-подключения.
+
+\section{Подключение CC1101 к STM32}
+
+В тестовом передатчике сохранено подключение, с которым ранее была получена работа радиомодуля IntroSat:
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Сигнал CC1101} & \textbf{STM32}\\
+\midrule
+CS / CSN & PA2\\
+GDO0 & PA0\\
+GDO2 & PA1\\
+SCK / MISO / MOSI & штатные SPI-выводы выбранной STM32-платы\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Если используется другая STM32-плата, следует сохранить фактическое рабочее подключение и выбрать соответствующую плату в Arduino IDE / PlatformIO.
+
+\section{Радиопрофиль v7}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Параметр & Значение\\
+\midrule
+Частота & 435.000 МГц\\
+Модуляция & 2-FSK\\
+Скорость & 4.8 kbps\\
+Девиация & 5 кГц\\
+Полоса RX наземного приёмника & \textbf{203 кГц}\\
+Sync word & 0x12AD\\
+Кодирование & NRZ\\
+Длина пакета & variable\\
+CRC CC1101 & включён\\
+Преамбула & 16 bit\\
+Мощность тестового передатчика & 5 dBm\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Полоса 203 кГц выбрана не как теоретический минимум, а как \textbf{рабочая стендовая настройка}: при 58 кГц пакет не принимался, а при 203 кГц тот же пакет уверенно декодировался.
+
+\section{Формат пакета телеметрии}
+
+Статический тестовый пакет:
+
+\begin{lstlisting}
+02,00001,00015,3.00,4.20,1,33
+\end{lstlisting}
+
+Фактическая длина — \textbf{29 ASCII-символов}. Порядок полей:
+
+\begin{center}
+\begin{tabularx}{\linewidth}{>{\bfseries}l c X}
+\toprule
+Поле & Длина & Смысл\\
+\midrule
+ID & 2 & номер команды / идентификатор аппарата\\
+PACKET & 5 & порядковый номер пакета\\
+UPTIME & 5 & время с момента запуска, с\\
+PANEL\_POWER & 4 & мощность солнечных панелей, X.XX Вт\\
+VOLT & 4 & напряжение аккумулятора, X.XX В\\
+MODE & 1 & 1 — штатный, 0 — аварийный\\
+CHECKSUM & 2 & XOR в HEX\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+Аварийный режим в окончательной бортовой программе должен включаться автоматически при \code{VOLT < 2.00 В}.
+
+\subsection{Контрольная сумма XOR}
+
+XOR рассчитывается по всей строке до двух HEX-символов контрольной суммы, \textbf{включая последнюю запятую}:
+
+\begin{lstlisting}
+02,00001,00015,3.00,4.20,1,
+\end{lstlisting}
+
+Для приведённого примера результат равен \code{0x33}.
+
+\section{Что показывает ЦУП}
+
+Карточки телеметрии расположены в следующем порядке:
+
+\begin{enumerate}[leftmargin=7mm]
+\item ID спутника;
+\item номер пакета;
+\item время работы с момента запуска;
+\item мощность солнечных панелей;
+\item напряжение аккумулятора;
+\item режим работы;
+\item контрольная сумма XOR;
+\item раскрытие антенны;
+\item RSSI;
+\item SNR.
+\end{enumerate}
+
+В минимальном 29-символьном пакете состояния антенны пока нет. Поэтому ЦУП v7 показывает в этой карточке \textbf{«Н/Д»}, а не прочерк. Когда в будущий формат будет добавлено поле антенны, значения должны трактоваться как \code{1 = РАСКРЫТА}, \code{0 = СЛОЖЕНА}.
+
+RSSI и SNR всегда располагаются \textbf{в самом конце, после карточки раскрытия антенны}. RSSI берётся из наземного CC1101. SNR для CC1101 является диагностической оценкой относительно принятого уровня шумового фона / опорного уровня и не является отдельным аппаратным измерением CC1101.
+
+\section{Графики}
+
+В v7 строятся графики:
+
+\begin{itemize}[leftmargin=7mm]
+\item напряжение аккумулятора;
+\item мощность солнечных панелей;
+\item RSSI;
+\item SNR.
+\end{itemize}
+
+Каждый отсчёт отображается \textbf{точкой на линии}. Это позволяет видеть фактические моменты поступления пакетов, а не только сглаженную кривую.
+
+\section{Прошивка STM32}
+
+\begin{enumerate}[leftmargin=7mm]
+\item Открыть \code{Transmit_v7_static.ino} в Arduino IDE.
+\item Установить библиотеку RadioLib.
+\item Выбрать фактическую STM32-плату и способ загрузки.
+\item Проверить рабочие выводы CC1101: PA2 / PA0 / PA1 и штатный SPI.
+\item Загрузить скетч.
+\item В Serial Monitor убедиться, что раз в секунду появляется \code{TX OK}.
+\end{enumerate}
+
+Тестовый скетч передаёт статическую строку \code{02,00001,00015,3.00,4.20,1,33} раз в секунду.
+
+\section{Прошивка ESP32}
+
+\subsection{Вариант A — через Arduino IDE}
+
+Это наиболее прозрачный способ для первичной проверки.
+
+\begin{enumerate}[leftmargin=7mm]
+\item Открыть \code{Altair_Gateway_v7.ino}.
+\item Выбрать ESP32-WROOM-32 / совместимую плату.
+\item Установить RadioLib.
+\item Загрузить скетч.
+\item Открыть Serial Monitor, 115200 бод.
+\item При работающем STM32 должна появиться строка вида:
+\end{enumerate}
+
+\begin{lstlisting}
+$TEL,ID=02,PACKET=00001,UPTIME=00015,PANEL_POWER=3.00,VOLT=4.20,MODE=1,CHECKSUM=33,CHECKSUM_OK=1,RSSI=-23.5,SNR=60.0,LQI=52
+\end{lstlisting}
+
+После проверки \textbf{закрыть Serial Monitor}, иначе он будет удерживать COM-порт.
+
+\subsection{Вариант B — встроенная прошивка из ЦУП Альтаир}
+
+Установщик v7 содержит скомпилированную прошивку радиошлюза. В разделе прошивки ESP32 можно записать её без Arduino IDE. После успешной прошивки перейти к подключению основного порта.
+
+\textbf{Не следует} после ручной загрузки тестового скетча нажимать «Прошить ESP32» старой версией программы: это перезапишет рабочую прошивку другой сборкой. Для v7 встроенная прошивка уже использует полосу 203 кГц.
+
+\section{Запуск ЦУП Альтаир}
+
+\begin{enumerate}[leftmargin=7mm]
+\item Установить \code{CUP-Altair-Setup-0.7.0.exe}.
+\item Подключить прошитую ESP32 к компьютеру по USB.
+\item Закрыть Arduino Serial Monitor и другие программы, удерживающие COM-порт.
+\item Запустить «ЦУП Альтаир».
+\item В разделе «Соединение» выбрать профиль ESP32 и скорость 115200 бод.
+\item Нажать «Подключить устройство» и выбрать COM-порт ESP32.
+\item Включить STM32-передатчик.
+\item Убедиться, что карточки телеметрии обновляются, а на графиках появляются точки.
+\end{enumerate}
+
+\section{Быстрая диагностика}
+
+\begin{longtable}{p{0.30\linewidth}p{0.62\linewidth}}
+\toprule
+\textbf{Симптом} & \textbf{Что проверить}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Симптом} & \textbf{Что проверить}\\
+\midrule
+\endhead
+ESP32 не видит CC1101 & питание 3.3 В, GND, GPIO18/19/23/21; простой тест \code{radio.begin()} должен вернуть 0.\\
+Пакеты видны на SDR, но нет приёма & убедиться, что RX bandwidth = 203 кГц; проверить 435.000 МГц, 4.8 kbps, 2-FSK, deviation 5 кГц, sync 0x12AD, CRC.\\
+В Serial Monitor есть \code{PACKET RECEIVED}, а ЦУП пустой & ESP32 должна выдавать нормализованную строку \code{$TEL,...}; закрыть Serial Monitor и открыть тот же COM-порт в ЦУПе.\\
+ЦУП не открывает COM-порт & закрыть Arduino IDE Serial Monitor, SDR-сервис с Serial, терминалы и другие программы, которые используют порт.\\
+Антенна показывает «Н/Д» & это штатно для 29-символьного пакета v7: поля состояния антенны в нём пока нет.\\
+Сигнал на SDR смещён от 435.000 МГц & широкая полоса 203 кГц введена именно для повышения устойчивости к такому рассогласованию; при сильном смещении дополнительно проверить кварцы и фактическую частоту обоих модулей.\\
+\bottomrule
+\end{longtable}
+
+\section{Минимальный контроль перед демонстрацией}
+
+Перед работой на площадке рекомендуется выполнить полный цикл:
+
+\begin{enumerate}[leftmargin=7mm]
+\item STM32 передаёт пакет раз в секунду — подтверждено Serial Monitor / SDR.
+\item ESP32 принимает пакет с BW 203 кГц и выдаёт \code{$TEL,...}.
+\item XOR пакета равен \code{33} и отображается как OK.
+\item ЦУП получает ID, пакет, uptime, мощность, напряжение и режим.
+\item Карточка антенны показывает «Н/Д», RSSI и SNR находятся после неё.
+\item На четырёх графиках появляются линии с точками.
+\end{enumerate}
+
+\vfill
+\begin{center}
+\small ЦУП Альтаир v7 · Технопром 2026 · Миссия на Луну
+\end{center}
+
+\end{document}
