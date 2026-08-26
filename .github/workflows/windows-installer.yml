@@ -58,7 +58,20 @@ jobs:
       - name: Install PlatformIO
         run: python -m pip install --upgrade platformio
 
-      - name: Compile ESP32 radio gateway v7
+      - name: Verify ESP32 release sources are identical
+        shell: pwsh
+        run: |
+          $ino = "firmware/radio_gateway_esp32/Altair_Gateway_v7/Altair_Gateway_v7.ino"
+          $cpp = "firmware/radio_gateway_esp32/src/main_v7.cpp"
+          $inoHash = (Get-FileHash -Algorithm SHA256 $ino).Hash
+          $cppHash = (Get-FileHash -Algorithm SHA256 $cpp).Hash
+          Write-Host "Arduino sketch SHA256: $inoHash"
+          Write-Host "Bundled source SHA256: $cppHash"
+          if ($inoHash -ne $cppHash) {
+            throw "ESP32 Arduino sketch and bundled PlatformIO source differ. Release blocked."
+          }
+
+      - name: Compile ESP32 radio gateway v7.1
         run: pio run -d firmware/radio_gateway_esp32
 
       - name: Compile STM32 v7 transmitter reference
@@ -84,7 +97,7 @@ jobs:
             @{ Source = "$buildDir/bootloader.bin"; File = "gateway-bootloader.bin"; Label = "Bootloader"; Address = 4096 },
             @{ Source = "$buildDir/partitions.bin"; File = "gateway-partitions.bin"; Label = "Partition table"; Address = 32768 },
             @{ Source = $bootApp0.FullName; File = "gateway-boot_app0.bin"; Label = "boot_app0"; Address = 57344 },
-            @{ Source = "$buildDir/firmware.bin"; File = "gateway-firmware.bin"; Label = "Altair v7 radio gateway"; Address = 65536 }
+            @{ Source = "$buildDir/firmware.bin"; File = "gateway-firmware.bin"; Label = "Altair v7.1 radio gateway"; Address = 65536 }
           )
 
           $manifestImages = @()
@@ -104,7 +117,7 @@ jobs:
             targetChip = "ESP32"
             firmwareVersion = $firmwareVersion
             applicationVersion = $appVersion
-            buildLabel = "Altair MCC v$appVersion / v7-bw203"
+            buildLabel = "Altair MCC v$appVersion / v7.1-proven-rx-bw203"
             flashMode = "dio"
             flashFreq = "40m"
             flashSize = "4MB"
@@ -114,7 +127,7 @@ jobs:
           $manifest | ConvertTo-Json -Depth 6 | Set-Content "bundled_firmware/manifest.json" -Encoding utf8
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: "22"
 
@@ -127,7 +140,7 @@ jobs:
       - name: Upload Windows installer artifact
         uses: actions/upload-artifact@v4
         with:
-          name: CUP-Altair-v7-Windows-Installer
+          name: CUP-Altair-v7.1-Windows-Installer
           path: |
             release/*.exe
             release/*.yml
@@ -176,6 +189,6 @@ jobs:
             "bundled_firmware/gateway-firmware.bin" `
             "bundled_firmware/manifest.json" `
             --target main `
-            --title "ЦУП Альтаир v7 ($env:RELEASE_TAG) — Технопром 2026. Миссия на Луну" `
+            --title "ЦУП Альтаир v7.1 ($env:RELEASE_TAG) — Технопром 2026. Миссия на Луну" `
             --notes-file "docs/RELEASE_V7.md" `
             --latest
