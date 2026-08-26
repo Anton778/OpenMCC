@@ -7,19 +7,46 @@ on:
   pull_request:
     branches:
       - main
-    types: [opened, synchronize, reopened, closed]
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
+  build-manual:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Compile v7 LaTeX manual
+        uses: xu-cheng/latex-action@v4
+        with:
+          root_file: docs/CUP_Altair_v7_Manual.tex
+          latexmk_use_xelatex: true
+
+      - name: Upload PDF manual
+        uses: actions/upload-artifact@v4
+        with:
+          name: CUP-Altair-v7-Manual
+          path: docs/CUP_Altair_v7_Manual.pdf
+          if-no-files-found: error
+          retention-days: 30
+
   build-windows:
+    needs: build-manual
     runs-on: windows-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Download compiled PDF manual
+        uses: actions/download-artifact@v4
+        with:
+          name: CUP-Altair-v7-Manual
+          path: docs
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -29,31 +56,23 @@ jobs:
       - name: Install PlatformIO
         run: python -m pip install --upgrade platformio
 
-      - name: Compile ESP32 radio gateway
+      - name: Compile ESP32 radio gateway v7
         run: pio run -d firmware/radio_gateway_esp32
 
-      - name: Compile STM32 v6 transmitter reference
-        run: pio run -d firmware/transmitter_stm32_v6
+      - name: Compile STM32 v7 transmitter reference
+        run: pio run -d firmware/transmitter_stm32_v7
 
       - name: Prepare bundled ESP32 firmware
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
           $buildDir = "firmware/radio_gateway_esp32/.pio/build/esp32dev"
-          $sourceCode = Get-Content "firmware/radio_gateway_esp32/src/main.cpp" -Raw
+          $sourceCode = Get-Content "firmware/radio_gateway_esp32/src/main_v7.cpp" -Raw
 
-          if ($sourceCode -notmatch 'constexpr\s+char\s+FW_VERSION\[\]\s*=\s*"([^"]+)"') {
-            throw "Unable to read FW_VERSION from ESP32 gateway source."
+          if ($sourceCode -notmatch 'FW_VERSION_V7\[\]\s*=\s*"([^"]+)"') {
+            throw "Unable to read FW_VERSION_V7 from ESP32 gateway source."
           }
           $firmwareVersion = $Matches[1]
-
-          $rxPatch = "legacy"
-          if (Test-Path "firmware/radio_gateway_esp32/src/main_fixed.cpp") {
-            $rxPatchSource = Get-Content "firmware/radio_gateway_esp32/src/main_fixed.cpp" -Raw
-            if ($rxPatchSource -match 'RX_PATCH_VERSION\[\]\s*=\s*"([^"]+)"') {
-              $rxPatch = $Matches[1]
-            }
-          }
 
           $bootApp0 = Get-ChildItem "$env:USERPROFILE/.platformio/packages" -Recurse -Filter "boot_app0.bin" | Select-Object -First 1
           if (-not $bootApp0) { throw "boot_app0.bin was not found." }
@@ -63,7 +82,7 @@ jobs:
             @{ Source = "$buildDir/bootloader.bin"; File = "gateway-bootloader.bin"; Label = "Bootloader"; Address = 4096 },
             @{ Source = "$buildDir/partitions.bin"; File = "gateway-partitions.bin"; Label = "Partition table"; Address = 32768 },
             @{ Source = $bootApp0.FullName; File = "gateway-boot_app0.bin"; Label = "boot_app0"; Address = 57344 },
-            @{ Source = "$buildDir/firmware.bin"; File = "gateway-firmware.bin"; Label = "Altair radio gateway"; Address = 65536 }
+            @{ Source = "$buildDir/firmware.bin"; File = "gateway-firmware.bin"; Label = "Altair v7 radio gateway"; Address = 65536 }
           )
 
           $manifestImages = @()
@@ -83,7 +102,7 @@ jobs:
             targetChip = "ESP32"
             firmwareVersion = $firmwareVersion
             applicationVersion = $appVersion
-            buildLabel = "Altair MCC v$appVersion CI / $rxPatch"
+            buildLabel = "Altair MCC v$appVersion / v7-bw203"
             flashMode = "dio"
             flashFreq = "40m"
             flashSize = "4MB"
@@ -106,20 +125,23 @@ jobs:
       - name: Upload Windows installer artifact
         uses: actions/upload-artifact@v4
         with:
-          name: CUP-Altair-Windows-Installer
+          name: CUP-Altair-v7-Windows-Installer
           path: |
             release/*.exe
             release/*.yml
             release/*.blockmap
             bundled_firmware/*.json
             bundled_firmware/*.bin
-            firmware/transmitter_stm32_v6/Transmit_v6_static/Transmit_v6_static.ino
-            docs/TELEMETRY_V6.md
+            firmware/radio_gateway_esp32/Altair_Gateway_v7/Altair_Gateway_v7.ino
+            firmware/transmitter_stm32_v7/Transmit_v7_static/Transmit_v7_static.ino
+            docs/CUP_Altair_v7_Manual.pdf
+            docs/CUP_Altair_v7_Manual.tex
+            docs/RELEASE_V7.md
           if-no-files-found: error
           retention-days: 30
 
       - name: Read application version
-        if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true) }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         id: app_version
         shell: pwsh
         run: |
@@ -128,12 +150,11 @@ jobs:
           "tag=v$version" >> $env:GITHUB_OUTPUT
 
       - name: Publish GitHub Release when this version is new
-        if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true) }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ steps.app_version.outputs.tag }}
-          RELEASE_VERSION: ${{ steps.app_version.outputs.version }}
         run: |
           gh release view $env:RELEASE_TAG *> $null
           if ($LASTEXITCODE -eq 0) {
@@ -142,13 +163,17 @@ jobs:
           }
           $installer = Get-ChildItem -Path release -Filter "CUP-Altair-Setup-*.exe" | Select-Object -First 1
           if (-not $installer) { throw "Altair Windows installer was not found in release/." }
+
           gh release create $env:RELEASE_TAG `
             $installer.FullName `
-            "firmware/transmitter_stm32_v6/Transmit_v6_static/Transmit_v6_static.ino" `
-            "docs/TELEMETRY_V6.md" `
+            "firmware/radio_gateway_esp32/Altair_Gateway_v7/Altair_Gateway_v7.ino" `
+            "firmware/transmitter_stm32_v7/Transmit_v7_static/Transmit_v7_static.ino" `
+            "docs/CUP_Altair_v7_Manual.pdf" `
+            "docs/CUP_Altair_v7_Manual.tex" `
+            "docs/RELEASE_V7.md" `
             "bundled_firmware/gateway-firmware.bin" `
             "bundled_firmware/manifest.json" `
             --target main `
-            --title "ЦУП Альтаир v6 исправленный ($env:RELEASE_TAG) — Технопром 2026. Миссия на Луну" `
-            --notes "Исправленный релиз v6. Приём ESP32+CC1101 переведён на проверенный стендом путь GDO0 polling; явно зафиксированы NRZ, sync 0x12AD, variable packet length и CRC. Профиль: 435.000 МГц, 4.8 kbps, 2-FSK, deviation 5 кГц, RX BW 58 кГц. Канонический пакет 02,00001,00015,3.00,4.20,1,33. В Release дополнительно приложены STM32-скетч, ESP32 firmware и документация." `
+            --title "ЦУП Альтаир v7 ($env:RELEASE_TAG) — Технопром 2026. Миссия на Луну" `
+            --notes-file "docs/RELEASE_V7.md" `
             --latest
