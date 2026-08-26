@@ -1,4 +1,4 @@
-name: ЦУП Альтаир — v5 UI checks
+name: ЦУП Альтаир — v6 checks
 
 on:
   pull_request:
@@ -22,7 +22,7 @@ jobs:
           node-version: "22"
 
       - name: Validate package.json
-        run: node -e "JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('package.json OK')"
+        run: node -e "const p=JSON.parse(require('fs').readFileSync('package.json','utf8')); if(p.version!=='0.6.0') process.exit(1); console.log('package v6 OK')"
 
       - name: Check browser JavaScript syntax
         run: |
@@ -38,18 +38,19 @@ jobs:
       - name: Check Electron host syntax
         run: node --check desktop/main.cjs
 
-      - name: Check required v5 interface fields
+      - name: Validate v6 telemetry implementation
         shell: bash
         run: |
-          for id in ID VOLT PANEL_POWER PACKET UPTIME TEMP RSSI SNR chartVOLT chartPANEL_POWER chartTEMP chartRSSI chartSNR; do
-            grep -q "id=\"$id\"" index.html || { echo "Missing interface id: $id"; exit 1; }
-          done
-          grep -q '"ANTENNA"' js/app.js || { echo "Missing ANTENNA field in application UI"; exit 1; }
-          grep -q 'ANTENNA: Object.freeze' js/parser.js || { echo "Missing ANTENNA parser definition"; exit 1; }
-          grep -q 'ANTENNA=' examples/technoprom_2026_transmitter/Transmit_v5.ino || { echo "Missing ANTENNA in transmitter example"; exit 1; }
-          grep -q '1 · РАСКРЫТА' js/app.js || { echo "Missing deployed antenna label"; exit 1; }
-          grep -q '0 · СЛОЖЕНА' js/app.js || { echo "Missing stowed antenna label"; exit 1; }
-          if grep -q 'id="CURR"' index.html; then
-            echo "CURR must not be present in the v5 main interface"
-            exit 1
-          fi
+          grep -q 'fixedPacketLength: 29' js/parser.js || { echo 'Missing fixed 29-char packet parser'; exit 1; }
+          grep -q '02,00001,00015,3.00,4.20,1,33' js/parser.js || { echo 'Missing canonical v6 packet'; exit 1; }
+          grep -q 'xorAscii' js/parser.js || { echo 'Missing XOR validation'; exit 1; }
+          grep -q '"MODE"' js/app.js || { echo 'Missing MODE UI'; exit 1; }
+          grep -q '"CHECKSUM"' js/app.js || { echo 'Missing CHECKSUM UI'; exit 1; }
+          grep -q '435.000' js/app.js || { echo 'Missing 435 MHz UI profile'; exit 1; }
+          grep -q '435.000f' firmware/radio_gateway_esp32/src/main.cpp || { echo 'Gateway is not defaulted to 435 MHz'; exit 1; }
+          grep -q 'TELEMETRY_PACKET.*02,00001,00015,3.00,4.20,1,33' firmware/transmitter_stm32_v6/Transmit_v6_static/Transmit_v6_static.ino || { echo 'Missing static STM32 packet'; exit 1; }
+          grep -q 'radio.begin(435.000f' firmware/transmitter_stm32_v6/Transmit_v6_static/Transmit_v6_static.ino || { echo 'STM32 transmitter is not at 435 MHz'; exit 1; }
+          if grep -q 'id="CURR"' index.html; then echo 'CURR must not be present'; exit 1; fi
+
+      - name: Verify canonical XOR example
+        run: node -e "const s='02,00001,00015,3.00,4.20,1,'; let x=0; for(const c of s) x^=c.charCodeAt(0); if(x!==0x33) process.exit(1); console.log('XOR=33, packet length='+(s+'33').length)"
