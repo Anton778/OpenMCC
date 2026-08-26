@@ -1,0 +1,123 @@
+name: Publish Altair v0.6.0
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: ${{ github.event.issue.title == 'RELEASE_V0.6.0_TRIGGER' }}
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install PlatformIO
+        run: python -m pip install --upgrade platformio
+
+      - name: Compile ESP32 radio gateway
+        run: pio run -d firmware/radio_gateway_esp32
+
+      - name: Compile STM32 v6 transmitter reference
+        run: pio run -d firmware/transmitter_stm32_v6
+
+      - name: Prepare bundled ESP32 firmware
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $buildDir = 'firmware/radio_gateway_esp32/.pio/build/esp32dev'
+          $sourceCode = Get-Content 'firmware/radio_gateway_esp32/src/main.cpp' -Raw
+          if ($sourceCode -notmatch 'constexpr\s+char\s+FW_VERSION\[\]\s*=\s*"([^"]+)"') {
+            throw 'Unable to read FW_VERSION from ESP32 gateway source.'
+          }
+          $firmwareVersion = $Matches[1]
+          $bootApp0 = Get-ChildItem "$env:USERPROFILE/.platformio/packages" -Recurse -Filter 'boot_app0.bin' | Select-Object -First 1
+          if (-not $bootApp0) { throw 'boot_app0.bin was not found.' }
+
+          New-Item -ItemType Directory -Force 'bundled_firmware' | Out-Null
+          $images = @(
+            @{ Source = "$buildDir/bootloader.bin"; File = 'gateway-bootloader.bin'; Label = 'Bootloader'; Address = 4096 },
+            @{ Source = "$buildDir/partitions.bin"; File = 'gateway-partitions.bin'; Label = 'Partition table'; Address = 32768 },
+            @{ Source = $bootApp0.FullName; File = 'gateway-boot_app0.bin'; Label = 'boot_app0'; Address = 57344 },
+            @{ Source = "$buildDir/firmware.bin"; File = 'gateway-firmware.bin'; Label = 'Altair radio gateway'; Address = 65536 }
+          )
+
+          $manifestImages = @()
+          foreach ($image in $images) {
+            if (-not (Test-Path $image.Source)) { throw "Firmware image not found: $($image.Source)" }
+            $target = Join-Path 'bundled_firmware' $image.File
+            Copy-Item $image.Source $target -Force
+            $fileInfo = Get-Item $target
+            $md5 = (Get-FileHash -Algorithm MD5 $target).Hash.ToLowerInvariant()
+            $manifestImages += [ordered]@{ file=$image.File; label=$image.Label; address=$image.Address; size=$fileInfo.Length; md5=$md5 }
+          }
+
+          $appVersion = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          if ($appVersion -ne '0.6.0') { throw "Expected application 0.6.0, found $appVersion" }
+          $manifest = [ordered]@{
+            schemaVersion = 1
+            targetBoard = 'ESP32-WROOM-32 / esp32dev'
+            targetChip = 'ESP32'
+            firmwareVersion = $firmwareVersion
+            applicationVersion = $appVersion
+            buildLabel = "Altair MCC v$appVersion release"
+            flashMode = 'dio'
+            flashFreq = '40m'
+            flashSize = '4MB'
+            eraseAll = $false
+            images = $manifestImages
+          }
+          $manifest | ConvertTo-Json -Depth 6 | Set-Content 'bundled_firmware/manifest.json' -Encoding utf8
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install desktop dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build Windows installer
+        run: npm run dist:win
+
+      - name: Verify release files
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem -Path release -Filter 'CUP-Altair-Setup-0.6.0.exe' | Select-Object -First 1
+          if (-not $installer) { throw 'CUP-Altair-Setup-0.6.0.exe was not built.' }
+          if (-not (Test-Path 'firmware/transmitter_stm32_v6/Transmit_v6_static/Transmit_v6_static.ino')) { throw 'STM32 v6 sketch is missing.' }
+          if (-not (Test-Path 'docs/TELEMETRY_V6.md')) { throw 'Telemetry v6 documentation is missing.' }
+          Write-Host "Installer: $($installer.FullName)"
+
+      - name: Publish GitHub Release v0.6.0
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view v0.6.0 *> $null
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host 'Release v0.6.0 already exists; no replacement performed.'
+            exit 0
+          }
+          $installer = Get-ChildItem -Path release -Filter 'CUP-Altair-Setup-0.6.0.exe' | Select-Object -First 1
+          gh release create v0.6.0 `
+            $installer.FullName `
+            'firmware/transmitter_stm32_v6/Transmit_v6_static/Transmit_v6_static.ino' `
+            'docs/TELEMETRY_V6.md' `
+            'bundled_firmware/gateway-firmware.bin' `
+            'bundled_firmware/manifest.json' `
+            --target main `
+            --title 'ЦУП Альтаир v6 (v0.6.0) — Технопром 2026. Миссия на Луну' `
+            --notes 'ЦУП Альтаир v6: фиксированный пакет телеметрии 02,00001,00015,3.00,4.20,1,33 (29 ASCII-символов), XOR=33, MODE 1/0, CC1101 435.000 МГц, ESP32-WROOM-32 gateway v0.3.0 с проверкой XOR и RSSI/SNR, а также статический STM32+CC1101 передатчик.' `
+            --latest
