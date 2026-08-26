@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - main
+    types: [opened, synchronize, reopened, closed]
   workflow_dispatch:
 
 permissions:
@@ -108,7 +109,7 @@ jobs:
           retention-days: 30
 
       - name: Read application version
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true) }}
         id: app_version
         shell: pwsh
         run: |
@@ -117,7 +118,7 @@ jobs:
           "tag=v$version" >> $env:GITHUB_OUTPUT
 
       - name: Publish GitHub Release when this version is new
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true) }}
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -132,7 +133,7 @@ jobs:
           $installer = Get-ChildItem -Path release -Filter "CUP-Altair-Setup-*.exe" | Select-Object -First 1
           if (-not $installer) { throw "Altair Windows installer was not found in release/." }
           gh release create $env:RELEASE_TAG $installer.FullName `
-            --target $env:GITHUB_SHA `
+            --target main `
             --title "ЦУП Альтаир v6 ($env:RELEASE_TAG) — Технопром 2026. Миссия на Луну" `
             --notes "ЦУП Альтаир v6: фиксированный 29-символьный пакет телеметрии с XOR, режимом 0/1, профиль CC1101 435.000 МГц, ESP32-приёмник с проверкой XOR, RSSI/SNR и STM32-скетч статического передатчика." `
             --latest
