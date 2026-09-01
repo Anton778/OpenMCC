@@ -8,12 +8,25 @@ const ALTAIR_V8 = Object.freeze({
     baudRate: 115200,
 });
 
+const V8_RADIO_DEFAULTS = Object.freeze({
+    frequencyMHz: 435.000,
+    powerDbm: 5,
+    bandwidthKHz: 203,
+});
+
+const V8_RADIO_POWERS_DBM = Object.freeze([-30, -20, -15, -10, 0, 5, 7, 10]);
+const V8_RADIO_BANDWIDTHS_KHZ = Object.freeze([
+    58, 68, 81, 102, 116, 135, 162, 203,
+    232, 270, 325, 406, 464, 541, 650, 812,
+]);
+
 const v8State = {
     packets: 0,
     errors: 0,
     rawLines: [],
     rawLimit: 600,
     idPacketCounts: new Map(),
+    radio: { ...V8_RADIO_DEFAULTS },
     connection: {
         device: "не подключено",
         baud: "115200",
@@ -97,7 +110,7 @@ function refreshConnectionSummary() {
         <span>Устройство: <strong>${s.device}</strong></span>
         <span>Порт: <strong>${s.port}</strong></span>
         <span>Скорость: <strong>${s.baud}</strong></span>
-        <span>RF: <strong>435.000 МГц</strong></span>
+        <span>RF: <strong>${v8State.radio.frequencyMHz.toFixed(3)} МГц · ${v8State.radio.powerDbm} дБм</strong></span>
     `;
 }
 
@@ -386,6 +399,214 @@ async function sendRf(name, params = {}) {
     return line;
 }
 
+function setRadioSettingsStatus(text, state = "neutral") {
+    const status = document.getElementById("v8RadioSettingsStatus");
+    if (!status) return;
+    status.textContent = text;
+    status.className = `v8RadioSettingsStatus ${state}`;
+}
+
+function parseRadioProfile(payload) {
+    const values = {};
+    String(payload ?? "").split(",").forEach(field => {
+        const index = field.indexOf("=");
+        if (index < 1) return;
+        values[field.slice(0, index).trim().toUpperCase()] = field.slice(index + 1).trim();
+    });
+
+    const frequencyMHz = Number(values.FREQ);
+    const powerDbm = Number(values.POWER);
+    const bandwidthKHz = Number(values.BW);
+
+    if (
+        !Number.isFinite(frequencyMHz) ||
+        !V8_RADIO_POWERS_DBM.includes(powerDbm) ||
+        !V8_RADIO_BANDWIDTHS_KHZ.includes(bandwidthKHz)
+    ) {
+        return null;
+    }
+
+    return { frequencyMHz, powerDbm, bandwidthKHz };
+}
+
+function renderRadioProfile(profile) {
+    if (!profile) return;
+    v8State.radio = { ...profile };
+
+    const frequency = document.getElementById("v8RadioFrequency");
+    const power = document.getElementById("v8RadioPower");
+    const bandwidth = document.getElementById("v8RadioBandwidth");
+    if (frequency) frequency.value = profile.frequencyMHz.toFixed(3);
+    if (power) power.value = String(profile.powerDbm);
+    if (bandwidth) bandwidth.value = String(profile.bandwidthKHz);
+
+    const metric = document.getElementById("v8FrequencyValue");
+    if (metric) {
+        metric.textContent = `${profile.frequencyMHz.toFixed(3)} МГц · BW ${profile.bandwidthKHz} кГц`;
+    }
+
+    const aboutFrequency = document.getElementById("v8AboutFrequency");
+    const aboutPower = document.getElementById("v8AboutPower");
+    const aboutBandwidth = document.getElementById("v8AboutBandwidth");
+    if (aboutFrequency) aboutFrequency.textContent = `${profile.frequencyMHz.toFixed(3)} МГц`;
+    if (aboutPower) aboutPower.textContent = `${profile.powerDbm} дБм`;
+    if (aboutBandwidth) aboutBandwidth.textContent = `${profile.bandwidthKHz} кГц`;
+
+    refreshConnectionSummary();
+}
+
+async function sendGatewayLine(line) {
+    if (!window.OpenMCCSerial?.getState?.().connected) {
+        throw new Error("Сначала подключите ESP32 к ЦУПу");
+    }
+
+    await window.OpenMCCSerial.writeLine(line);
+    const last = document.getElementById("lastCommandText");
+    if (last) last.textContent = line;
+    v8Log(`Команда радиошлюзу: ${line}`, "command");
+    return line;
+}
+
+function installRadioSettings(panel, protocolNote) {
+    if (!panel || document.getElementById("v8RadioSettings")) return;
+
+    const group = document.createElement("div");
+    group.id = "v8RadioSettings";
+    group.className = "commandGroup v8RadioSettings";
+    group.innerHTML = `
+        <div class="v8RadioSettingsTitleRow">
+            <div>
+                <div class="commandGroupTitle">Рабочие параметры радиоканала</div>
+                <div class="v8RadioSettingsCaption">Настройки наземного CC1101 для приёма телеметрии и передачи команд</div>
+            </div>
+            <span id="v8RadioSettingsStatus" class="v8RadioSettingsStatus neutral">НЕ ПОДКЛЮЧЕНО</span>
+        </div>
+
+        <div class="v8RadioSettingsGrid">
+            <label class="v8RadioSettingField">
+                <span>Частота, МГц</span>
+                <input class="v8RadioControl" id="v8RadioFrequency" type="number" min="387" max="464" step="0.001" value="435.000" inputmode="decimal">
+                <small>Допустимо: 387–464 МГц</small>
+            </label>
+
+            <label class="v8RadioSettingField">
+                <span>Мощность TX, дБм</span>
+                <select class="v8RadioControl" id="v8RadioPower">
+                    ${V8_RADIO_POWERS_DBM.map(value => `<option value="${value}"${value === V8_RADIO_DEFAULTS.powerDbm ? " selected" : ""}>${value} дБм</option>`).join("")}
+                </select>
+                <small>Уровень мощности передаваемых команд</small>
+            </label>
+
+            <label class="v8RadioSettingField">
+                <span>Полоса RX, кГц</span>
+                <select class="v8RadioControl" id="v8RadioBandwidth">
+                    ${V8_RADIO_BANDWIDTHS_KHZ.map(value => `<option value="${value}"${value === V8_RADIO_DEFAULTS.bandwidthKHz ? " selected" : ""}>${value} кГц</option>`).join("")}
+                </select>
+                <small>Полоса приёмника телеметрии</small>
+            </label>
+        </div>
+
+        <div class="v8RadioSettingsActions">
+            <button type="button" id="v8ApplyRadioSettings" class="commandButton commandPrimary v8RadioControl">Применить настройки</button>
+            <button type="button" id="v8ResetRadioSettings" class="commandButton v8RadioControl">Сбросить к исходным</button>
+        </div>
+
+        <div class="v8RadioSettingsWarning">
+            После изменения частоты бортовой передатчик должен быть настроен на ту же частоту. Исходный профиль: <strong>435,000 МГц · 5 дБм · 203 кГц</strong>.
+        </div>
+    `;
+
+    if (protocolNote?.parentNode === panel) panel.insertBefore(group, protocolNote);
+    else panel.appendChild(group);
+    renderRadioProfile(v8State.radio);
+
+    const frequency = document.getElementById("v8RadioFrequency");
+    const power = document.getElementById("v8RadioPower");
+    const bandwidth = document.getElementById("v8RadioBandwidth");
+    const apply = document.getElementById("v8ApplyRadioSettings");
+    const reset = document.getElementById("v8ResetRadioSettings");
+
+    apply?.addEventListener("click", async () => {
+        const profile = {
+            frequencyMHz: Number(frequency?.value),
+            powerDbm: Number(power?.value),
+            bandwidthKHz: Number(bandwidth?.value),
+        };
+
+        if (
+            !Number.isFinite(profile.frequencyMHz) ||
+            profile.frequencyMHz < 387 ||
+            profile.frequencyMHz > 464 ||
+            !V8_RADIO_POWERS_DBM.includes(profile.powerDbm) ||
+            !V8_RADIO_BANDWIDTHS_KHZ.includes(profile.bandwidthKHz)
+        ) {
+            setRadioSettingsStatus("ОШИБКА ЗНАЧЕНИЙ", "error");
+            v8Log("Некорректные параметры радиоканала", "error");
+            return;
+        }
+
+        setRadioSettingsStatus("ПРИМЕНЕНИЕ...", "pending");
+        try {
+            await sendGatewayLine(
+                `$CMD,RADIO,SET,FREQ=${profile.frequencyMHz.toFixed(3)},POWER=${profile.powerDbm},BW=${profile.bandwidthKHz}`
+            );
+        } catch (error) {
+            setRadioSettingsStatus("ОШИБКА ПЕРЕДАЧИ", "error");
+            v8Log(error.message, "error");
+        }
+    });
+
+    reset?.addEventListener("click", async () => {
+        setRadioSettingsStatus("СБРОС...", "pending");
+        try {
+            await sendGatewayLine("$CMD,RADIO,RESET");
+        } catch (error) {
+            setRadioSettingsStatus("ОШИБКА ПЕРЕДАЧИ", "error");
+            v8Log(error.message, "error");
+        }
+    });
+
+    window.addEventListener("openmcc:device-info", event => {
+        const payload = String(event.detail?.payload || "");
+        if (!/^RADIO(?:_READY)?,/i.test(payload)) return;
+        const profile = parseRadioProfile(payload);
+        if (!profile) return;
+        renderRadioProfile(profile);
+        setRadioSettingsStatus("ПРОФИЛЬ ПОЛУЧЕН", "online");
+    });
+
+    window.addEventListener("openmcc:device-ack", event => {
+        const payload = String(event.detail?.payload || "");
+        if (!/^RADIO_CONFIG_(?:APPLIED|RESET),/i.test(payload)) return;
+        const profile = parseRadioProfile(payload);
+        if (profile) renderRadioProfile(profile);
+        setRadioSettingsStatus(
+            /^RADIO_CONFIG_RESET,/i.test(payload) ? "ИСХОДНЫЙ ПРОФИЛЬ" : "ПРИМЕНЕНО",
+            "online"
+        );
+    });
+
+    window.addEventListener("openmcc:device-error", event => {
+        const payload = String(event.detail?.payload || "");
+        if (!/RADIO_CONFIG|RF_RX_RESTART/i.test(payload)) return;
+        setRadioSettingsStatus("ОШИБКА ESP32", "error");
+    });
+
+    window.addEventListener("openmcc:serial-connected", () => {
+        setRadioSettingsStatus("ЗАПРОС ПРОФИЛЯ...", "pending");
+        setTimeout(() => {
+            sendGatewayLine("$CMD,RADIO_STATUS").catch(error => {
+                setRadioSettingsStatus("НЕТ ОТВЕТА", "error");
+                v8Log(error.message, "error");
+            });
+        }, 120);
+    });
+
+    window.addEventListener("openmcc:serial-disconnected", () => {
+        setRadioSettingsStatus("НЕ ПОДКЛЮЧЕНО", "neutral");
+    });
+}
+
 function installCommandTransmission() {
     const panel = document.getElementById("commandPanel");
     if (!panel || panel.dataset.v8tx === "1") return;
@@ -469,6 +690,8 @@ function installCommandTransmission() {
         transmitCustomCommand();
     });
 
+    installRadioSettings(panel, note);
+
     const availability = document.getElementById("commandAvailability");
     const refresh = () => {
         const connected = Boolean(window.OpenMCCSerial?.getState?.().connected);
@@ -488,6 +711,7 @@ function installCommandTransmission() {
             document.getElementById("customCommand"),
             document.getElementById("sendCustomCommand"),
             document.getElementById("v8CommandTarget"),
+            ...panel.querySelectorAll(".v8RadioControl"),
         ].filter(Boolean);
 
         controls.forEach(control => {
@@ -532,16 +756,18 @@ function installAboutDialog() {
                     <li>построение графиков и отображение RSSI, SNR и LQI;</li>
                     <li>просмотр исходных строк последовательного порта;</li>
                     <li>передача адресных и широковещательных команд по радиоканалу.</li>
+                    <li>изменение частоты, мощности TX и полосы RX наземного CC1101.</li>
                 </ul>
             </section>
 
             <section class="aboutSection">
                 <h3>Рабочий радиопрофиль</h3>
                 <div class="aboutSpecGrid">
-                    <div><span>Частота</span><strong>435.000 МГц</strong></div>
+                    <div><span>Частота</span><strong id="v8AboutFrequency">435.000 МГц</strong></div>
+                    <div><span>Мощность TX</span><strong id="v8AboutPower">5 дБм</strong></div>
                     <div><span>Модуляция</span><strong>2-FSK</strong></div>
                     <div><span>Скорость</span><strong>4,8 кбит/с</strong></div>
-                    <div><span>Полоса RX</span><strong>203 кГц</strong></div>
+                    <div><span>Полоса RX</span><strong id="v8AboutBandwidth">203 кГц</strong></div>
                     <div><span>Интерфейс USB</span><strong>115200 бод</strong></div>
                     <div><span>Аппаратный CRC</span><strong>включён</strong></div>
                 </div>
@@ -551,6 +777,7 @@ function installAboutDialog() {
         </div>
     `;
     document.body.appendChild(dialog);
+    renderRadioProfile(v8State.radio);
 
     const close = () => dialog.classList.remove("open");
     document.getElementById("v8AboutButton")?.addEventListener("click", () => dialog.classList.add("open"));

@@ -27,17 +27,31 @@
 #define CC_GDO0  4
 #define CC_GDO2  27
 
-static constexpr char FW_VERSION[] = "8.2.0";
+static constexpr char FW_VERSION[] = "8.3.0";
 static constexpr float RF_FREQ_MHZ = 435.000f;
 static constexpr float RF_BITRATE_KBPS = 4.8f;
 static constexpr float RF_DEVIATION_KHZ = 5.0f;
 static constexpr float RF_BW_KHZ = 203.0f;
 static constexpr int8_t RF_POWER_DBM = 5;
 static constexpr uint16_t RF_PREAMBLE_BITS = 16;
+static constexpr float RF_MIN_FREQ_MHZ = 387.000f;
+static constexpr float RF_MAX_FREQ_MHZ = 464.000f;
+
+static const int8_t RF_ALLOWED_POWERS_DBM[] = {
+  -30, -20, -15, -10, 0, 5, 7, 10
+};
+
+static const uint16_t RF_ALLOWED_BANDWIDTHS_KHZ[] = {
+  58, 68, 81, 102, 116, 135, 162, 203,
+  232, 270, 325, 406, 464, 541, 650, 812
+};
 
 CC1101 radio = new Module(CC_CS, CC_GDO0, RADIOLIB_NC, CC_GDO2);
 String usbLine;
 volatile bool rfPacketReceived = false;
+float activeRfFrequencyMHz = RF_FREQ_MHZ;
+int8_t activeRfPowerDbm = RF_POWER_DBM;
+uint16_t activeRfBandwidthKHz = static_cast<uint16_t>(RF_BW_KHZ);
 
 // Обработчик прерывания только устанавливает флаг. Чтение SPI и вывод в USB
 // выполняются в основном цикле, а не внутри обработчика прерывания.
@@ -69,7 +83,126 @@ int startReceiveAgain() {
 }
 
 void printRadioStatus() {
-  Serial.println("$INFO,RADIO,TYPE=CC1101,FREQ=435.000,RATE=4.8,MOD=2FSK,DEV=5,BW=203,POWER=5,SYNC=12AD,CRC=1,XOR=OFF,RF_TX=ON,RX_MODE=INTERRUPT,PROFILE=FIXED_V8");
+  Serial.print("$INFO,RADIO,TYPE=CC1101,FREQ=");
+  Serial.print(activeRfFrequencyMHz, 3);
+  Serial.print(",RATE=4.8,MOD=2FSK,DEV=5,BW=");
+  Serial.print(activeRfBandwidthKHz);
+  Serial.print(",POWER=");
+  Serial.print(static_cast<int>(activeRfPowerDbm));
+  Serial.println(",SYNC=12AD,CRC=1,XOR=OFF,RF_TX=ON,RX_MODE=INTERRUPT,PROFILE=RUNTIME_V8");
+}
+
+bool isAllowedPower(int value) {
+  for (const int8_t allowed : RF_ALLOWED_POWERS_DBM) {
+    if (value == allowed) return true;
+  }
+  return false;
+}
+
+bool isAllowedBandwidth(int value) {
+  for (const uint16_t allowed : RF_ALLOWED_BANDWIDTHS_KHZ) {
+    if (value == allowed) return true;
+  }
+  return false;
+}
+
+// Извлекает значение параметра KEY из фрагмента вида ,KEY=VALUE.
+bool readCommandParameter(const String& line, const char* key, String& value) {
+  String token = ",";
+  token += key;
+  token += "=";
+  const int tokenStart = line.indexOf(token);
+  if (tokenStart < 0) return false;
+
+  const int valueStart = tokenStart + token.length();
+  int valueEnd = line.indexOf(',', valueStart);
+  if (valueEnd < 0) valueEnd = line.length();
+
+  value = line.substring(valueStart, valueEnd);
+  value.trim();
+  return value.length() > 0;
+}
+
+bool parseFloatStrict(const String& text, float& value) {
+  char* end = nullptr;
+  value = strtof(text.c_str(), &end);
+  return end != text.c_str() && *end == '\0' && isfinite(value);
+}
+
+bool parseIntegerStrict(const String& text, int& value) {
+  char* end = nullptr;
+  const long parsed = strtol(text.c_str(), &end, 10);
+  if (end == text.c_str() || *end != '\0') return false;
+  value = static_cast<int>(parsed);
+  return true;
+}
+
+void printRadioConfigResult(const char* result) {
+  Serial.print("$ACK,");
+  Serial.print(result);
+  Serial.print(",FREQ=");
+  Serial.print(activeRfFrequencyMHz, 3);
+  Serial.print(",POWER=");
+  Serial.print(static_cast<int>(activeRfPowerDbm));
+  Serial.print(",BW=");
+  Serial.println(activeRfBandwidthKHz);
+}
+
+// Применяет новый профиль как одну транзакцию. Если любой вызов RadioLib
+// завершается ошибкой, предыдущий рабочий профиль восстанавливается.
+bool applyRadioSettings(float frequencyMHz, int powerDbm, int bandwidthKHz, const char* result) {
+  if (
+    frequencyMHz < RF_MIN_FREQ_MHZ ||
+    frequencyMHz > RF_MAX_FREQ_MHZ ||
+    !isAllowedPower(powerDbm) ||
+    !isAllowedBandwidth(bandwidthKHz)
+  ) {
+    Serial.print("$ERR,RADIO_CONFIG_INVALID,FREQ=");
+    Serial.print(frequencyMHz, 3);
+    Serial.print(",POWER=");
+    Serial.print(powerDbm);
+    Serial.print(",BW=");
+    Serial.println(bandwidthKHz);
+    return false;
+  }
+
+  const float previousFrequencyMHz = activeRfFrequencyMHz;
+  const int8_t previousPowerDbm = activeRfPowerDbm;
+  const uint16_t previousBandwidthKHz = activeRfBandwidthKHz;
+
+  rfPacketReceived = false;
+  int state = radio.standby();
+  if (state == RADIOLIB_ERR_NONE) state = radio.setFrequency(frequencyMHz);
+  if (state == RADIOLIB_ERR_NONE) state = radio.setOutputPower(static_cast<int8_t>(powerDbm));
+  if (state == RADIOLIB_ERR_NONE) state = radio.setRxBandwidth(static_cast<float>(bandwidthKHz));
+
+  if (state != RADIOLIB_ERR_NONE) {
+    // Восстановление выполняется полностью, даже если ошибка возникла
+    // после успешного изменения одного из предыдущих параметров.
+    radio.standby();
+    radio.setFrequency(previousFrequencyMHz);
+    radio.setOutputPower(previousPowerDbm);
+    radio.setRxBandwidth(static_cast<float>(previousBandwidthKHz));
+    startReceiveAgain();
+
+    Serial.print("$ERR,RADIO_CONFIG_APPLY,CODE=");
+    Serial.println(state);
+    return false;
+  }
+
+  activeRfFrequencyMHz = frequencyMHz;
+  activeRfPowerDbm = static_cast<int8_t>(powerDbm);
+  activeRfBandwidthKHz = static_cast<uint16_t>(bandwidthKHz);
+
+  const int receiveState = startReceiveAgain();
+  if (receiveState != RADIOLIB_ERR_NONE) {
+    Serial.print("$ERR,RF_RX_RESTART,CODE=");
+    Serial.println(receiveState);
+    return false;
+  }
+
+  printRadioConfigResult(result);
+  return true;
 }
 
 // Передаёт одну строку в эфир и возвращает CC1101 в режим приёма.
@@ -124,7 +257,13 @@ void handleUsbCommand(String line) {
   if (line.equalsIgnoreCase("$CMD,GATEWAY_INFO")) {
     Serial.print("$INFO,GATEWAY=ALTAIR_V8,BOARD=ESP32-WROOM-32,FW=");
     Serial.print(FW_VERSION);
-    Serial.println(",FREQ=435.000,RATE=4.8,DEV=5,BW=203,XOR=OFF,RF_TX=ON,RX_MODE=INTERRUPT");
+    Serial.print(",FREQ=");
+    Serial.print(activeRfFrequencyMHz, 3);
+    Serial.print(",RATE=4.8,DEV=5,BW=");
+    Serial.print(activeRfBandwidthKHz);
+    Serial.print(",POWER=");
+    Serial.print(static_cast<int>(activeRfPowerDbm));
+    Serial.println(",XOR=OFF,RF_TX=ON,RX_MODE=INTERRUPT");
     return;
   }
 
@@ -133,9 +272,54 @@ void handleUsbCommand(String line) {
     return;
   }
 
-  // Радиопрофиль зафиксирован, чтобы все устройства работали одинаково.
+  if (line.equalsIgnoreCase("$CMD,RADIO,RESET")) {
+    applyRadioSettings(
+      RF_FREQ_MHZ,
+      RF_POWER_DBM,
+      static_cast<int>(RF_BW_KHZ),
+      "RADIO_CONFIG_RESET"
+    );
+    return;
+  }
+
+  // Формат: $CMD,RADIO,SET,FREQ=435.000,POWER=5,BW=203
+  if (line.startsWith("$CMD,RADIO,SET,")) {
+    String frequencyText;
+    String powerText;
+    String bandwidthText;
+
+    if (
+      !readCommandParameter(line, "FREQ", frequencyText) ||
+      !readCommandParameter(line, "POWER", powerText) ||
+      !readCommandParameter(line, "BW", bandwidthText)
+    ) {
+      Serial.println("$ERR,RADIO_CONFIG_FIELDS_REQUIRED,FIELDS=FREQ|POWER|BW");
+      return;
+    }
+
+    float frequencyMHz = 0.0f;
+    int powerDbm = 0;
+    int bandwidthKHz = 0;
+    if (
+      !parseFloatStrict(frequencyText, frequencyMHz) ||
+      !parseIntegerStrict(powerText, powerDbm) ||
+      !parseIntegerStrict(bandwidthText, bandwidthKHz)
+    ) {
+      Serial.println("$ERR,RADIO_CONFIG_NUMBER_FORMAT");
+      return;
+    }
+
+    applyRadioSettings(
+      frequencyMHz,
+      powerDbm,
+      bandwidthKHz,
+      "RADIO_CONFIG_APPLIED"
+    );
+    return;
+  }
+
   if (line.startsWith("$CMD,RADIO,")) {
-    Serial.println("$ERR,RADIO_CONFIG_FIXED,FREQ=435.000,RATE=4.8,DEV=5,BW=203");
+    Serial.println("$ERR,RADIO_CONFIG_UNKNOWN,SUPPORTED=SET|RESET|STATUS");
     return;
   }
 
@@ -273,7 +457,7 @@ void setup() {
 
   Serial.print("$INFO,GATEWAY=ALTAIR_V8,BOARD=ESP32-WROOM-32,FW=");
   Serial.println(FW_VERSION);
-  Serial.println("$INFO,RADIO_READY,TYPE=CC1101,FREQ=435.000,RATE=4.8,DEV=5,BW=203,SYNC=12AD,CRC=1,RX_MODE=INTERRUPT");
+  Serial.println("$INFO,RADIO_READY,TYPE=CC1101,FREQ=435.000,RATE=4.8,DEV=5,BW=203,POWER=5,SYNC=12AD,CRC=1,RX_MODE=INTERRUPT,RUNTIME_CONFIG=1");
   Serial.println("$INFO,APPLICATION_XOR_CHECK=DISABLED,RF_TX=ENABLED");
 }
 

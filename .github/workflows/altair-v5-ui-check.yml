@@ -56,6 +56,9 @@ jobs:
           const v8Runtime = fs.readFileSync('js/v8.js', 'utf8');
           if (!v8Runtime.includes('control.disabled = !connected')) throw new Error('Visible command controls are not synchronized with serial state');
           if (!v8Runtime.includes('oldCustomInput?.cloneNode(true)')) throw new Error('Legacy custom-command handler is still active');
+          if (!v8Runtime.includes('$CMD,RADIO,SET,FREQ=')) throw new Error('Runtime radio settings command is missing');
+          if (!v8Runtime.includes('$CMD,RADIO,RESET')) throw new Error('Radio settings reset command is missing');
+          if (!v8Runtime.includes('id="v8RadioFrequency"')) throw new Error('Radio settings controls are missing');
 
           const charts = fs.readFileSync('js/charts.js', 'utf8');
           if (!charts.includes('datasetFor(chart, id)')) throw new Error('Multi-ID chart datasets are missing');
@@ -77,9 +80,12 @@ jobs:
           grep -Fq 'APPLICATION_XOR_CHECK=DISABLED' "$ground_esp32"
           grep -Fq '$CMD,RF,' "$ground_esp32"
           grep -Fq '$CMD,RADIO_STATUS' "$ground_esp32"
-          grep -Fq 'FW_VERSION[] = "8.2.0"' "$ground_esp32"
+          grep -Fq 'FW_VERSION[] = "8.3.0"' "$ground_esp32"
           grep -Fq 'radio.setPacketReceivedAction(onRfPacketReceived);' "$ground_esp32"
           grep -Fq 'const int state = radio.readData(packet);' "$ground_esp32"
+          grep -Fq '$CMD,RADIO,SET,' "$ground_esp32"
+          grep -Fq '$CMD,RADIO,RESET' "$ground_esp32"
+          grep -Fq 'RADIO_CONFIG_APPLIED' "$ground_esp32"
           if grep -Fq 'const int state = radio.receive(packet);' "$ground_esp32"; then
             echo 'Blocking CC1101 receive must not be used in the ESP32 gateway'
             exit 1
