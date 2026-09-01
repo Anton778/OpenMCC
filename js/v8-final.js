@@ -73,8 +73,6 @@
         const grid = document.querySelector("#telemetryPanel .altairTelemetryGrid");
         if (!grid) return;
 
-        // Канонический порядок v8. RSSI и SNR всегда находятся в самом конце,
-        // после состояния раскрытия антенны.
         const order = [
             "ID",
             "PACKET",
@@ -96,7 +94,7 @@
 
     function cleanLegacyUi() {
         const badge = document.querySelector(".buildBadge");
-        if (badge) badge.textContent = "v8 · 0.8.0";
+        if (badge) badge.textContent = "v8 · 0.8.1";
 
         const projectEyebrow = document.querySelector("#projectPanel .panelEyebrow");
         if (projectEyebrow) projectEyebrow.textContent = "RELEASE V8";
@@ -124,8 +122,6 @@
             eventLogFirst.textContent = "ЦУП Альтаир v8 запущен.";
         }
 
-        // Старый набор готовых команд из v5 отправлял команды в обход нового RF-протокола.
-        // В v8 используются основные кнопки PING/INFO/TM_START/TM_STOP и произвольная команда.
         document.querySelectorAll(".commandPresetGroup").forEach(group => group.remove());
 
         const help = document.getElementById("helpDialog");
@@ -172,3 +168,6 @@
         setTimeout(initialize, 450);
     }
 })();
+
+import("/js/v8.1.js").catch(error => console.error("Altair v8.0.1 UI patch failed", error));
+import("/js/logo-transparent.js").catch(error => console.error("Altair transparent logo patch failed", error));

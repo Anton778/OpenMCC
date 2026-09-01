@@ -1,0 +1,243 @@
+/* ЦУП Альтаир v8.0.1 — компактный рабочий интерфейс */
+
+/* Логотип без белой подложки */
+.altairLogo .logoMark.v8LogoMark {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+}
+.altairLogo .logoMark.v8LogoMark img {
+    width: 42px !important;
+    height: 42px !important;
+    object-fit: contain;
+    background: transparent !important;
+}
+#v8AboutDialog .aboutHeader img {
+    background: transparent !important;
+    padding: 0 !important;
+}
+
+/* Вся шапка в одну строку: бренд + миссия + радиоканал + UTC + канал + действия */
+#topBar {
+    grid-template-columns: minmax(290px, 2fr) minmax(145px,.78fr) minmax(205px,1fr) minmax(115px,.58fr) minmax(130px,.7fr) auto !important;
+    align-items: center !important;
+}
+.topActions {
+    align-self: center !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap;
+}
+.buildBadge { white-space: nowrap; }
+
+/* Основная логика страницы: сначала setup, затем телеметрия во всю ширину, затем графики */
+#v81SetupFlow,
+#telemetryPanel,
+#chartPanel,
+#rawSerialPanel {
+    grid-column: 1 / -1 !important;
+}
+
+.v81SetupFlow {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+    gap: 12px;
+    align-items: start;
+}
+.v81SetupFlow > .panel {
+    grid-column: auto !important;
+    margin: 0;
+    min-height: 0;
+}
+.v81SetupStep {
+    position: relative;
+    border-color: rgba(70,145,215,.34) !important;
+}
+.v81StepLabel {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: -2px 0 10px;
+    color: #dceeff;
+}
+.v81StepLabel > span {
+    display: grid;
+    place-items: center;
+    width: 25px;
+    height: 25px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    color: #04111f;
+    background: #55d9ff;
+    font-weight: 900;
+}
+.v81StepLabel strong { font-size: .88rem; letter-spacing: .02em; }
+.v81StepLabel em {
+    margin-left: auto;
+    color: #7791ac;
+    font-style: normal;
+    font-size: .68rem;
+    letter-spacing: .07em;
+}
+.v81SetupFlow.firmware-confirmed .v81FirmwareStep .v81StepLabel > span,
+.v81SetupFlow.firmware-confirmed .v81ConnectionStep .v81StepLabel > span {
+    background: #45e69b;
+}
+
+/* Прошивка может быть компактно свернута после успешной записи/подтверждения */
+#firmwarePanel.v81-step-collapsed > :not(.v81StepLabel):not(.panelTitleRow) {
+    display: none !important;
+}
+#firmwarePanel.v81-step-collapsed .panelTitleRow {
+    margin-bottom: 0 !important;
+}
+#firmwarePanel.v81-step-collapsed {
+    padding-bottom: 12px !important;
+}
+.v81ExistingGatewayButton {
+    width: 100%;
+    margin-top: 8px;
+}
+
+/* Соединение: в свернутом состоянии реально одна компактная строка */
+#serialPanel.v8-collapsed {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+}
+#serialPanel.v8-collapsed .v81StepLabel {
+    margin-bottom: 4px;
+}
+#serialPanel.v8-collapsed .panelTitleRow {
+    display: none !important;
+}
+#serialPanel.v8-collapsed .v8ConnectionSummary {
+    margin-top: 0 !important;
+    gap: 6px !important;
+}
+#serialPanel.v8-collapsed .v8ConnectionSummary span {
+    padding: 4px 8px !important;
+    font-size: .72rem !important;
+}
+.v81ConnectionGateNote {
+    margin: 8px 0;
+    padding: 8px 10px;
+    border: 1px solid rgba(255,177,67,.38);
+    border-radius: 8px;
+    background: rgba(90,52,6,.18);
+    color: #ffd39b;
+    font-size: .78rem;
+    line-height: 1.35;
+}
+#connectButton:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+/* Телеметрия непосредственно под setup */
+#telemetryPanel { width: 100%; }
+#telemetryPanel .altairTelemetryGrid {
+    grid-template-columns: repeat(10, minmax(105px, 1fr)) !important;
+}
+#telemetryPanel .telemetryCard { min-width: 0; }
+
+/* Графики + список ID справа */
+.v81ChartsBody {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 250px;
+    gap: 12px;
+    align-items: stretch;
+}
+.v81ChartsBody .altairChartGrid {
+    min-width: 0;
+}
+.v81IdRoster {
+    min-width: 0;
+    border: 1px solid rgba(60,101,145,.42);
+    border-radius: 12px;
+    background: rgba(3,13,25,.72);
+    padding: 12px;
+}
+.v81RosterTitle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.v81RosterTitle span {
+    display: block;
+    color: #667e99;
+    font-size: .62rem;
+    letter-spacing: .13em;
+}
+.v81RosterTitle strong { display:block; color:#dceeff; font-size:.88rem; margin-top:2px; }
+.v81RosterTitle b {
+    display: grid;
+    place-items: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 7px;
+    border-radius: 999px;
+    color: #5ff1b1;
+    background: rgba(49,217,142,.12);
+    border: 1px solid rgba(49,217,142,.28);
+}
+.v81ExpectedField { display:block; margin-bottom:10px; }
+.v81ExpectedField span { display:block; color:#72879e; font-size:.68rem; margin-bottom:4px; }
+.v81ExpectedField input {
+    width:100%; box-sizing:border-box; border:1px solid rgba(66,104,145,.4); border-radius:7px;
+    background:#06111e; color:#ccecff; padding:7px 8px; font:11px Consolas,monospace;
+}
+#v81IdList { display:grid; gap:5px; }
+.v81IdRow {
+    display:grid;
+    grid-template-columns: 12px 54px 1fr 58px auto;
+    align-items:center;
+    gap:6px;
+    min-height:25px;
+    padding:4px 5px;
+    border-radius:7px;
+    background:rgba(7,22,38,.62);
+    font-size:.7rem;
+}
+.v81IdRow.offline { opacity:.55; }
+.v81IdDot { width:8px; height:8px; border-radius:50%; }
+.v81IdRow strong { color:#dceeff; }
+.v81IdRow span { color:#8ba1b8; }
+.v81IdRow time { color:#6f879f; font-family:Consolas,monospace; }
+.v81CmdBadge {
+    color:#ffd67d !important;
+    border:1px solid rgba(255,199,75,.3);
+    background:rgba(100,69,4,.2);
+    border-radius:5px;
+    padding:1px 4px;
+    font-size:.58rem;
+}
+.v81IdRoster > p { color:#6f859d; font-size:.67rem; line-height:1.4; margin:10px 0 0; }
+
+/* RAW COM внизу и свернут по умолчанию */
+#rawSerialPanel.v81-raw-collapsed > :not(.panelTitleRow) {
+    display: none !important;
+}
+#rawSerialPanel.v81-raw-collapsed {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+}
+#rawSerialPanel.v81-raw-collapsed .panelTitleRow { margin:0 !important; }
+
+@media (max-width: 1550px) {
+    #topBar {
+        grid-template-columns: minmax(250px,1.7fr) minmax(130px,.7fr) minmax(190px,.95fr) minmax(100px,.55fr) auto !important;
+    }
+    .topMetric.connection { display:none !important; }
+    #telemetryPanel .altairTelemetryGrid { grid-template-columns: repeat(5, minmax(120px,1fr)) !important; }
+}
+@media (max-width: 1150px) {
+    .v81SetupFlow { grid-template-columns:1fr; }
+    .v81ChartsBody { grid-template-columns:1fr; }
+    #v81IdRoster { max-height:320px; overflow:auto; }
+    #telemetryPanel .altairTelemetryGrid { grid-template-columns: repeat(3,minmax(120px,1fr)) !important; }
+}
+@media (max-width: 760px) {
+    #telemetryPanel .altairTelemetryGrid { grid-template-columns: repeat(2,minmax(110px,1fr)) !important; }
+}
