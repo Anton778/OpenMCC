@@ -32,7 +32,6 @@ static constexpr int8_t RF_POWER_DBM = 5;
 static constexpr uint16_t RF_PREAMBLE_BITS = 16;
 
 CC1101 radio = new Module(CC_CS, CC_GDO0, RADIOLIB_NC, CC_GDO2);
-
 String usbLine;
 
 bool splitCsv(const String& packet, String fields[], int maxFields, int& count) {
@@ -52,6 +51,10 @@ bool splitCsv(const String& packet, String fields[], int maxFields, int& count) 
 
 void startReceiveAgain() {
   radio.startReceive();
+}
+
+void printRadioStatus() {
+  Serial.println("$INFO,RADIO,TYPE=CC1101,FREQ=435.000,RATE=4.8,MOD=2FSK,DEV=5,BW=203,POWER=5,SYNC=12AD,CRC=1,XOR=OFF,RF_TX=ON,PROFILE=FIXED_V8");
 }
 
 bool transmitRf(String payload) {
@@ -86,6 +89,19 @@ void handleUsbCommand(String line) {
 
   if (line.equalsIgnoreCase("$CMD,GATEWAY_INFO")) {
     Serial.println("$INFO,GATEWAY=ALTAIR_V8,FREQ=435.000,RATE=4.8,DEV=5,BW=203,XOR=OFF,RF_TX=ON");
+    return;
+  }
+
+  if (line.equalsIgnoreCase("$CMD,RADIO_STATUS")) {
+    printRadioStatus();
+    return;
+  }
+
+  // В v8 радиопрофиль наземного CC1101 намеренно фиксирован на
+  // проверенной стендовой конфигурации. Старые команды конфигурации
+  // принимаем как служебные, но параметры по ним не меняем.
+  if (line.startsWith("$CMD,RADIO,")) {
+    Serial.println("$ERR,RADIO_CONFIG_FIXED,FREQ=435.000,RATE=4.8,DEV=5,BW=203");
     return;
   }
 
@@ -185,7 +201,6 @@ void emitTelemetry(String packet) {
 void setup() {
   Serial.begin(115200);
   delay(700);
-
   usbLine.reserve(240);
 
   SPI.begin(CC_SCK, CC_MISO, CC_MOSI, CC_CS);
