@@ -1,6 +1,6 @@
 {
   "name": "altair-mcc",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "private": true,
   "description": "ЦУП Альтаир v8 — учебный центр управления полётами и радиошлюз для CubeSat",
   "author": "Антон Т.",
