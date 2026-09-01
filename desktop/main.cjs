@@ -8,6 +8,7 @@ const path = require("node:path");
 const WEB_ROOT = path.resolve(__dirname, "..");
 const HOST = "127.0.0.1";
 const PRODUCT_NAME = "ЦУП Альтаир";
+const APP_ICON = path.join(WEB_ROOT, "assets", "altair-logo.png");
 
 const MIME_TYPES = Object.freeze({
     ".html": "text/html; charset=utf-8",
@@ -165,12 +166,13 @@ async function loadDesktopModules(window) {
 
 async function createMainWindow() {
     mainWindow = new BrowserWindow({
-        title: `${PRODUCT_NAME} — Технопром 2026`,
+        title: `${PRODUCT_NAME} v8 — Миссия на Луну`,
         width: 1600,
         height: 1000,
         minWidth: 1100,
         minHeight: 700,
         backgroundColor: "#070b16",
+        icon: APP_ICON,
         autoHideMenuBar: true,
         show: false,
         webPreferences: {
