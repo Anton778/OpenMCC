@@ -20,18 +20,6 @@
 - [Скетч спутника для Arduino Nano](firmware/satellite/arduino_nano/Altair_Satellite_Arduino_Nano/Altair_Satellite_Arduino_Nano.ino)
 - [Простой статичный передатчик для Arduino Nano](firmware/satellite/arduino_nano_static_tx/Altair_Satellite_Arduino_Nano_Static_TX/Altair_Satellite_Arduino_Nano_Static_TX.ino)
 
-
-## Запуск обновлённой версии без установки
-
-Собирать новый `.exe` для проверки изменений не требуется.
-
-1. Обновите репозиторий через GitHub Desktop командой **Pull origin** либо скачайте и распакуйте архив **Code → Download ZIP**.
-2. Закройте установленную версию ЦУП и монитор последовательного порта Arduino IDE.
-3. Запустите файл [`start_openmcc.bat`](start_openmcc.bat) двойным щелчком.
-4. Откройте адрес `http://localhost:8765/` в Chrome, Edge или другом Chromium-браузере с поддержкой Web Serial.
-5. Выберите `ESP32 — радиошлюз`, скорость `115200 бод` и подключите COM-порт ESP32.
-
-Окно локального сервера должно оставаться открытым во время работы программы. Для остановки достаточно закрыть это окно.
 ## Как выглядит система
 
 <table>
