@@ -74,12 +74,14 @@
 |---|---|
 | VCC | 3V3 |
 | GND | GND |
-| SCK | GPIO18 |
-| MISO / SO | GPIO19 |
-| MOSI / SI | GPIO23 |
-| CSN / CS | GPIO21 |
-| GDO0 | GPIO4 |
-| GDO2 | GPIO27 |
+| SCK | GPIO18 (D18) |
+| MISO / SO | GPIO19 (D19) |
+| MOSI / SI | GPIO23 (D23) |
+| CSN / CS | GPIO21 (D21) |
+| GDO0 | GPIO4 (D4) |
+| GDO2 | GPIO27 (D27) |
+
+> В Arduino IDE обозначения `D18`, `D19`, `D23`, `D21`, `D4`, `D27` соответствуют тем же GPIO ESP32. На самой плате вывод может быть подписан просто числом: `18`, `19`, `23`, `21`, `4`, `27`.
 
 ### Arduino Nano *
 
