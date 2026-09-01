@@ -98,7 +98,7 @@ void buildTelemetry(char* packet, size_t packetSize) {
 }
 
 // Передаёт произвольную строку через тот же CC1101.
-bool transmitPayload(const String& payload) {
+bool transmitPayload(String payload) {
   radio.standby();
   const int state = radio.transmit(payload);
   radio.standby();
