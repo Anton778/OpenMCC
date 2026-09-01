@@ -20,9 +20,6 @@
 - [Скетч спутника для Arduino Nano](firmware/satellite/arduino_nano/Altair_Satellite_Arduino_Nano/Altair_Satellite_Arduino_Nano.ino)
 - [Простой статичный передатчик для Arduino Nano](firmware/satellite/arduino_nano_static_tx/Altair_Satellite_Arduino_Nano_Static_TX/Altair_Satellite_Arduino_Nano_Static_TX.ino)
 
-### 3. Руководство
-
-- [Руководство пользователя ЦУП Альтаир v8, PDF](https://github.com/Anton778/OpenMCC/releases/download/v0.8.0/CUP_Altair_v8_Manual.pdf)
 
 ## Запуск обновлённой версии без установки
 
