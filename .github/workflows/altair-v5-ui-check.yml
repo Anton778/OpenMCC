@@ -28,6 +28,7 @@ jobs:
           node --check js/v8.js
           node --check js/v8-final.js
           node --check js/v8.1.js
+          node --check js/logo-transparent.js
           node --check js/help.js
           node --check js/flasher-v5.js
           node --check js/serial.js
@@ -57,11 +58,15 @@ jobs:
           const finalRuntime = fs.readFileSync('js/v8-final.js', 'utf8');
           if (!finalRuntime.includes('bandwidth: "203"')) throw new Error('v8 UI must enforce RX BW 203 kHz');
           if (!finalRuntime.includes('v8.1.js')) throw new Error('v8.0.1 UX patch is not loaded');
+          if (!finalRuntime.includes('logo-transparent.js')) throw new Error('Transparent logo runtime patch is not loaded');
 
           const patch = fs.readFileSync('js/v8.1.js', 'utf8');
           if (!patch.includes('v81SetupFlow')) throw new Error('Guided firmware/connection flow is missing');
           if (!patch.includes('v81IdRoster')) throw new Error('Satellite ID roster is missing');
           if (!patch.includes('rawSerialPanel')) throw new Error('RAW COM placement logic is missing');
+
+          const logoPatch = fs.readFileSync('js/logo-transparent.js', 'utf8');
+          if (!logoPatch.includes('canvas.toDataURL("image/png")')) throw new Error('Transparent logo conversion is missing');
 
           const css = fs.readFileSync('css/v8.1.css', 'utf8');
           if (!css.includes('background: transparent !important')) throw new Error('Transparent Altair logo patch is missing');
@@ -85,6 +90,7 @@ jobs:
           grep -Fq 'rawSerialConsole' js/v8.js
           grep -Fq 'Сбросить принятые данные' js/v8.js
           test -f js/v8.1.js
+          test -f js/logo-transparent.js
           test -f css/v8.1.css
           test -f docs/CUP_Altair_v8_Manual.tex
           test -f docs/RELEASE_V8.md
