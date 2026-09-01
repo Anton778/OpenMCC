@@ -1,0 +1,272 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=18mm]{geometry}
+\usepackage{fontspec}
+\setmainfont{DejaVu Serif}
+\setsansfont{DejaVu Sans}
+\setmonofont{DejaVu Sans Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{russian}
+\usepackage{array,booktabs,tabularx,longtable}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{microtype}
+\usepackage{parskip}
+
+\definecolor{AltairBlue}{HTML}{1C5FD4}
+\definecolor{AltairDark}{HTML}{0B1B2C}
+\hypersetup{colorlinks=true,linkcolor=AltairBlue,urlcolor=AltairBlue,pdftitle={ЦУП Альтаир v8 - руководство пользователя}}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{ЦУП Альтаир v8}
+\rhead{Миссия на Луну}
+\cfoot{\thepage}
+\titleformat{\section}{\Large\bfseries\sffamily\color{AltairBlue}}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\large\bfseries\sffamily}{\thesubsection.}{0.5em}{}
+\lstset{basicstyle=\ttfamily\small,breaklines=true,frame=single,columns=fullflexible,showstringspaces=false}
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+
+\begin{document}
+
+\begin{center}
+{\Huge\bfseries\sffamily ЦУП Альтаир v8}\\[2mm]
+{\large Центр управления полётами}\\[3mm]
+{\Large\bfseries Миссия на Луну}\\[6mm]
+{\large Руководство пользователя и радиошлюза ESP32 + CC1101}\\[4mm]
+Версия 0.8.0
+\end{center}
+
+\vspace{3mm}
+\hrule
+\vspace{5mm}
+
+\textbf{Автор: Антон Т.}
+
+ЦУП Альтаир - учебная наземная станция для приёма телеметрии нескольких CubeSat, отображения параметров, построения графиков, просмотра сырых данных последовательного порта и передачи команд через радиошлюз ESP32 + CC1101.
+
+\section{Состав системы}
+
+Типовая цепочка:
+
+\begin{center}
+\fbox{\parbox{0.92\linewidth}{\centering
+\textbf{CubeSat + CC1101} $\longrightarrow$ \textbf{435.000 МГц} $\longrightarrow$
+\textbf{CC1101 + ESP32} $\longrightarrow$ \textbf{USB 115200} $\longrightarrow$
+\textbf{ЦУП Альтаир v8}
+}}
+\end{center}
+
+На площадке Технопрома-2026 система использовалась с крупной наземной антенной, большим экраном ЦУПа и учебными аппаратами с раскрывающимися ленточными антеннами.
+
+\section{Что необходимо скачать}
+
+Для обычного пользователя достаточно:
+
+\begin{enumerate}[leftmargin=7mm]
+\item \code{CUP-Altair-Setup-0.8.0.exe} - приложение для Windows.
+\item \code{Altair_Gateway_v8.ino} - прошивка ESP32 радиошлюза, если требуется ручная загрузка через Arduino IDE.
+\end{enumerate}
+
+Все актуальные файлы находятся в GitHub Release \code{v0.8.0}. Предыдущие GitHub Releases удаляются автоматически при публикации v8, чтобы пользователь видел одну актуальную версию.
+
+\section{Подключение CC1101 к ESP32}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{CC1101} & \textbf{ESP32-WROOM-32} & \textbf{Назначение}\\
+\midrule
+VCC & 3V3 & питание 3.3 В\\
+GND & GND & общий провод\\
+SCK & GPIO18 & SPI clock\\
+MISO / SO & GPIO19 & SPI MISO\\
+MOSI / SI & GPIO23 & SPI MOSI\\
+CSN / CS & GPIO21 & chip select\\
+GDO0 & GPIO4 & пакетный интерфейс\\
+GDO2 & GPIO27 & служебный вывод\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Важно:} CC1101 должен питаться от 3.3 В.
+
+\section{Рабочий радиопрофиль}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Параметр & Значение\\
+\midrule
+Частота & \textbf{435.000 МГц}\\
+Модуляция & 2-FSK\\
+Скорость & 4.8 kbps\\
+Девиация & 5 кГц\\
+Полоса RX & \textbf{203 кГц}\\
+Sync word & 0x12AD\\
+Encoding & NRZ\\
+Длина пакета & variable\\
+CRC CC1101 & включён\\
+Преамбула & 16 bit\\
+USB & 115200 бод\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Полоса 203 кГц выбрана по результатам реальной работы стенда: часть передатчиков имела заметный частотный уход, и узкая полоса приводила к пропускам.
+
+\section{Формат телеметрии}
+
+Базовый пакет:
+
+\begin{lstlisting}
+02,00001,00015,3.00,4.20,1,33
+\end{lstlisting}
+
+Поля:
+
+\begin{lstlisting}
+ID,PACKET,UPTIME,PANEL_POWER,VOLT,MODE,CHECKSUM
+\end{lstlisting}
+
+Расширенный вариант с состоянием антенны:
+
+\begin{lstlisting}
+02,00001,00015,3.00,4.20,1,1,33
+\end{lstlisting}
+
+Поля:
+
+\begin{lstlisting}
+ID,PACKET,UPTIME,PANEL_POWER,VOLT,MODE,ANTENNA,CHECKSUM
+\end{lstlisting}
+
+\code{ANTENNA=1} означает раскрытую антенну, \code{ANTENNA=0} - сложенную.
+
+\subsection{Контрольная сумма}
+
+В v8 прикладная проверка XOR \textbf{отключена}. Поле \code{CHECKSUM} принимается и отображается, но пакет не отбрасывается при несовпадении.
+
+Это позволяет участникам менять ID, напряжение, режим и другие параметры без обязательного пересчёта последних двух HEX-символов.
+
+Аппаратный CRC пакетного механизма CC1101 остаётся включённым. Поэтому грубо повреждённый радиопакет по-прежнему может быть отклонён радиочипом.
+
+\section{Подключение к программе}
+
+\begin{enumerate}[leftmargin=7mm]
+\item Подключить прошитую ESP32 к компьютеру.
+\item Закрыть Arduino Serial Monitor и другие программы, занявшие COM-порт.
+\item Запустить ЦУП Альтаир v8.
+\item Выбрать профиль ESP32 и скорость 115200 бод.
+\item Нажать «Подключить устройство».
+\item Выбрать нужный COM-порт.
+\end{enumerate}
+
+После успешного подключения панель соединения автоматически сворачивается. Её можно в любой момент развернуть кнопкой в заголовке.
+
+На верхней панели постоянно видна рабочая частота \textbf{435.000 МГц} и полоса приёма 203 кГц.
+
+\section{Несколько спутников}
+
+Графики v8 группируют телеметрию по полю \code{ID}. Каждый новый ID получает собственную линию и цвет.
+
+Например, при одновременном приёме аппаратов 01, 02 и 07 на каждом графике отображаются три отдельные линии. Это устраняет смешивание данных разных спутников.
+
+Кнопка «Сбросить принятые данные» очищает:
+
+\begin{itemize}[leftmargin=7mm]
+\item карточки телеметрии;
+\item графики и список обнаруженных ID;
+\item счётчики пакетов и ошибок;
+\item сырой COM-журнал;
+\item внутренний буфер парсера.
+\end{itemize}
+
+\section{Сырые данные COM}
+
+Панель «Сырые данные последовательного порта» показывает строки, поступающие от ESP32, до их интерпретации интерфейсом.
+
+Она нужна для ответа на главный диагностический вопрос: \textit{приходят ли данные с нужной скоростью вообще?}
+
+Если строки быстро появляются в COM-панели, но карточки не обновляются, проблема находится в формате пакета. Если строк нет, следует проверять радиоканал, ESP32, выбранный порт и питание.
+
+\section{Передача команд}
+
+ESP32-шлюз v8 является приёмопередатчиком. Программа формирует USB-команду:
+
+\begin{lstlisting}
+$CMD,RF,TO=02,NAME=PING
+\end{lstlisting}
+
+Шлюз передаёт в эфир:
+
+\begin{lstlisting}
+$CMD,TO=02,NAME=PING
+\end{lstlisting}
+
+Адрес \code{ALL} используется для широковещательной передачи.
+
+\begin{center}
+\begin{tabularx}{\linewidth}{lX}
+\toprule
+\textbf{NAME} & \textbf{Назначение}\\
+\midrule
+PING & проверка радиопередачи\\
+INFO & запрос информации\\
+TM\_START & запуск телеметрии\\
+TM\_STOP & остановка телеметрии\\
+TM\_PERIOD & изменение периода передачи, параметр \code{MS}\\
+USER & произвольная команда, параметр \code{DATA}\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+Бортовая прошивка спутника должна самостоятельно реализовать реакцию на команды. Даже без такой обработки сам факт передачи можно проверить на SDR.
+
+\section{Почему телеметрия может приходить редко}
+
+ЦУП не выполняет искусственного ограничения частоты обновления: разобранная строка сразу передаётся интерфейсу и графикам.
+
+Типовые причины редкого поступления:
+
+\begin{itemize}[leftmargin=7mm]
+\item большой период передачи телеметрии на конкретном аппарате;
+\item коллизии нескольких передатчиков на одной частоте;
+\item частотный уход радиомодуля;
+\item ошибки аппаратного CRC CC1101;
+\item неправильный COM-порт или занятый Serial Monitor.
+\end{itemize}
+
+Для диагностики необходимо сравнить реальный поток в панели COM с ожидаемым периодом передачи.
+
+\section{Первый тест}
+
+После прошивки ESP32 рекомендуется выполнить минимальный тест:
+
+\begin{enumerate}[leftmargin=7mm]
+\item Убедиться, что в COM-панели появляется \code{\$INFO,RADIO_READY}.
+\item Включить один передатчик.
+\item Убедиться, что появляются строки \code{\$TEL,...}.
+\item Изменить ID передатчика без пересчёта прикладного XOR: пакет должен продолжить отображаться.
+\item Включить второй ID: на графике должна появиться вторая линия.
+\item Нажать PING в разделе команд и проверить RF-передачу на SDR или совместимом приёмнике.
+\end{enumerate}
+
+\section{О программе}
+
+\textbf{ЦУП Альтаир v8 / 0.8.0.}
+
+Автор: \textbf{Антон Т.}
+
+Программа сделана в рамках проекта «Миссия на Луну» к профильной смене по спутникостроению и развивалась во время Технопрома-2026.
+
+\vfill
+\begin{center}
+\small ЦУП Альтаир v8 - Миссия на Луну
+\end{center}
+
+\end{document}
