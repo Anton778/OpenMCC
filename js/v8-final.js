@@ -73,8 +73,6 @@
         const grid = document.querySelector("#telemetryPanel .altairTelemetryGrid");
         if (!grid) return;
 
-        // Канонический порядок v8. RSSI и SNR всегда находятся в самом конце,
-        // после состояния раскрытия антенны.
         const order = [
             "ID",
             "PACKET",
@@ -96,7 +94,7 @@
 
     function cleanLegacyUi() {
         const badge = document.querySelector(".buildBadge");
-        if (badge) badge.textContent = "v8 · 0.8.0";
+        if (badge) badge.textContent = "v8 · 0.8.1";
 
         const projectEyebrow = document.querySelector("#projectPanel .panelEyebrow");
         if (projectEyebrow) projectEyebrow.textContent = "RELEASE V8";
@@ -121,11 +119,9 @@
 
         const eventLogFirst = document.querySelector("#eventLog > div:first-child");
         if (eventLogFirst && /v5/i.test(eventLogFirst.textContent || "")) {
-            eventLogFirst.textContent = "ЦУП Альтаир v8 запущен.";
+            eventLogFirst.textContent = "ЦУП Альтаир v8.1 запущен.";
         }
 
-        // Старый набор готовых команд из v5 отправлял команды в обход нового RF-протокола.
-        // В v8 используются основные кнопки PING/INFO/TM_START/TM_STOP и произвольная команда.
         document.querySelectorAll(".commandPresetGroup").forEach(group => group.remove());
 
         const help = document.getElementById("helpDialog");
@@ -135,7 +131,7 @@
 
             const sections = help.querySelectorAll("section");
             if (sections[0]) {
-                sections[0].innerHTML = '<h3>ЦУП Альтаир v8</h3><p>Подключите ESP32-радиошлюз на 115200 бод. Рабочий радиоканал: <strong>435.000 МГц</strong>, 4.8 kbps, 2-FSK, девиация 5 кГц, RX BW 203 кГц.</p>';
+                sections[0].innerHTML = '<h3>ЦУП Альтаир v8.1</h3><p>Сначала подготовьте ESP32-радиошлюз, затем подключите его на 115200 бод. Рабочий радиоканал: <strong>435.000 МГц</strong>, 4.8 kbps, 2-FSK, девиация 5 кГц, RX BW 203 кГц.</p>';
             }
             if (sections[1]) {
                 sections[1].innerHTML = '<h3>Телеметрия v8</h3><p>Принимаются позиционные пакеты с 7 полями и расширенные пакеты с полем <code>ANTENNA</code>. Поле контрольной суммы сохраняется, но прикладная XOR-проверка отключена: изменение ID не приводит к отбрасыванию пакета.</p>';
@@ -161,7 +157,6 @@
         apply();
         setTimeout(apply, 250);
         setTimeout(apply, 800);
-
         const selector = document.getElementById("radioModuleType");
         selector?.addEventListener("change", () => setTimeout(apply, 80));
     }
@@ -172,3 +167,5 @@
         setTimeout(initialize, 450);
     }
 })();
+
+import("/js/v8.1-ui.js").catch(error => console.error("Altair v8.1 UI runtime failed", error));
