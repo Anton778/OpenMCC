@@ -1,120 +1,538 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="860" viewBox="0 0 1320 860" role="img" aria-labelledby="title desc">
-  <title id="title">Подключение радиомодуля CC1101 к ESP32-WROOM-32</title>
-  <desc id="desc">Векторная схема соединений VCC, GND, SCK, MISO, MOSI, CSN, GDO0 и GDO2 между CC1101 и ESP32-WROOM-32.</desc>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
 
-  <defs>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="7" stdDeviation="10" flood-color="#0f172a" flood-opacity="0.16"/>
-    </filter>
-    <style>
-      .font { font-family: Inter, "Segoe UI", Arial, sans-serif; }
-      .title { font-size: 32px; font-weight: 750; fill: #0f172a; }
-      .subtitle { font-size: 17px; font-weight: 500; fill: #475569; }
-      .board-title { font-size: 24px; font-weight: 750; fill: #ffffff; }
-      .board-subtitle { font-size: 15px; font-weight: 500; fill: #cbd5e1; }
-      .pin { font-size: 18px; font-weight: 700; fill: #ffffff; }
-      .pin-note { font-size: 13px; font-weight: 500; fill: #cbd5e1; }
-      .wire-label { font-size: 14px; font-weight: 700; fill: #0f172a; }
-      .notice { font-size: 17px; font-weight: 700; fill: #991b1b; }
-      .footnote { font-size: 14px; font-weight: 500; fill: #475569; }
-      .wire { fill: none; stroke-width: 5; stroke-linecap: round; }
-      .terminal { stroke: #ffffff; stroke-width: 3; }
-    </style>
+<svg
+   version="1.1"
+   id="svg1"
+   width="765.1178"
+   height="255.42302"
+   viewBox="0 0 765.1178 255.42302"
+   sodipodi:docname="СС1101_pins.svg"
+   inkscape:version="1.3-beta (cedbd6c6ff, 2023-05-28)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <linearGradient
+       id="swatch2"
+       inkscape:swatch="solid"
+       gradientTransform="translate(-905.9832,-21.734431)">
+      <stop
+         style="stop-color:#000000;stop-opacity:0.99737531;"
+         offset="0"
+         id="stop2" />
+    </linearGradient>
+    <rect
+       x="72.532883"
+       y="-98.970108"
+       width="77.27803"
+       height="26.43722"
+       id="rect1" />
+    <rect
+       x="72.532883"
+       y="-98.970108"
+       width="77.27803"
+       height="26.43722"
+       id="rect1-7" />
+    <rect
+       x="72.532883"
+       y="-98.970108"
+       width="77.27803"
+       height="26.43722"
+       id="rect1-74" />
+    <rect
+       x="72.532883"
+       y="-98.970108"
+       width="77.27803"
+       height="26.43722"
+       id="rect1-74-0" />
+    <rect
+       x="72.532883"
+       y="-98.970108"
+       width="77.27803"
+       height="26.43722"
+       id="rect1-74-1" />
+    <rect
+       x="72.532883"
+       y="-98.970108"
+       width="77.27803"
+       height="26.43722"
+       id="rect1-74-3" />
+    <rect
+       x="72.532883"
+       y="-98.970108"
+       width="77.27803"
+       height="26.43722"
+       id="rect1-74-3-0" />
+    <rect
+       x="72.532883"
+       y="-98.970108"
+       width="77.27803"
+       height="26.43722"
+       id="rect1-74-3-0-5" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#swatch2"
+       id="linearGradient2"
+       x1="329.7446"
+       y1="-194.88976"
+       x2="351.52225"
+       y2="-194.88976"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.77417447,0,0,0.77417447,153.85284,226.19917)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#swatch2"
+       id="linearGradient3"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.77417447,0,0,0.77417447,179.61216,226.70759)"
+       x1="329.7446"
+       y1="-194.88976"
+       x2="351.52225"
+       y2="-194.88976" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#swatch2"
+       id="linearGradient4"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.77417447,0,0,0.77417447,153.68337,248.4844)"
+       x1="329.7446"
+       y1="-194.88976"
+       x2="351.52225"
+       y2="-194.88976" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#swatch2"
+       id="linearGradient5"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.77417447,0,0,0.77417447,179.44269,248.99281)"
+       x1="329.7446"
+       y1="-194.88976"
+       x2="351.52225"
+       y2="-194.88976" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#swatch2"
+       id="linearGradient6"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.77417447,0,0,0.77417447,153.17496,273.05745)"
+       x1="329.7446"
+       y1="-194.88976"
+       x2="351.52225"
+       y2="-194.88976" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#swatch2"
+       id="linearGradient7"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.77417447,0,0,0.77417447,178.93428,273.56586)"
+       x1="329.7446"
+       y1="-194.88976"
+       x2="351.52225"
+       y2="-194.88976" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#swatch2"
+       id="linearGradient8"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.77417447,0,0,0.77417447,153.34443,296.44423)"
+       x1="329.7446"
+       y1="-194.88976"
+       x2="351.52225"
+       y2="-194.88976" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#swatch2"
+       id="linearGradient9"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.77417447,0,0,0.77417447,179.10375,296.95264)"
+       x1="329.7446"
+       y1="-194.88976"
+       x2="351.52225"
+       y2="-194.88976" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#swatch2"
+       id="linearGradient10"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.77417447,0,0,0.77417447,-103.66591,211.82667)"
+       x1="329.7446"
+       y1="-194.88976"
+       x2="351.52225"
+       y2="-194.88976" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#swatch2"
+       id="linearGradient11"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.77417447,0,0,0.77417447,-65.253679,212.35917)"
+       x1="329.7446"
+       y1="-194.88976"
+       x2="351.52225"
+       y2="-194.88976" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#swatch2"
+       id="linearGradient14"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.77417447,0,0,0.77417447,-103.96613,248.98077)"
+       x1="329.7446"
+       y1="-194.88976"
+       x2="351.52225"
+       y2="-194.88976" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#swatch2"
+       id="linearGradient15"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.77417447,0,0,0.77417447,-65.553898,249.51326)"
+       x1="329.7446"
+       y1="-194.88976"
+       x2="351.52225"
+       y2="-194.88976" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#swatch2"
+       id="linearGradient16"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.77417447,0,0,0.77417447,-102.94931,283.55252)"
+       x1="329.7446"
+       y1="-194.88976"
+       x2="351.52225"
+       y2="-194.88976" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#swatch2"
+       id="linearGradient17"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.77417447,0,0,0.77417447,-64.537082,284.08501)"
+       x1="329.7446"
+       y1="-194.88976"
+       x2="351.52225"
+       y2="-194.88976" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#swatch2"
+       id="linearGradient18"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.77417447,0,0,0.77417447,-102.27144,319.81896)"
+       x1="329.7446"
+       y1="-194.88976"
+       x2="351.52225"
+       y2="-194.88976" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#swatch2"
+       id="linearGradient19"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.77417447,0,0,0.77417447,-63.859205,320.35145)"
+       x1="329.7446"
+       y1="-194.88976"
+       x2="351.52225"
+       y2="-194.88976" />
+    <rect
+       x="72.532883"
+       y="-98.970108"
+       width="77.27803"
+       height="26.43722"
+       id="rect1-7-5" />
+    <rect
+       x="72.532883"
+       y="-98.970108"
+       width="77.27803"
+       height="26.43722"
+       id="rect1-7-5-7" />
+    <rect
+       x="72.532883"
+       y="-98.970108"
+       width="77.27803"
+       height="26.43722"
+       id="rect1-7-5-6" />
+    <rect
+       x="72.532883"
+       y="-98.970108"
+       width="77.27803"
+       height="26.43722"
+       id="rect1-7-5-7-1" />
+    <rect
+       x="72.532883"
+       y="-98.970108"
+       width="77.27803"
+       height="26.43722"
+       id="rect1-7-50" />
   </defs>
-
-  <rect width="1320" height="860" fill="#f8fafc"/>
-  <rect x="1" y="1" width="1318" height="858" rx="24" fill="none" stroke="#dbe4ee" stroke-width="2"/>
-
-  <g class="font">
-    <text x="660" y="52" text-anchor="middle" class="title">Подключение CC1101 к ESP32-WROOM-32</text>
-    <text x="660" y="82" text-anchor="middle" class="subtitle">Интерфейс SPI и линии состояния GDO0/GDO2</text>
-
-    <!-- ESP32 board -->
-    <g filter="url(#shadow)">
-      <rect x="60" y="120" width="370" height="650" rx="24" fill="#16324f"/>
-      <rect x="80" y="140" width="330" height="84" rx="14" fill="#0f253b" stroke="#315b7d" stroke-width="2"/>
-      <rect x="164" y="155" width="162" height="48" rx="6" fill="#d7dde4"/>
-      <path d="M178 170h134v19H178z" fill="#b8c2cc"/>
-      <path d="M192 162v34M211 162v34M230 162v34M249 162v34M268 162v34M287 162v34" stroke="#8b99a8" stroke-width="2"/>
-      <text x="245" y="252" text-anchor="middle" class="board-title">ESP32-WROOM-32</text>
-      <text x="245" y="277" text-anchor="middle" class="board-subtitle">радиошлюз ЦУПа · логика 3,3 В</text>
-    </g>
-
-    <!-- CC1101 board -->
-    <g filter="url(#shadow)">
-      <rect x="890" y="120" width="370" height="650" rx="24" fill="#0f766e"/>
-      <rect x="1044" y="139" width="62" height="58" rx="8" fill="#d9b453" stroke="#fff4bd" stroke-width="3"/>
-      <rect x="1055" y="122" width="40" height="24" rx="5" fill="#cbd5e1" stroke="#8795a4" stroke-width="2"/>
-      <circle cx="1075" cy="168" r="11" fill="#f8fafc" stroke="#9b7a2c" stroke-width="3"/>
-      <path d="M1075 197v30" stroke="#d9b453" stroke-width="5"/>
-      <text x="1075" y="252" text-anchor="middle" class="board-title">CC1101</text>
-      <text x="1075" y="277" text-anchor="middle" class="board-subtitle">радиомодуль · питание 3,3 В</text>
-    </g>
-
-    <!-- Wires -->
-    <path d="M430 330H890" class="wire" stroke="#e11d48"/>
-    <path d="M430 390H890" class="wire" stroke="#334155"/>
-    <path d="M430 450H890" class="wire" stroke="#ea580c"/>
-    <path d="M430 510H890" class="wire" stroke="#2563eb"/>
-    <path d="M430 570H890" class="wire" stroke="#7c3aed"/>
-    <path d="M430 630H890" class="wire" stroke="#ca8a04"/>
-    <path d="M430 690H890" class="wire" stroke="#16a34a"/>
-    <path d="M430 750H890" class="wire" stroke="#0891b2"/>
-
-    <!-- ESP32 pin labels -->
-    <g>
-      <text x="395" y="326" text-anchor="end" class="pin">3V3</text><text x="395" y="345" text-anchor="end" class="pin-note">питание</text>
-      <text x="395" y="386" text-anchor="end" class="pin">GND</text><text x="395" y="405" text-anchor="end" class="pin-note">общий</text>
-      <text x="395" y="446" text-anchor="end" class="pin">GPIO18</text><text x="395" y="465" text-anchor="end" class="pin-note">D18</text>
-      <text x="395" y="506" text-anchor="end" class="pin">GPIO19</text><text x="395" y="525" text-anchor="end" class="pin-note">D19</text>
-      <text x="395" y="566" text-anchor="end" class="pin">GPIO23</text><text x="395" y="585" text-anchor="end" class="pin-note">D23</text>
-      <text x="395" y="626" text-anchor="end" class="pin">GPIO21</text><text x="395" y="645" text-anchor="end" class="pin-note">D21</text>
-      <text x="395" y="686" text-anchor="end" class="pin">GPIO4</text><text x="395" y="705" text-anchor="end" class="pin-note">D4</text>
-      <text x="395" y="746" text-anchor="end" class="pin">GPIO27</text><text x="395" y="765" text-anchor="end" class="pin-note">D27</text>
-    </g>
-
-    <!-- CC1101 pin labels -->
-    <g>
-      <text x="925" y="326" class="pin">VCC</text><text x="925" y="345" class="pin-note">3,3 В</text>
-      <text x="925" y="386" class="pin">GND</text><text x="925" y="405" class="pin-note">общий</text>
-      <text x="925" y="446" class="pin">SCK</text><text x="925" y="465" class="pin-note">тактовая SPI</text>
-      <text x="925" y="506" class="pin">MISO / SO</text><text x="925" y="525" class="pin-note">CC1101 → ESP32</text>
-      <text x="925" y="566" class="pin">MOSI / SI</text><text x="925" y="585" class="pin-note">ESP32 → CC1101</text>
-      <text x="925" y="626" class="pin">CSN / CS</text><text x="925" y="645" class="pin-note">выбор микросхемы</text>
-      <text x="925" y="686" class="pin">GDO0</text><text x="925" y="705" class="pin-note">линия состояния</text>
-      <text x="925" y="746" class="pin">GDO2</text><text x="925" y="765" class="pin-note">линия состояния</text>
-    </g>
-
-    <!-- Terminals -->
-    <g>
-      <circle cx="430" cy="330" r="8" fill="#e11d48" class="terminal"/><circle cx="890" cy="330" r="8" fill="#e11d48" class="terminal"/>
-      <circle cx="430" cy="390" r="8" fill="#334155" class="terminal"/><circle cx="890" cy="390" r="8" fill="#334155" class="terminal"/>
-      <circle cx="430" cy="450" r="8" fill="#ea580c" class="terminal"/><circle cx="890" cy="450" r="8" fill="#ea580c" class="terminal"/>
-      <circle cx="430" cy="510" r="8" fill="#2563eb" class="terminal"/><circle cx="890" cy="510" r="8" fill="#2563eb" class="terminal"/>
-      <circle cx="430" cy="570" r="8" fill="#7c3aed" class="terminal"/><circle cx="890" cy="570" r="8" fill="#7c3aed" class="terminal"/>
-      <circle cx="430" cy="630" r="8" fill="#ca8a04" class="terminal"/><circle cx="890" cy="630" r="8" fill="#ca8a04" class="terminal"/>
-      <circle cx="430" cy="690" r="8" fill="#16a34a" class="terminal"/><circle cx="890" cy="690" r="8" fill="#16a34a" class="terminal"/>
-      <circle cx="430" cy="750" r="8" fill="#0891b2" class="terminal"/><circle cx="890" cy="750" r="8" fill="#0891b2" class="terminal"/>
-    </g>
-
-    <!-- Signal labels -->
-    <g>
-      <rect x="575" y="313" width="170" height="34" rx="17" fill="#ffffff" stroke="#fecdd3" stroke-width="2"/><text x="660" y="335" text-anchor="middle" class="wire-label">ПИТАНИЕ 3,3 В</text>
-      <rect x="601" y="373" width="118" height="34" rx="17" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/><text x="660" y="395" text-anchor="middle" class="wire-label">ОБЩИЙ</text>
-      <rect x="607" y="433" width="106" height="34" rx="17" fill="#ffffff" stroke="#fed7aa" stroke-width="2"/><text x="660" y="455" text-anchor="middle" class="wire-label">SPI SCK</text>
-      <rect x="599" y="493" width="122" height="34" rx="17" fill="#ffffff" stroke="#bfdbfe" stroke-width="2"/><text x="660" y="515" text-anchor="middle" class="wire-label">SPI MISO</text>
-      <rect x="597" y="553" width="126" height="34" rx="17" fill="#ffffff" stroke="#ddd6fe" stroke-width="2"/><text x="660" y="575" text-anchor="middle" class="wire-label">SPI MOSI</text>
-      <rect x="607" y="613" width="106" height="34" rx="17" fill="#ffffff" stroke="#fde68a" stroke-width="2"/><text x="660" y="635" text-anchor="middle" class="wire-label">SPI CS</text>
-      <rect x="610" y="673" width="100" height="34" rx="17" fill="#ffffff" stroke="#bbf7d0" stroke-width="2"/><text x="660" y="695" text-anchor="middle" class="wire-label">GDO0</text>
-      <rect x="610" y="733" width="100" height="34" rx="17" fill="#ffffff" stroke="#a5f3fc" stroke-width="2"/><text x="660" y="755" text-anchor="middle" class="wire-label">GDO2</text>
-    </g>
-
-    <g transform="translate(60 798)">
-      <rect width="1200" height="40" rx="12" fill="#fff1f2" stroke="#fecdd3" stroke-width="2"/>
-      <circle cx="23" cy="20" r="10" fill="#e11d48"/>
-      <text x="23" y="25" text-anchor="middle" font-size="15" font-weight="800" fill="#ffffff">!</text>
-      <text x="44" y="25" class="notice">CC1101 подключать только к 3,3 В. Расположение контактов сверять по маркировке конкретного модуля.</text>
-    </g>
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.0431189"
+     inkscape:cx="379.15141"
+     inkscape:cy="133.73356"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g1">
+    <inkscape:page
+       x="0"
+       y="0"
+       width="765.1178"
+       height="255.42302"
+       id="page1"
+       margin="0 0 0"
+       bleed="0" />
+  </sodipodi:namedview>
+  <g
+     inkscape:groupmode="layer"
+     inkscape:label="Image"
+     id="g1"
+     transform="translate(-27.80124,34.511886)">
+    <path
+       style="fill:#000000"
+       d="m 395.74065,188.41511 c -0.82206,-0.99052 -1.05891,-23.31939 -0.87245,-82.25 l 0.25595,-80.89037 h 147.5 147.5 v 24.25067 24.25067 l 5.16821,-6.7e-4 c 6.72296,-8.7e-4 8.33179,0.69549 8.33179,3.60632 0,2.39107 0.01,2.39301 12,2.39301 h 12 v -2.60841 c 0,-2.28901 0.30881,-2.5309 2.52196,-1.97543 1.7677,0.44366 2.69693,0.17701 3.10699,-0.8916 0.75589,-1.96983 1.82563,-1.92713 3.9088,0.15604 1.57414,1.57414 1.74018,1.57414 2.62112,0 1.16719,-2.08566 3.84113,-2.21138 3.84113,-0.1806 0,2.03056 1.97243,1.89508 3.63976,-0.25 1.28621,-1.65476 1.44524,-1.64115 2.92207,0.25 1.53624,1.96723 1.58513,1.96855 2.9841,0.0806 1.39724,-1.88561 1.45917,-1.88598 3.52016,-0.0208 1.96928,1.78217 2.15721,1.79256 3.06559,0.16938 1.18872,-2.12412 3.86832,-2.28288 3.86832,-0.22918 0,2.03888 1.67618,1.89423 2.8969,-0.25 1.36882,-2.40438 4.49302,-0.46636 4.91448,3.04858 0.27944,2.33055 0.79217,2.62785 5,2.89914 l 4.68862,0.30228 v 26 26 l -4.75,0.30479 c -4.52248,0.29019 -4.75,0.44586 -4.75,3.25 0,3.17129 -0.85706,3.678 -2.86732,1.69521 -1.01538,-1.00151 -1.52435,-0.90211 -2.56024,0.5 -0.71111,0.9625 -1.64371,1.75 -2.07244,1.75 -0.42873,0 -1.3638,-0.7875 -2.07793,-1.75 -1.22611,-1.65255 -1.38539,-1.63862 -2.86024,0.25 -1.47683,1.89115 -1.63586,1.90476 -2.92207,0.25 -0.74814,-0.9625 -1.71103,-1.75 -2.13976,-1.75 -0.42873,0 -1.39162,0.7875 -2.13976,1.75 -1.28621,1.65476 -1.44524,1.64115 -2.92207,-0.25 -1.53624,-1.96723 -1.58513,-1.96855 -2.9841,-0.0806 -1.38192,1.86494 -1.47989,1.86723 -3.45407,0.0806 -1.97415,-1.78658 -2.07392,-1.78429 -3.5159,0.0806 -1.46332,1.89251 -1.50488,1.89251 -2.9682,0 -1.42145,-1.83836 -1.56653,-1.84478 -3.43698,-0.15204 -2.39652,2.16882 -3.61318,1.51363 -4.99993,-2.69251 l -1.06693,-3.23605 -10.25603,0.29906 c -12.06792,0.3519 -12.75603,0.52042 -12.75603,3.12387 0,1.75078 -0.78181,2.02067 -6.60863,2.28138 l -6.60862,0.29569 0.15575,23.06094 c 0.0925,13.69487 -0.25947,24.15308 -0.86662,25.75 l -1.02238,2.68906 h -145.9023 c -121.77612,0 -146.0889,-0.22483 -147.0307,-1.35963 z m 291.8835,-25.53338 c 0,-20.86481 -0.20048,-23.96994 -1.58179,-24.5 -0.86998,-0.33385 -11.46554,-0.60699 -23.54569,-0.60699 h -21.9639 l 0.29569,-6.75 0.29569,-6.75 23.25,-0.26843 23.25,-0.26843 v -5.46314 -5.46314 l -23.25,-0.26843 -23.25,-0.26843 v -6 -6 l 23.25,-0.26843 23.25,-0.26843 V 94.27474 88.8116 l -23.25,-0.26843 -23.25,-0.26843 -0.30184,-6.40894 c -0.20962,-4.45064 0.0959,-6.66126 1,-7.23469 0.71601,-0.45416 11.31434,-0.83264 23.55184,-0.84106 l 22.25,-0.0153 V 50.78147 27.78819 L 543.62382,27.53147 c -79.20019,-0.1412 -144.45019,-0.10672 -145,0.0766 -0.65504,0.21843 -0.99967,27.71216 -0.99967,79.75001 v 79.41667 h 145 145 z m -90.5,11.89301 c -0.33992,-0.55 -1.68095,-1 -2.98007,-1 -1.45262,0 -4.02874,-1.66724 -6.69098,-4.33034 -5.40724,-5.40897 -7.31679,-11.36519 -5.52679,-17.239 3.07263,-10.08269 8.56823,-14.54451 18.05024,-14.65481 7.19174,-0.0837 11.45745,1.90836 15.93611,7.44189 2.51693,3.10975 2.95667,4.54781 3.07426,10.05371 0.0855,4.00407 -0.42794,7.51827 -1.36274,9.32672 -2.17948,4.21642 -6.90632,8.43309 -10.18946,9.08972 -1.5687,0.31374 -3.09438,0.96231 -3.3904,1.44127 -0.74195,1.20051 -6.1609,1.09936 -6.92017,-0.12916 z m 13.12567,-5.66365 c 4.67858,-3.56853 6.37433,-7.17555 6.37433,-13.55885 0,-4.47212 -0.49335,-5.92034 -3.09,-9.07052 -1.6995,-2.06178 -4.4188,-4.43585 -6.0429,-5.2757 -3.63786,-1.88122 -12.59923,-1.54677 -15.23847,0.56872 -9.8552,7.89946 -10.83407,18.27766 -2.4759,26.25 3.72019,3.54846 4.28214,3.75 10.4561,3.75 5.52577,0 7.05923,-0.40777 10.01684,-2.66365 z m -135.18747,-16.6368 c -0.27447,-0.71525 -0.37284,-7.35275 -0.21861,-14.75 l 0.28041,-13.44955 22.25,-0.26913 22.25,-0.26913 v 15.01913 15.01913 h -22.03138 c -17.15847,0 -22.14177,-0.28763 -22.53042,-1.30045 z m 42.34236,-13.42283 c 0.27544,-12 0.23891,-12.23353 -2,-12.78485 -1.25431,-0.30887 -10.15556,-0.43339 -19.78056,-0.27672 l -17.5,0.28485 -0.28452,11.43886 c -0.15648,6.29137 -0.0544,12.03862 0.22693,12.77167 0.40673,1.05991 4.45787,1.27719 19.78452,1.06114 l 19.27307,-0.27167 z m -49.09908,-38.92857 c -0.37481,-0.37482 -0.68148,-13.43148 -0.68148,-29.01482 V 42.77474 h 30.01534 30.01533 l -0.26533,28.75 -0.26534,28.75 -29.06852,0.26482 c -15.98768,0.14564 -29.37518,-0.0419 -29.75,-0.41667 z m 57.08512,-28.59815 -0.2666,-26.25 -27.25,-0.26607 -27.25,-0.26607 v 26.51607 26.51607 h 27.5166 27.51661 z m 70.7334,4.25 c -0.33992,-0.55 -1.50332,-1 -2.58533,-1 -3.23903,0 -10.25695,-7.89834 -11.61251,-13.06934 -2.0731,-7.90813 2.40874,-17.64449 9.82521,-21.34432 5.01564,-2.50213 14.11416,-2.09023 18.77148,0.84981 10.74179,6.78099 11.66629,23.45459 1.72108,31.04018 -1.81979,1.38802 -4.27874,2.52367 -5.46432,2.52367 -1.18559,0 -2.15561,0.45 -2.15561,1 0,0.55 -1.77344,1 -3.94098,1 -2.16754,0 -4.2191,-0.45 -4.55902,-1 z m 11.48191,-3.99077 c 6.30898,-3.2186 9.01809,-7.6123 9.01809,-14.62578 0,-5.12016 -0.4116,-6.4271 -3.02111,-9.5929 -7.24623,-8.79092 -18.33284,-9.10077 -25.39347,-0.70969 -5.28178,6.27703 -5.27664,14.56735 0.0129,20.85363 5.13733,6.10537 12.40748,7.63368 19.38358,4.07474 z m 93.78319,34.74077 -0.2651,-29.25 -27.93386,-0.26614 c -15.36362,-0.14638 -28.2632,0.0786 -28.66573,0.5 -0.40253,0.42138 -0.8823,2.34114 -1.06614,4.26614 l -0.33427,3.5 24,0.5 24,0.5 0.27221,19.42725 c 0.20841,14.87367 -0.026,19.61651 -1,20.23469 -0.69971,0.44409 -11.46244,0.81433 -23.91717,0.82275 l -22.64497,0.0153 -0.38641,4.05195 c -0.21253,2.22858 -0.1848,4.25358 0.0616,4.5 0.24642,0.24643 13.42984,0.44805 29.29648,0.44805 h 28.84844 z m 33.85067,7.35736 c -0.94114,-28.09328 -1.58943,-35.10736 -3.2449,-35.10736 -1.12836,0 -1.37087,4.92873 -1.37087,27.86133 v 27.86133 l 2.63631,-0.50397 2.63632,-0.50396 z m 6.69592,3.64264 c -0.65641,-30.75339 -1.30858,-38.74993 -3.16034,-38.75061 -1.50064,-5.5e-4 -1.62463,2.39509 -1.35855,26.25 0.16103,14.43784 0.48441,26.81311 0.71861,27.50061 0.2342,0.6875 1.26311,1.25 2.28647,1.25 1.7521,0 1.84041,-0.94806 1.51381,-16.25 z m 7.13227,10.2308 c -0.0308,-3.01444 -0.437,-15.2683 -0.90263,-27.2308 -0.78543,-20.17882 -0.98004,-21.75 -2.69396,-21.75 -1.65459,0 -1.84894,0.91309 -1.86245,8.75 -0.008,4.8125 0.52208,17.20502 1.17861,27.53893 1.02598,16.14918 1.41446,18.74563 2.76508,18.48079 1.2085,-0.23697 1.55845,-1.57385 1.51535,-5.78892 z m 6.03892,-17.2308 c -0.73077,-29.59827 -0.97988,-31.75 -3.67566,-31.75 -1.97109,0 -2.03932,0.37115 -1.42471,7.75 0.35504,4.2625 0.92585,16.6375 1.26846,27.5 0.58306,18.48621 0.74396,19.75 2.51444,19.75 1.81758,0 1.86908,-0.90883 1.31747,-23.25 z m 7.06843,8 c -1.45692,-37.20233 -1.67492,-39.87401 -3.22752,-39.55334 -1.24642,0.25744 -1.4528,3.97847 -1.36387,24.59013 0.11858,27.48032 0.41159,30.21321 3.23934,30.21321 1.87325,0 1.92597,-0.59473 1.35205,-15.25 z m 6.06632,-8.5 c -0.7961,-27.27025 -1.22941,-31.25 -3.40243,-31.25 -1.34037,0 -1.44815,2.25352 -0.87291,18.25 1.0738,29.86061 1.72266,36.75 3.46121,36.75 1.32043,0 1.42144,-2.94669 0.81413,-23.75 z m -40.61763,-3.80902 V 82.77474 h -11.5 -11.5 v 23.46617 23.46617 l 10.75,0.28383 c 5.9125,0.15611 11.0875,0.14477 11.5,-0.0252 0.4125,-0.16996 0.75,-10.85746 0.75,-23.75 z m 51,0.059 V 82.77474 h -3.5 -3.5 v 23.5 23.5 h 3.5 3.5 z m -89.59946,0 -5.4e-4,-3 h -22.95 -22.95 l -0.0759,2.5 c -0.0417,1.375 0.1025,2.84587 0.32051,3.26859 0.21801,0.42273 10.5799,0.64773 23.02642,0.5 l 22.63005,-0.26857 z"
+       id="path1"
+       sodipodi:nodetypes="sscccccssscssssssssssssssscccssssssssssssssssscssscsscssssscccccccccccccccccssscccssscccsssssssssssssssssssssscccccssssscssscssscccccsscccccccccsssssssssssssssssccssscccssscsssccssscccsssssssssscsssssssssssssssssssccccccsssccccccccccccccssscc" />
+    <text
+       xml:space="preserve"
+       id="text1"
+       style="font-size:18.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';white-space:pre;shape-inside:url(#rect1);fill:#ffffff;stroke:#000000;stroke-width:0.763465;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:0.963255"
+       transform="matrix(1.4857559,0,0,1.4857559,-42.409534,191.81832)"><tspan
+         x="72.533203"
+         y="-82.401751"
+         id="tspan4"><tspan
+           style="fill:#000000;stroke:none"
+           id="tspan3">GND</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       id="text1-2"
+       style="font-size:18.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';white-space:pre;shape-inside:url(#rect1-74);display:inline;fill:#ffffff;stroke:#000000;stroke-width:0.763465;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:0.963255"
+       transform="matrix(1.4857559,0,0,1.4857559,-56.332883,229.97874)"><tspan
+         x="72.533203"
+         y="-82.401751"
+         id="tspan6"><tspan
+           style="fill:#000000;stroke:none"
+           id="tspan5">GDO0</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       id="text1-2-5"
+       style="font-size:18.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';white-space:pre;shape-inside:url(#rect1-74-1);display:inline;fill:#ffffff;stroke:#000000;stroke-width:0.763465;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:0.963255"
+       transform="matrix(1.4857559,0,0,1.4857559,-37.201996,265.56731)"><tspan
+         x="72.533203"
+         y="-82.401751"
+         id="tspan8"><tspan
+           style="fill:#000000;stroke:none"
+           id="tspan7">SCK</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       id="text1-2-3"
+       style="font-size:18.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';white-space:pre;shape-inside:url(#rect1-74-0);display:inline;fill:#ffffff;stroke:#000000;stroke-width:0.763465;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:0.963255"
+       transform="matrix(1.4857559,0,0,1.4857559,123.92519,228.69525)"><tspan
+         x="72.533203"
+         y="-82.401751"
+         id="tspan10"><tspan
+           style="fill:#000000;stroke:none"
+           id="tspan9">CSN</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       id="text1-8"
+       style="font-size:18.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';white-space:pre;shape-inside:url(#rect1-7);display:inline;fill:#ffffff;stroke:#000000;stroke-width:0.763465;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:0.963255"
+       transform="matrix(1.4857559,0,0,1.4857559,121.74124,194.1235)"><tspan
+         x="72.533203"
+         y="-82.401751"
+         id="tspan12"><tspan
+           style="fill:#000000;stroke:none"
+           id="tspan11">VCC</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       id="text1-8-4"
+       style="font-size:18.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';white-space:pre;shape-inside:url(#rect1-7-50);display:inline;fill:#ffffff;stroke:#000000;stroke-width:0.763465;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:0.963255"
+       transform="matrix(1.4857559,0,0,1.4857559,410.51758,133.52774)"><tspan
+         x="72.533203"
+         y="-82.401751"
+         id="tspan14"><tspan
+           style="fill:#000000;stroke:none"
+           id="tspan13">СС1101</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       id="text1-8-3"
+       style="font-size:12.5638px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';white-space:pre;shape-inside:url(#rect1-7-5);display:inline;fill:#ffffff;stroke:#000000;stroke-width:0.763465;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:0.963255"
+       transform="matrix(1.4857559,0,0,1.4857559,305.02869,191.37336)"><tspan
+         x="72.533203"
+         y="-87.818813"
+         id="tspan30"><tspan
+           style="fill:#000000;stroke:none"
+           id="tspan29">1</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       id="text1-8-3-1"
+       style="font-size:12.5638px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';white-space:pre;shape-inside:url(#rect1-7-5-7);display:inline;fill:#ffffff;stroke:#000000;stroke-width:0.763465;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:0.963255"
+       transform="matrix(1.4857559,0,0,1.4857559,330.93412,191.09093)"><tspan
+         x="72.533203"
+         y="-87.818813"
+         id="tspan32"><tspan
+           style="fill:#000000;stroke:none"
+           id="tspan31">2</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       id="text1-8-3-1-0"
+       style="font-size:12.5638px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';white-space:pre;shape-inside:url(#rect1-7-5-7-1);display:inline;fill:#ffffff;stroke:#000000;stroke-width:0.763465;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:0.963255"
+       transform="matrix(1.4857559,0,0,1.4857559,99.618149,183.27981)"><tspan
+         x="72.533203"
+         y="-87.818813"
+         id="tspan34"><tspan
+           style="fill:#000000;stroke:none"
+           id="tspan33">2</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       id="text1-2-1"
+       style="font-size:18.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';white-space:pre;shape-inside:url(#rect1-74-3);display:inline;fill:#ffffff;stroke:#000000;stroke-width:0.763465;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:0.963255"
+       transform="matrix(1.4857559,0,0,1.4857559,121.89156,263.94488)"><tspan
+         x="72.533203"
+         y="-82.401751"
+         id="tspan36"><tspan
+           style="fill:#000000;stroke:none"
+           id="tspan35">MOSI</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       id="text1-2-1-9"
+       style="font-size:18.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';white-space:pre;shape-inside:url(#rect1-74-3-0);display:inline;fill:#ffffff;stroke:#000000;stroke-width:0.763465;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:0.963255"
+       transform="matrix(1.4857559,0,0,1.4857559,-71.742599,301.49481)"><tspan
+         x="72.533203"
+         y="-82.401751"
+         id="tspan38"><tspan
+           style="fill:#000000;stroke:none"
+           id="tspan37">MIOSO</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       id="text1-2-1-9-6"
+       style="font-size:18.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';white-space:pre;shape-inside:url(#rect1-74-3-0-5);display:inline;fill:#ffffff;stroke:#000000;stroke-width:0.763465;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:0.963255"
+       transform="matrix(1.4857559,0,0,1.4857559,122.27287,300.8892)"><tspan
+         x="72.533203"
+         y="-82.401751"
+         id="tspan40"><tspan
+           style="fill:#000000;stroke:none"
+           id="tspan39">DGO2</tspan></tspan></text>
+    <circle
+       style="fill:none;fill-opacity:1;stroke:url(#linearGradient2);stroke-width:2.32252;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.997375"
+       id="path2"
+       cx="417.56253"
+       cy="75.320496"
+       r="8.1343288" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:url(#linearGradient3);stroke-width:2.32252;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.997375"
+       id="path2-5"
+       cx="443.32184"
+       cy="75.828903"
+       r="8.1343288" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:url(#linearGradient4);stroke-width:2.32252;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.997375"
+       id="path2-4"
+       cx="417.39304"
+       cy="97.605713"
+       r="8.1343288" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:url(#linearGradient5);stroke-width:2.32252;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.997375"
+       id="path2-5-0"
+       cx="443.15234"
+       cy="98.11412"
+       r="8.1343288" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:url(#linearGradient6);stroke-width:2.32252;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.997375"
+       id="path2-9"
+       cx="416.88467"
+       cy="122.17877"
+       r="8.1343288" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:url(#linearGradient7);stroke-width:2.32252;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.997375"
+       id="path2-5-00"
+       cx="442.64398"
+       cy="122.68718"
+       r="8.1343288" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:url(#linearGradient8);stroke-width:2.32252;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.997375"
+       id="path2-52"
+       cx="417.05411"
+       cy="145.56555"
+       r="8.1343288" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:url(#linearGradient9);stroke-width:2.32252;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.997375"
+       id="path2-5-3"
+       cx="442.81342"
+       cy="146.07394"
+       r="8.1343288" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:url(#linearGradient10);stroke-width:2.32252;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.997375"
+       id="path2-6"
+       cx="160.04378"
+       cy="60.947994"
+       r="8.1343288" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:url(#linearGradient11);stroke-width:2.32252;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.997375"
+       id="path2-5-09"
+       cx="198.45599"
+       cy="61.48048"
+       r="8.1343288" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:url(#linearGradient14);stroke-width:2.32252;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.997375"
+       id="path2-6-4"
+       cx="159.74356"
+       cy="98.102097"
+       r="8.1343288" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:url(#linearGradient15);stroke-width:2.32252;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.997375"
+       id="path2-5-09-5"
+       cx="198.15578"
+       cy="98.634575"
+       r="8.1343288" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:url(#linearGradient16);stroke-width:2.32252;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.997375"
+       id="path2-6-8"
+       cx="160.76038"
+       cy="132.67383"
+       r="8.1343288" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:url(#linearGradient17);stroke-width:2.32252;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.997375"
+       id="path2-5-09-2"
+       cx="199.17259"
+       cy="133.20633"
+       r="8.1343288" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:url(#linearGradient18);stroke-width:2.32252;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.997375"
+       id="path2-6-6"
+       cx="161.43825"
+       cy="168.94028"
+       r="8.1343288" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:url(#linearGradient19);stroke-width:2.32252;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.997375"
+       id="path2-5-09-8"
+       cx="199.85046"
+       cy="169.47276"
+       r="8.1343288" />
+    <rect
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.997375"
+       id="rect19"
+       width="81.006355"
+       height="154.21712"
+       x="138.9549"
+       y="36.342541" />
+    <text
+       xml:space="preserve"
+       id="text1-8-3-3"
+       style="font-size:12.5638px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';white-space:pre;shape-inside:url(#rect1-7-5-6);display:inline;fill:#ffffff;stroke:#000000;stroke-width:0.763465;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:0.963255"
+       transform="matrix(1.4857559,0,0,1.4857559,36.057434,183.63428)"><tspan
+         x="72.533203"
+         y="-87.818813"
+         id="tspan42"><tspan
+           style="fill:#000000;stroke:none"
+           id="tspan41">1</tspan></tspan></text>
   </g>
 </svg>
