@@ -114,7 +114,6 @@
     function createChart(parameter) {
         const canvas = document.getElementById(parameter.canvasId);
         if (!canvas) return null;
-
         return new Chart(canvas.getContext("2d"), {
             type: "line",
             data: { labels: [], datasets: [] },
@@ -125,7 +124,6 @@
     function datasetFor(chart, id) {
         let dataset = chart.data.datasets.find(item => item.altairId === id);
         if (dataset) return dataset;
-
         const color = colorForId(id);
         dataset = {
             altairId: id,
@@ -159,19 +157,14 @@
         const chart = state.charts[key];
         const numeric = Number(value);
         if (!chart || !Number.isFinite(numeric)) return false;
-
         const label = timeLabel(timestamp);
         chart.data.labels.push(label);
-
         chart.data.datasets.forEach(dataset => dataset.data.push(null));
         const dataset = datasetFor(chart, id);
-
         while (dataset.data.length < chart.data.labels.length) dataset.data.push(null);
         dataset.data[dataset.data.length - 1] = numeric;
-
         trimChart(chart);
         chart.update("none");
-
         const parameter = PARAMETERS[key];
         const current = document.getElementById(parameter.valueId);
         if (current) {
@@ -197,29 +190,20 @@
 
     function updateStats() {
         const lengths = Object.values(state.charts).map(c => c.data.labels.length);
-        if (elements.pointCount) {
-            elements.pointCount.textContent = String(lengths.length ? Math.max(...lengths) : 0);
-        }
-        if (elements.timeWindow) {
-            elements.timeWindow.textContent = `${CONFIG.maximumPoints} общих отсчётов`;
-        }
-        if (elements.recordingState) {
-            elements.recordingState.textContent = state.paused ? "ПАУЗА" : "ЗАПИСЬ";
-        }
+        if (elements.pointCount) elements.pointCount.textContent = String(lengths.length ? Math.max(...lengths) : 0);
+        if (elements.timeWindow) elements.timeWindow.textContent = `${CONFIG.maximumPoints} общих отсчётов`;
+        if (elements.recordingState) elements.recordingState.textContent = state.paused ? "ПАУЗА" : "ЗАПИСЬ";
     }
 
     function processTelemetry(telemetry) {
         if (state.paused || !telemetry || typeof telemetry !== "object") return;
-
         const id = normalizeId(telemetry.ID);
         colorForId(id);
         const ts = Date.now();
         let added = 0;
-
         Object.keys(PARAMETERS).forEach(key => {
             if (Object.hasOwn(telemetry, key) && appendSample(key, telemetry[key], id, ts)) added += 1;
         });
-
         if (added) {
             state.totalPackets += 1;
             updateStats();
@@ -233,7 +217,6 @@
             chart.data.datasets.length = 0;
             chart.update("none");
         });
-
         Object.values(PARAMETERS).forEach(parameter => {
             const el = document.getElementById(parameter.valueId);
             if (el) {
@@ -241,7 +224,6 @@
                 el.style.color = "";
             }
         });
-
         state.totalPackets = 0;
         state.idColors.clear();
         state.ids.length = 0;
@@ -251,33 +233,25 @@
 
     function initialize() {
         if (state.initialized || typeof Chart === "undefined") return;
-
         elements.status = document.getElementById("chartStatus");
         elements.pauseButton = document.getElementById("pauseChartsButton");
         elements.clearButton = document.getElementById("clearChartsButton");
         elements.pointCount = document.getElementById("chartPointCount");
         elements.timeWindow = document.getElementById("chartTimeWindow");
         elements.recordingState = document.getElementById("chartRecordingState");
-
         Object.entries(PARAMETERS).forEach(([key, parameter]) => {
             const chart = createChart(parameter);
             if (chart) state.charts[key] = chart;
         });
-
         window.addEventListener("openmcc:telemetry", event => processTelemetry(event.detail));
-        window.addEventListener("openmcc:serial-disconnected", () => {
-            if (!state.paused) setStatus("waiting");
-        });
-
+        window.addEventListener("openmcc:serial-disconnected", () => { if (!state.paused) setStatus("waiting"); });
         elements.pauseButton?.addEventListener("click", () => {
             state.paused = !state.paused;
             elements.pauseButton.textContent = state.paused ? "Продолжить" : "Пауза";
             setStatus(state.paused ? "paused" : "active");
             updateStats();
         });
-
         elements.clearButton?.addEventListener("click", clearCharts);
-
         updateStats();
         setStatus("waiting");
         state.initialized = true;
@@ -298,11 +272,8 @@
         }),
     });
 
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initialize, { once: true });
-    } else {
-        initialize();
-    }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initialize, { once: true });
+    else initialize();
 })();
 
 import("/js/v8.js").catch(error => console.error("Altair v8 patch failed", error));
