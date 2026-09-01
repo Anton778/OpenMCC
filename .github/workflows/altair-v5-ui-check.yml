@@ -62,14 +62,21 @@ jobs:
       - name: Validate v8 radio profile and release files
         shell: bash
         run: |
-          grep -Fq 'RF_FREQ_MHZ = 435.000f' firmware/radio_gateway_esp32/src/main_v8.cpp
-          grep -Fq 'RF_BW_KHZ = 203.0f' firmware/radio_gateway_esp32/src/main_v8.cpp
-          grep -Fq 'APPLICATION_XOR_CHECK=DISABLED' firmware/radio_gateway_esp32/src/main_v8.cpp
-          grep -Fq '$CMD,RF,' firmware/radio_gateway_esp32/src/main_v8.cpp
-          grep -Fq '$CMD,RADIO_STATUS' firmware/radio_gateway_esp32/src/main_v8.cpp
-          grep -Fq 'const int state = radio.receive(packet);' firmware/radio_gateway_esp32/src/main_v8.cpp
-          cmp -s firmware/radio_gateway_esp32/src/main_v8.cpp firmware/radio_gateway_esp32/Altair_Gateway_v8/Altair_Gateway_v8.ino
-          grep -Fq '+<main_v8.cpp>' firmware/radio_gateway_esp32/platformio.ini
+          ground_esp32='firmware/ground_station/esp32/Altair_Ground_ESP32/Altair_Ground_ESP32.ino'
+
+          grep -Fq 'RF_FREQ_MHZ = 435.000f' "$ground_esp32"
+          grep -Fq 'RF_BW_KHZ = 203.0f' "$ground_esp32"
+          grep -Fq 'APPLICATION_XOR_CHECK=DISABLED' "$ground_esp32"
+          grep -Fq '$CMD,RF,' "$ground_esp32"
+          grep -Fq '$CMD,RADIO_STATUS' "$ground_esp32"
+          grep -Fq 'const int state = radio.receive(packet);' "$ground_esp32"
+          grep -Fq 'src_dir = Altair_Ground_ESP32' firmware/ground_station/esp32/platformio.ini
+
+          test -f firmware/ground_station/arduino_uno/Altair_Ground_Arduino_Uno/Altair_Ground_Arduino_Uno.ino
+          test -f firmware/ground_station/arduino_nano/Altair_Ground_Arduino_Nano/Altair_Ground_Arduino_Nano.ino
+          test -f firmware/satellite/stm32/Altair_Satellite_STM32/Altair_Satellite_STM32.ino
+          test -f firmware/satellite/arduino_nano/Altair_Satellite_Arduino_Nano/Altair_Satellite_Arduino_Nano.ino
+
           grep -Fq '435.000' js/v8.js
           grep -Fq 'rawSerialConsole' js/v8.js
           grep -Fq 'Сбросить принятые данные' js/v8.js
