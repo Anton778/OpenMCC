@@ -39,6 +39,9 @@ jobs:
           - name: Спутник — Arduino Nano
             id: satellite-nano
             project: firmware/satellite/arduino_nano
+          - name: Спутник — Arduino Nano, статичный передатчик
+            id: satellite-nano-static-tx
+            project: firmware/satellite/arduino_nano_static_tx
 
     steps:
       - name: Получить исходный код

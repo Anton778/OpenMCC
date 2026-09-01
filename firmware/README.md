@@ -18,8 +18,11 @@
 |---|---|
 | STM32F103C8T6 / Blue Pill / IntroSat | [`Altair_Satellite_STM32.ino`](satellite/stm32/Altair_Satellite_STM32/Altair_Satellite_STM32.ino) |
 | Arduino Nano | [`Altair_Satellite_Arduino_Nano.ino`](satellite/arduino_nano/Altair_Satellite_Arduino_Nano/Altair_Satellite_Arduino_Nano.ino) |
+| Arduino Nano, только передатчик | [`Altair_Satellite_Arduino_Nano_Static_TX.ino`](satellite/arduino_nano_static_tx/Altair_Satellite_Arduino_Nano_Static_TX/Altair_Satellite_Arduino_Nano_Static_TX.ino) |
 
 Бортовые скетчи передают телеметрию, принимают адресованные команды и поддерживают `PING`, `INFO`, `TM_START`, `TM_STOP`, `TM_PERIOD` и `USER`.
+
+Упрощённый вариант `Static_TX` не включает приёмник и обработку команд. Он передаёт один статичный пакет `02,00001,00015,3.00,4.20,1,33` раз в секунду и предназначен для первичной проверки радиолинии.
 
 ## Общий радиопрофиль
 

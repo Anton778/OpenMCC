@@ -22,6 +22,7 @@
 
 - [Скетч спутника IntroSat для STM32F103C8T6 / Blue Pill](firmware/satellite/stm32/Altair_Satellite_STM32/Altair_Satellite_STM32.ino)
 - [Скетч спутника для Arduino Nano](firmware/satellite/arduino_nano/Altair_Satellite_Arduino_Nano/Altair_Satellite_Arduino_Nano.ino)
+- [Простой статичный передатчик для Arduino Nano](firmware/satellite/arduino_nano_static_tx/Altair_Satellite_Arduino_Nano_Static_TX/Altair_Satellite_Arduino_Nano_Static_TX.ino)
 
 ### 3. Руководство
 
