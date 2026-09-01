@@ -49,6 +49,14 @@ jobs:
           if (!app.includes('version: "0.8.0"')) throw new Error('app.js must identify v0.8.0');
           if (app.includes('applyV6BrandingAndRadioProfile')) throw new Error('Legacy v6 runtime override is still present');
 
+          const index = fs.readFileSync('index.html', 'utf8');
+          if (!index.includes('<script src="js/v8.js"></script>')) throw new Error('v8.js is not connected in index.html');
+          if (!index.includes('<script src="js/v8-final.js"></script>')) throw new Error('v8-final.js is not connected in index.html');
+
+          const v8Runtime = fs.readFileSync('js/v8.js', 'utf8');
+          if (!v8Runtime.includes('control.disabled = !connected')) throw new Error('Visible command controls are not synchronized with serial state');
+          if (!v8Runtime.includes('oldCustomInput?.cloneNode(true)')) throw new Error('Legacy custom-command handler is still active');
+
           const charts = fs.readFileSync('js/charts.js', 'utf8');
           if (!charts.includes('datasetFor(chart, id)')) throw new Error('Multi-ID chart datasets are missing');
           if (!charts.includes('pointRadius: 2.7')) throw new Error('Visible chart points are missing');

@@ -354,30 +354,59 @@ function installCommandTransmission() {
         });
     }
 
-    const oldCustom = document.getElementById("sendCustomCommand");
-    if (oldCustom) {
-        const button = oldCustom.cloneNode(true);
-        oldCustom.replaceWith(button);
-        button.addEventListener("click", async () => {
-            const input = document.getElementById("customCommand");
-            const text = String(input?.value || "").trim();
-            if (!text) return;
-            try {
-                await sendRf("USER", { DATA: text });
-                input.value = "";
-            } catch (error) {
-                v8Log(error.message, "error");
-            }
-        });
-    }
+    // Заменяем поле ввода, чтобы удалить старый обработчик,
+    // который отправлял команду без обязательного префикса RF.
+    const oldCustomInput = document.getElementById("customCommand");
+    const customInput = oldCustomInput?.cloneNode(true) || null;
+    if (oldCustomInput && customInput) oldCustomInput.replaceWith(customInput);
+
+    const oldCustomButton = document.getElementById("sendCustomCommand");
+    const customButton = oldCustomButton?.cloneNode(true) || null;
+    if (oldCustomButton && customButton) oldCustomButton.replaceWith(customButton);
+
+    const transmitCustomCommand = async () => {
+        const text = String(customInput?.value || "").trim();
+        if (!text) return;
+
+        try {
+            await sendRf("USER", { DATA: text });
+            customInput.value = "";
+        } catch (error) {
+            v8Log(error.message, "error");
+        }
+    };
+
+    customButton?.addEventListener("click", transmitCustomCommand);
+    customInput?.addEventListener("keydown", event => {
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        transmitCustomCommand();
+    });
 
     const availability = document.getElementById("commandAvailability");
     const refresh = () => {
         const connected = Boolean(window.OpenMCCSerial?.getState?.().connected);
-        if (!availability) return;
-        availability.textContent = connected ? "ГОТОВ К ПЕРЕДАЧЕ" : "НЕДОСТУПЕН";
-        availability.classList.toggle("offline", !connected);
-        availability.classList.toggle("online", connected);
+
+        if (availability) {
+            availability.textContent = connected ? "ГОТОВ К ПЕРЕДАЧЕ" : "НЕДОСТУПЕН";
+            availability.classList.toggle("offline", !connected);
+            availability.classList.toggle("online", connected);
+        }
+
+        // ui.js хранит ссылки на исходные кнопки, а v8 заменяет их копиями.
+        // Поэтому состояние фактически видимых элементов обновляется здесь.
+        const controls = [
+            ...panel.querySelectorAll("[data-command]"),
+            document.getElementById("telemetryRate"),
+            document.getElementById("applyTelemetryRate"),
+            document.getElementById("customCommand"),
+            document.getElementById("sendCustomCommand"),
+            document.getElementById("v8CommandTarget"),
+        ].filter(Boolean);
+
+        controls.forEach(control => {
+            control.disabled = !connected;
+        });
     };
     window.addEventListener("openmcc:serial-connected", refresh);
     window.addEventListener("openmcc:serial-disconnected", refresh);
