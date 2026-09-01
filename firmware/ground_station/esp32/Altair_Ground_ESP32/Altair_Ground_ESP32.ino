@@ -27,7 +27,7 @@
 #define CC_GDO0  4
 #define CC_GDO2  27
 
-static constexpr char FW_VERSION[] = "8.1.0";
+static constexpr char FW_VERSION[] = "8.2.0";
 static constexpr float RF_FREQ_MHZ = 435.000f;
 static constexpr float RF_BITRATE_KBPS = 4.8f;
 static constexpr float RF_DEVIATION_KHZ = 5.0f;
@@ -37,6 +37,13 @@ static constexpr uint16_t RF_PREAMBLE_BITS = 16;
 
 CC1101 radio = new Module(CC_CS, CC_GDO0, RADIOLIB_NC, CC_GDO2);
 String usbLine;
+volatile bool rfPacketReceived = false;
+
+// Обработчик прерывания только устанавливает флаг. Чтение SPI и вывод в USB
+// выполняются в основном цикле, а не внутри обработчика прерывания.
+void IRAM_ATTR onRfPacketReceived() {
+  rfPacketReceived = true;
+}
 
 // Разделяет принятую строку по запятым без проверки значений полей.
 bool splitCsv(const String& packet, String fields[], int maxFields, int& count) {
@@ -56,12 +63,13 @@ bool splitCsv(const String& packet, String fields[], int maxFields, int& count) 
   return count > 0;
 }
 
-void startReceiveAgain() {
-  radio.startReceive();
+int startReceiveAgain() {
+  rfPacketReceived = false;
+  return radio.startReceive();
 }
 
 void printRadioStatus() {
-  Serial.println("$INFO,RADIO,TYPE=CC1101,FREQ=435.000,RATE=4.8,MOD=2FSK,DEV=5,BW=203,POWER=5,SYNC=12AD,CRC=1,XOR=OFF,RF_TX=ON,PROFILE=FIXED_V8");
+  Serial.println("$INFO,RADIO,TYPE=CC1101,FREQ=435.000,RATE=4.8,MOD=2FSK,DEV=5,BW=203,POWER=5,SYNC=12AD,CRC=1,XOR=OFF,RF_TX=ON,RX_MODE=INTERRUPT,PROFILE=FIXED_V8");
 }
 
 // Передаёт одну строку в эфир и возвращает CC1101 в режим приёма.
@@ -69,13 +77,29 @@ bool transmitRf(String payload) {
   payload.trim();
   if (payload.length() == 0) return false;
 
-  radio.standby();
-  const int state = radio.transmit(payload);
-  startReceiveAgain();
+  // Удаляем возможный старый флаг RX: команда имеет приоритет, а после TX
+  // приёмник будет запущен заново с очищенным FIFO.
+  rfPacketReceived = false;
+
+  const uint32_t startedAt = millis();
+  int state = radio.standby();
+  if (state == RADIOLIB_ERR_NONE) {
+    state = radio.transmit(payload);
+  }
+
+  const int receiveState = startReceiveAgain();
 
   if (state == RADIOLIB_ERR_NONE) {
+    if (receiveState != RADIOLIB_ERR_NONE) {
+      Serial.print("$ERR,RF_RX_RESTART,CODE=");
+      Serial.println(receiveState);
+      return false;
+    }
+
     Serial.print("$ACK,RF_TX,BYTES=");
     Serial.print(payload.length());
+    Serial.print(",TX_MS=");
+    Serial.print(millis() - startedAt);
     Serial.print(",DATA=");
     Serial.println(payload);
     return true;
@@ -100,7 +124,7 @@ void handleUsbCommand(String line) {
   if (line.equalsIgnoreCase("$CMD,GATEWAY_INFO")) {
     Serial.print("$INFO,GATEWAY=ALTAIR_V8,BOARD=ESP32-WROOM-32,FW=");
     Serial.print(FW_VERSION);
-    Serial.println(",FREQ=435.000,RATE=4.8,DEV=5,BW=203,XOR=OFF,RF_TX=ON");
+    Serial.println(",FREQ=435.000,RATE=4.8,DEV=5,BW=203,XOR=OFF,RF_TX=ON,RX_MODE=INTERRUPT");
     return;
   }
 
@@ -234,23 +258,51 @@ void setup() {
     while (true) delay(1000);
   }
 
+  // Приём запускается один раз и далее работает в фоне. GDO0 формирует
+  // прерывание только после получения полного пакета. Благодаря этому
+  // loop() постоянно опрашивает USB и команда передаётся без ожидания
+  // тайм-аута блокирующего radio.receive().
+  radio.setPacketReceivedAction(onRfPacketReceived);
+  state = startReceiveAgain();
+
+  if (state != RADIOLIB_ERR_NONE) {
+    Serial.print("$ERR,CC1101_RX_START,CODE=");
+    Serial.println(state);
+    while (true) delay(1000);
+  }
+
   Serial.print("$INFO,GATEWAY=ALTAIR_V8,BOARD=ESP32-WROOM-32,FW=");
   Serial.println(FW_VERSION);
-  Serial.println("$INFO,RADIO_READY,TYPE=CC1101,FREQ=435.000,RATE=4.8,DEV=5,BW=203,SYNC=12AD,CRC=1");
+  Serial.println("$INFO,RADIO_READY,TYPE=CC1101,FREQ=435.000,RATE=4.8,DEV=5,BW=203,SYNC=12AD,CRC=1,RX_MODE=INTERRUPT");
   Serial.println("$INFO,APPLICATION_XOR_CHECK=DISABLED,RF_TX=ENABLED");
 }
 
 void loop() {
   pollUsb();
 
-  String packet;
-  const int state = radio.receive(packet);
+  if (rfPacketReceived) {
+    // После срабатывания GDO0 пакет уже полностью находится в RX FIFO.
+    rfPacketReceived = false;
 
-  if (state == RADIOLIB_ERR_NONE) {
-    emitTelemetry(packet);
-  } else if (state == RADIOLIB_ERR_CRC_MISMATCH) {
-    Serial.println("$ERR,RADIO_RX_CRC");
+    String packet;
+    const int state = radio.readData(packet);
+
+    if (state == RADIOLIB_ERR_NONE) {
+      emitTelemetry(packet);
+    } else if (state == RADIOLIB_ERR_CRC_MISMATCH) {
+      Serial.println("$ERR,RADIO_RX_CRC");
+    } else {
+      Serial.print("$ERR,RADIO_RX,CODE=");
+      Serial.println(state);
+    }
+
+    const int receiveState = startReceiveAgain();
+    if (receiveState != RADIOLIB_ERR_NONE) {
+      Serial.print("$ERR,RF_RX_RESTART,CODE=");
+      Serial.println(receiveState);
+    }
   }
 
-  pollUsb();
+  // Освобождаем время системным задачам ESP32, не блокируя обработку USB.
+  delay(1);
 }
