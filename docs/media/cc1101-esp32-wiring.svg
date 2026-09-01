@@ -280,9 +280,9 @@
      inkscape:pageopacity="0.0"
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
-     inkscape:zoom="1.0431189"
-     inkscape:cx="379.15141"
-     inkscape:cy="133.73356"
+     inkscape:zoom="0.73759645"
+     inkscape:cx="-98.29223"
+     inkscape:cy="16.946936"
      inkscape:window-width="1920"
      inkscape:window-height="1009"
      inkscape:window-x="-8"
@@ -295,7 +295,7 @@
        width="765.1178"
        height="255.42302"
        id="page1"
-       margin="0 0 0"
+       margin="0"
        bleed="0" />
   </sodipodi:namedview>
   <g
@@ -315,9 +315,9 @@
        transform="matrix(1.4857559,0,0,1.4857559,-42.409534,191.81832)"><tspan
          x="72.533203"
          y="-82.401751"
-         id="tspan4"><tspan
+         id="tspan2"><tspan
            style="fill:#000000;stroke:none"
-           id="tspan3">GND</tspan></tspan></text>
+           id="tspan1">GND</tspan></tspan></text>
     <text
        xml:space="preserve"
        id="text1-2"
@@ -325,9 +325,9 @@
        transform="matrix(1.4857559,0,0,1.4857559,-56.332883,229.97874)"><tspan
          x="72.533203"
          y="-82.401751"
-         id="tspan6"><tspan
+         id="tspan4"><tspan
            style="fill:#000000;stroke:none"
-           id="tspan5">GDO0</tspan></tspan></text>
+           id="tspan3">GDO0</tspan></tspan></text>
     <text
        xml:space="preserve"
        id="text1-2-5"
@@ -335,9 +335,9 @@
        transform="matrix(1.4857559,0,0,1.4857559,-37.201996,265.56731)"><tspan
          x="72.533203"
          y="-82.401751"
-         id="tspan8"><tspan
+         id="tspan6"><tspan
            style="fill:#000000;stroke:none"
-           id="tspan7">SCK</tspan></tspan></text>
+           id="tspan5">SCK</tspan></tspan></text>
     <text
        xml:space="preserve"
        id="text1-2-3"
@@ -345,9 +345,9 @@
        transform="matrix(1.4857559,0,0,1.4857559,123.92519,228.69525)"><tspan
          x="72.533203"
          y="-82.401751"
-         id="tspan10"><tspan
+         id="tspan8"><tspan
            style="fill:#000000;stroke:none"
-           id="tspan9">CSN</tspan></tspan></text>
+           id="tspan7">CSN</tspan></tspan></text>
     <text
        xml:space="preserve"
        id="text1-8"
@@ -355,9 +355,9 @@
        transform="matrix(1.4857559,0,0,1.4857559,121.74124,194.1235)"><tspan
          x="72.533203"
          y="-82.401751"
-         id="tspan12"><tspan
+         id="tspan10"><tspan
            style="fill:#000000;stroke:none"
-           id="tspan11">VCC</tspan></tspan></text>
+           id="tspan9">VCC</tspan></tspan></text>
     <text
        xml:space="preserve"
        id="text1-8-4"
@@ -365,9 +365,9 @@
        transform="matrix(1.4857559,0,0,1.4857559,410.51758,133.52774)"><tspan
          x="72.533203"
          y="-82.401751"
-         id="tspan14"><tspan
+         id="tspan12"><tspan
            style="fill:#000000;stroke:none"
-           id="tspan13">СС1101</tspan></tspan></text>
+           id="tspan11">СС1101</tspan></tspan></text>
     <text
        xml:space="preserve"
        id="text1-8-3"
@@ -375,9 +375,9 @@
        transform="matrix(1.4857559,0,0,1.4857559,305.02869,191.37336)"><tspan
          x="72.533203"
          y="-87.818813"
-         id="tspan30"><tspan
+         id="tspan14"><tspan
            style="fill:#000000;stroke:none"
-           id="tspan29">1</tspan></tspan></text>
+           id="tspan13">1</tspan></tspan></text>
     <text
        xml:space="preserve"
        id="text1-8-3-1"
@@ -385,9 +385,9 @@
        transform="matrix(1.4857559,0,0,1.4857559,330.93412,191.09093)"><tspan
          x="72.533203"
          y="-87.818813"
-         id="tspan32"><tspan
+         id="tspan16"><tspan
            style="fill:#000000;stroke:none"
-           id="tspan31">2</tspan></tspan></text>
+           id="tspan15">2</tspan></tspan></text>
     <text
        xml:space="preserve"
        id="text1-8-3-1-0"
@@ -395,9 +395,9 @@
        transform="matrix(1.4857559,0,0,1.4857559,99.618149,183.27981)"><tspan
          x="72.533203"
          y="-87.818813"
-         id="tspan34"><tspan
+         id="tspan18"><tspan
            style="fill:#000000;stroke:none"
-           id="tspan33">2</tspan></tspan></text>
+           id="tspan17">2</tspan></tspan></text>
     <text
        xml:space="preserve"
        id="text1-2-1"
@@ -405,19 +405,19 @@
        transform="matrix(1.4857559,0,0,1.4857559,121.89156,263.94488)"><tspan
          x="72.533203"
          y="-82.401751"
-         id="tspan36"><tspan
+         id="tspan20"><tspan
            style="fill:#000000;stroke:none"
-           id="tspan35">MOSI</tspan></tspan></text>
+           id="tspan19">MOSI</tspan></tspan></text>
     <text
        xml:space="preserve"
        id="text1-2-1-9"
        style="font-size:18.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';white-space:pre;shape-inside:url(#rect1-74-3-0);display:inline;fill:#ffffff;stroke:#000000;stroke-width:0.763465;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:0.963255"
-       transform="matrix(1.4857559,0,0,1.4857559,-71.742599,301.49481)"><tspan
+       transform="matrix(1.4857559,0,0,1.4857559,-50.710155,300.87509)"><tspan
          x="72.533203"
          y="-82.401751"
-         id="tspan38"><tspan
+         id="tspan22"><tspan
            style="fill:#000000;stroke:none"
-           id="tspan37">MIOSO</tspan></tspan></text>
+           id="tspan21">MISO</tspan></tspan></text>
     <text
        xml:space="preserve"
        id="text1-2-1-9-6"
@@ -425,9 +425,9 @@
        transform="matrix(1.4857559,0,0,1.4857559,122.27287,300.8892)"><tspan
          x="72.533203"
          y="-82.401751"
-         id="tspan40"><tspan
+         id="tspan24"><tspan
            style="fill:#000000;stroke:none"
-           id="tspan39">DGO2</tspan></tspan></text>
+           id="tspan23">GDO2</tspan></tspan></text>
     <circle
        style="fill:none;fill-opacity:1;stroke:url(#linearGradient2);stroke-width:2.32252;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.997375"
        id="path2"
@@ -538,8 +538,8 @@
        transform="matrix(1.4857559,0,0,1.4857559,36.057434,183.63428)"><tspan
          x="72.533203"
          y="-87.818813"
-         id="tspan42"><tspan
+         id="tspan26"><tspan
            style="fill:#000000;stroke:none"
-           id="tspan41">1</tspan></tspan></text>
+           id="tspan25">1</tspan></tspan></text>
   </g>
 </svg>
