@@ -27,6 +27,7 @@ jobs:
           node --check js/charts.js
           node --check js/v8.js
           node --check js/v8-final.js
+          node --check js/v8.1.js
           node --check js/help.js
           node --check js/flasher-v5.js
           node --check js/serial.js
@@ -36,7 +37,7 @@ jobs:
           node - <<'NODE'
           const fs = require('fs');
           const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-          if (pkg.version !== '0.8.0') throw new Error(`Expected 0.8.0, got ${pkg.version}`);
+          if (pkg.version !== '0.8.1') throw new Error(`Expected 0.8.1, got ${pkg.version}`);
           if (pkg.build?.win?.icon !== 'assets/altair-logo.png') throw new Error('Altair Windows PNG icon source is not configured');
           if (pkg.author !== 'Антон Т.') throw new Error('Application author metadata is missing');
 
@@ -46,7 +47,7 @@ jobs:
           }
 
           const app = fs.readFileSync('js/app.js', 'utf8');
-          if (!app.includes('version: "0.8.0"')) throw new Error('app.js must identify v0.8.0');
+          if (!app.includes('version: "0.8.0"')) throw new Error('Legacy v8 coordinator version marker unexpectedly changed');
           if (app.includes('applyV6BrandingAndRadioProfile')) throw new Error('Legacy v6 runtime override is still present');
 
           const charts = fs.readFileSync('js/charts.js', 'utf8');
@@ -55,8 +56,18 @@ jobs:
 
           const finalRuntime = fs.readFileSync('js/v8-final.js', 'utf8');
           if (!finalRuntime.includes('bandwidth: "203"')) throw new Error('v8 UI must enforce RX BW 203 kHz');
+          if (!finalRuntime.includes('v8.1.js')) throw new Error('v8.0.1 UX patch is not loaded');
 
-          console.log('Altair v8 JS/package checks OK');
+          const patch = fs.readFileSync('js/v8.1.js', 'utf8');
+          if (!patch.includes('v81SetupFlow')) throw new Error('Guided firmware/connection flow is missing');
+          if (!patch.includes('v81IdRoster')) throw new Error('Satellite ID roster is missing');
+          if (!patch.includes('rawSerialPanel')) throw new Error('RAW COM placement logic is missing');
+
+          const css = fs.readFileSync('css/v8.1.css', 'utf8');
+          if (!css.includes('background: transparent !important')) throw new Error('Transparent Altair logo patch is missing');
+          if (!css.includes('grid-template-columns: minmax(290px')) throw new Error('Single-row top bar patch is missing');
+
+          console.log('Altair v8.0.1 JS/package checks OK');
           NODE
 
       - name: Validate v8 radio profile and release files
@@ -73,6 +84,8 @@ jobs:
           grep -Fq '435.000' js/v8.js
           grep -Fq 'rawSerialConsole' js/v8.js
           grep -Fq 'Сбросить принятые данные' js/v8.js
+          test -f js/v8.1.js
+          test -f css/v8.1.css
           test -f docs/CUP_Altair_v8_Manual.tex
           test -f docs/RELEASE_V8.md
           test -f docs/media/mcc-technoprom.jpg
