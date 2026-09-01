@@ -1,46 +1,36 @@
 "use strict";
 
-/* ============================================================
-   ЦУП Альтаир — telemetry parser
-   Release v6 / 0.6.0
-
-   Primary v6 packet (29 ASCII characters):
-   ID(2),PACKET(5),UPTIME(5),PANEL_POWER(4),VOLT(4),MODE(1),XOR(2)
-
-   Example:
-   02,00001,00015,3.00,4.20,1,33
-
-   XOR is calculated over every character before the two HEX checksum
-   characters, INCLUDING the final comma after MODE.
-   ============================================================ */
-
+/* ЦУП Альтаир v8 — permissive telemetry parser.
+ * Прикладная контрольная сумма принимается как информационное поле и НЕ проверяется.
+ */
 (() => {
     const CONFIG = Object.freeze({
-        version: "0.6.0",
-        fixedPacketLength: 29,
+        version: "0.8.0",
         maximumBufferLength: 65536,
         maximumLineLength: 4096,
+        checksumValidation: false,
     });
 
     const KNOWN_PARAMETERS = Object.freeze({
-        ID: Object.freeze({ type: "string" }),
-        PACKET: Object.freeze({ type: "number" }),
-        UPTIME: Object.freeze({ type: "number", unit: "s" }),
-        PANEL_POWER: Object.freeze({ type: "number", unit: "W" }),
-        VOLT: Object.freeze({ type: "number", unit: "V" }),
-        MODE: Object.freeze({ type: "number" }),
-        CHECKSUM: Object.freeze({ type: "string" }),
-        CHECKSUM_OK: Object.freeze({ type: "number" }),
-        RSSI: Object.freeze({ type: "number", unit: "dBm" }),
-        SNR: Object.freeze({ type: "number", unit: "dB" }),
-        LQI: Object.freeze({ type: "number" }),
-        ANTENNA: Object.freeze({ type: "number" }),
-        TEMP: Object.freeze({ type: "number", unit: "°C" }),
-        LIGHT: Object.freeze({ type: "number" }),
-        ERRORS: Object.freeze({ type: "number" }),
-        ROLL: Object.freeze({ type: "number" }),
-        PITCH: Object.freeze({ type: "number" }),
-        YAW: Object.freeze({ type: "number" }),
+        ID: { type: "string" },
+        PACKET: { type: "number" },
+        UPTIME: { type: "number" },
+        PANEL_POWER: { type: "number" },
+        VOLT: { type: "number" },
+        MODE: { type: "number" },
+        ANTENNA: { type: "number" },
+        CHECKSUM: { type: "string" },
+        CHECKSUM_OK: { type: "number" },
+        CHECKSUM_BYPASS: { type: "number" },
+        RSSI: { type: "number" },
+        SNR: { type: "number" },
+        LQI: { type: "number" },
+        TEMP: { type: "number" },
+        LIGHT: { type: "number" },
+        ERRORS: { type: "number" },
+        ROLL: { type: "number" },
+        PITCH: { type: "number" },
+        YAW: { type: "number" },
     });
 
     const ALIASES = Object.freeze({
@@ -67,7 +57,7 @@
         lastPacket: null,
     };
 
-    function writeLog(message, type = "info", metadata = null) {
+    function log(message, type = "info", metadata = null) {
         window.OpenMCCLogger?.write?.(message, type, "PARSER", metadata);
     }
 
@@ -90,57 +80,13 @@
         const definition = KNOWN_PARAMETERS[key];
         const text = String(rawValue ?? "").trim();
         if (definition?.type === "string") return text;
-        if (/^(null|none|nan|---)$/i.test(text)) return null;
+        if (/^(null|none|nan|---|н\/д)$/i.test(text)) return null;
         const numeric = Number(text.replace(",", "."));
         if (!Number.isFinite(numeric)) {
             if (!definition) return text;
             throw new Error(`Параметр ${key} должен содержать число`);
         }
         return numeric;
-    }
-
-    function xorAscii(text) {
-        let value = 0;
-        for (let i = 0; i < text.length; i += 1) value ^= text.charCodeAt(i) & 0xFF;
-        return value & 0xFF;
-    }
-
-    function toHex2(value) {
-        return Number(value & 0xFF).toString(16).toUpperCase().padStart(2, "0");
-    }
-
-    function looksLikeFixedV6(line) {
-        return /^[A-Za-z0-9]{2},\d{5},\d{5},\d\.\d{2},\d\.\d{2},[01],[0-9A-Fa-f]{2}$/.test(line);
-    }
-
-    function parseFixedV6(line) {
-        if (line.length !== CONFIG.fixedPacketLength) {
-            throw new Error(`Пакет v6 должен иметь 29 символов, получено ${line.length}`);
-        }
-        if (!looksLikeFixedV6(line)) {
-            throw new Error("Пакет v6 не соответствует фиксированному формату");
-        }
-
-        const fields = line.split(",");
-        const checksumReceived = fields[6].toUpperCase();
-        const bodyWithFinalComma = line.slice(0, -2);
-        const checksumCalculated = toHex2(xorAscii(bodyWithFinalComma));
-
-        if (checksumReceived !== checksumCalculated) {
-            throw new Error(`XOR не совпадает: принято ${checksumReceived}, рассчитано ${checksumCalculated}`);
-        }
-
-        return {
-            ID: fields[0],
-            PACKET: Number(fields[1]),
-            UPTIME: Number(fields[2]),
-            PANEL_POWER: Number(fields[3]),
-            VOLT: Number(fields[4]),
-            MODE: Number(fields[5]),
-            CHECKSUM: checksumReceived,
-            CHECKSUM_OK: 1,
-            RAW_PACKET: line,
-        };
     }
 
     function parseKeyValueItems(text) {
@@ -154,57 +100,80 @@
         return packet;
     }
 
+    // Позиционный формат:
+    // 7 полей: ID,PACKET,UPTIME,PANEL_POWER,VOLT,MODE,CHECKSUM
+    // 8 полей: ID,PACKET,UPTIME,PANEL_POWER,VOLT,MODE,ANTENNA,CHECKSUM
+    function parsePositionPacket(line) {
+        const f = line.split(",").map(v => v.trim());
+        if (f.length !== 7 && f.length !== 8) {
+            throw new Error(`Ожидалось 7 или 8 полей, получено ${f.length}`);
+        }
+        const hasAntenna = f.length === 8;
+        const checksumIndex = hasAntenna ? 7 : 6;
+        const packet = {
+            ID: f[0],
+            PACKET: Number(f[1]),
+            UPTIME: Number(f[2]),
+            PANEL_POWER: Number(f[3]),
+            VOLT: Number(f[4]),
+            MODE: Number(f[5]),
+            CHECKSUM: f[checksumIndex],
+            CHECKSUM_BYPASS: 1,
+            RAW_PACKET: line,
+        };
+        if (hasAntenna) packet.ANTENNA = Number(f[6]);
+        return packet;
+    }
+
     function parseTmLine(line) {
         const content = line.replace(/^\$TM[,]?/i, "").trim();
         if (content.includes("=")) return parseKeyValueItems(content);
-
-        const values = content.split(",").map(value => value.trim());
-        if (values.length >= 8) {
-            return {
-                ID: values[0], PACKET: Number(values[1]), UPTIME: Number(values[2]),
-                LIGHT: Number(values[3]), VOLT: Number(values[4]), TEMP: Number(values[5]),
-                MODE: Number(values[6]), ERRORS: Number(values[7]),
-            };
-        }
-        if (values.length >= 6) {
-            const packet = {
-                ID: values[0], PACKET: Number(values[1]), UPTIME: Number(values[2]),
-                VOLT: Number(values[3]), PANEL_POWER: Number(values[4]), TEMP: Number(values[5]),
-            };
-            if (values.length >= 7) packet.ANTENNA = Number(values[6]);
-            return packet;
-        }
-        throw new Error("Неизвестный позиционный $TM пакет");
+        return parsePositionPacket(content);
     }
 
     function parseJsonLine(line) {
         const source = JSON.parse(line);
-        if (!source || Array.isArray(source) || typeof source !== "object") throw new Error("JSON должен быть объектом");
+        if (!source || Array.isArray(source) || typeof source !== "object") {
+            throw new Error("JSON должен быть объектом");
+        }
         const packet = {};
         Object.entries(source).forEach(([key, value]) => {
             const normalized = normalizeName(key);
-            packet[normalized] = typeof value === "number" || value === null ? value : parseValue(normalized, value);
+            packet[normalized] =
+                typeof value === "number" || value === null
+                    ? value
+                    : parseValue(normalized, value);
         });
         return packet;
     }
 
     function validatePacket(packet) {
-        if (!packet || typeof packet !== "object" || !Object.keys(packet).length) throw new Error("Пустой пакет телеметрии");
+        if (!packet || typeof packet !== "object" || !Object.keys(packet).length) {
+            throw new Error("Пустой пакет телеметрии");
+        }
         if (Object.hasOwn(packet, "MODE") && packet.MODE !== null && ![0, 1].includes(Number(packet.MODE))) {
             throw new Error("MODE должен быть 0 или 1");
         }
         if (Object.hasOwn(packet, "ANTENNA") && packet.ANTENNA !== null && ![0, 1].includes(Number(packet.ANTENNA))) {
-            throw new Error("ANTENNA должен быть 0 или 1");
+            packet.ANTENNA = null;
         }
     }
 
     function handleServiceLine(line) {
         const upper = line.toUpperCase();
-        const service = [["$ACK", "openmcc:device-ack"], ["$ERR", "openmcc:device-error"], ["$INFO", "openmcc:device-info"]]
-            .find(([prefix]) => upper.startsWith(prefix));
+        const service = [
+            ["$ACK", "openmcc:device-ack"],
+            ["$ERR", "openmcc:device-error"],
+            ["$INFO", "openmcc:device-info"],
+            ["$RAW", "openmcc:unparsed-line"],
+        ].find(([prefix]) => upper.startsWith(prefix));
         if (!service) return false;
         const [prefix, eventName] = service;
-        emit(eventName, { line, payload: line.slice(prefix.length).replace(/^,/, ""), timestamp: Date.now() });
+        emit(eventName, {
+            line,
+            payload: line.slice(prefix.length).replace(/^,/, ""),
+            timestamp: Date.now(),
+        });
         return true;
     }
 
@@ -212,10 +181,19 @@
         state.totalLines += 1;
         const line = normalizeLine(rawLine);
         state.lastRawLine = line;
-        if (!line) { state.ignoredLines += 1; return null; }
+
+        if (!line) {
+            state.ignoredLines += 1;
+            return null;
+        }
+
         if (line.length > CONFIG.maximumLineLength) {
             state.errorCount += 1;
-            emit("openmcc:telemetry-error", { message: "Строка телеметрии слишком длинная", rawLine: line, timestamp: Date.now() });
+            emit("openmcc:telemetry-error", {
+                message: "Строка телеметрии слишком длинная",
+                rawLine: line,
+                timestamp: Date.now(),
+            });
             return null;
         }
 
@@ -224,28 +202,44 @@
 
         try {
             let packet;
-            if (looksLikeFixedV6(line)) packet = parseFixedV6(line);
-            else if (/^\$TM(?:,|$)/i.test(line)) packet = parseTmLine(line);
-            else if (/^\$TEL(?:,|$)/i.test(line)) packet = parseKeyValueItems(line.replace(/^\$TEL[,]?/i, ""));
-            else if (line.startsWith("{") && line.endsWith("}")) packet = parseJsonLine(line);
-            else if (line.includes("=")) packet = parseKeyValueItems(line);
-            else {
+
+            if (/^\$TEL(?:,|$)/i.test(line)) {
+                packet = parseKeyValueItems(line.replace(/^\$TEL[,]?/i, ""));
+            } else if (/^\$TM(?:,|$)/i.test(line)) {
+                packet = parseTmLine(line);
+            } else if (line.startsWith("{") && line.endsWith("}")) {
+                packet = parseJsonLine(line);
+            } else if (line.includes("=")) {
+                packet = parseKeyValueItems(line);
+            } else if (line.includes(",")) {
+                packet = parsePositionPacket(line);
+            } else {
                 state.ignoredLines += 1;
                 emit("openmcc:unparsed-line", { line, timestamp: Date.now() });
-                writeLog(`Нераспознанная RF-строка: ${line}`, "info");
                 return null;
             }
 
             validatePacket(packet);
+
+            // В v8 контрольная сумма намеренно не валидируется.
+            if (Object.hasOwn(packet, "CHECKSUM")) {
+                packet.CHECKSUM_BYPASS = 1;
+                delete packet.CHECKSUM_OK;
+            }
+
             state.parsedPackets += 1;
             state.lastPacket = Object.freeze({ ...packet });
             emit("openmcc:telemetry", { ...packet });
             return packet;
         } catch (error) {
             state.errorCount += 1;
-            const detail = { message: `Ошибка телеметрии: ${error.message}`, rawLine: line, timestamp: Date.now() };
+            const detail = {
+                message: `Ошибка телеметрии: ${error.message}`,
+                rawLine: line,
+                timestamp: Date.now(),
+            };
             emit("openmcc:telemetry-error", detail);
-            writeLog(detail.message, "error", detail);
+            log(detail.message, "error", detail);
             return null;
         }
     }
@@ -255,10 +249,12 @@
         if (!text) return [];
         state.totalFragments += 1;
         state.textBuffer += text;
+
         if (state.textBuffer.length > CONFIG.maximumBufferLength) {
             state.textBuffer = state.textBuffer.slice(-CONFIG.maximumBufferLength);
             state.errorCount += 1;
         }
+
         const lines = state.textBuffer.split(/\r?\n/);
         state.textBuffer = lines.pop() ?? "";
         return lines.map(parseLine).filter(Boolean);
@@ -271,28 +267,42 @@
     }
 
     function reset() {
-        Object.assign(state, { textBuffer: "", totalFragments: 0, totalLines: 0, parsedPackets: 0, ignoredLines: 0, errorCount: 0, lastRawLine: "", lastPacket: null });
+        Object.assign(state, {
+            textBuffer: "",
+            totalFragments: 0,
+            totalLines: 0,
+            parsedPackets: 0,
+            ignoredLines: 0,
+            errorCount: 0,
+            lastRawLine: "",
+            lastPacket: null,
+        });
     }
 
     function initialize() {
         if (state.initialized) return;
         state.initialized = true;
-        writeLog(`Парсер телеметрии v${CONFIG.version} готов. Фиксированный пакет: 29 символов.`, "success");
-        emit("openmcc:parser-ready", { version: CONFIG.version, fixedPacketLength: CONFIG.fixedPacketLength });
+        log("Парсер телеметрии v0.8.0 готов. Прикладная проверка XOR отключена.", "success");
+        emit("openmcc:parser-ready", {
+            version: CONFIG.version,
+            checksumValidation: false,
+        });
     }
 
     window.OpenMCCParser = Object.freeze({
         config: CONFIG,
         knownParameters: KNOWN_PARAMETERS,
         parseLine,
-        parseFixedV6,
-        xorAscii,
+        parsePositionPacket,
         pushText,
         flush,
         reset,
-        getState() { return { ...state, bufferedCharacters: state.textBuffer.length }; },
+        getState: () => ({ ...state, bufferedCharacters: state.textBuffer.length }),
     });
 
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initialize, { once: true });
-    else initialize();
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initialize, { once: true });
+    } else {
+        initialize();
+    }
 })();

@@ -1,102 +1,234 @@
 "use strict";
 
-/* ЦУП Альтаир — telemetry charts, v7 / 0.7.0 */
+/* ЦУП Альтаир — telemetry charts v8 / 0.8.0
+ * Каждый ID спутника получает отдельную линию и цвет.
+ */
 (() => {
-    const CONFIG = Object.freeze({ version: "0.7.0", maximumPoints: 120, tension: 0.24 });
+    const CONFIG = Object.freeze({
+        version: "0.8.0",
+        maximumPoints: 180,
+        tension: 0.18,
+    });
+
     const PARAMETERS = Object.freeze({
         VOLT: { title: "Напряжение аккумулятора", unit: "В", decimals: 2, canvasId: "chartVOLT", valueId: "chartValueVOLT" },
         PANEL_POWER: { title: "Мощность солнечных панелей", unit: "Вт", decimals: 2, canvasId: "chartPANEL_POWER", valueId: "chartValuePANEL_POWER" },
         RSSI: { title: "RSSI", unit: "dBm", decimals: 1, canvasId: "chartRSSI", valueId: "chartValueRSSI" },
         SNR: { title: "SNR", unit: "dB", decimals: 1, canvasId: "chartSNR", valueId: "chartValueSNR" },
     });
-    const state = { initialized: false, paused: false, totalPackets: 0, charts: {} };
+
+    const COLORS = Object.freeze([
+        "#00d9ff", "#ffb703", "#fb7185", "#34d399", "#a78bfa",
+        "#f97316", "#60a5fa", "#f472b6", "#a3e635", "#facc15",
+        "#2dd4bf", "#c084fc",
+    ]);
+
+    const state = {
+        initialized: false,
+        paused: false,
+        totalPackets: 0,
+        charts: {},
+        idColors: new Map(),
+        ids: [],
+    };
+
     const elements = {};
 
-    function log(message, type = "info") { window.OpenMCCLogger?.write?.(message, type, "CHARTS"); }
-    function timeLabel(ts) { return new Date(ts).toLocaleTimeString("ru-RU", { hour12: false, minute: "2-digit", second: "2-digit" }); }
+    function log(message, type = "info") {
+        window.OpenMCCLogger?.write?.(message, type, "CHARTS");
+    }
 
-    function options(parameter) {
+    function normalizeId(value) {
+        const text = String(value ?? "UNKNOWN").trim();
+        return text || "UNKNOWN";
+    }
+
+    function colorForId(id) {
+        if (!state.idColors.has(id)) {
+            const index = state.idColors.size % COLORS.length;
+            state.idColors.set(id, COLORS[index]);
+            state.ids.push(id);
+        }
+        return state.idColors.get(id);
+    }
+
+    function timeLabel(ts) {
+        return new Date(ts).toLocaleTimeString("ru-RU", {
+            hour12: false,
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+        });
+    }
+
+    function chartOptions(parameter) {
         return {
-            responsive: true, maintainAspectRatio: false, animation: false, normalized: true, parsing: true,
-            interaction: { intersect: false, mode: "index" },
-            plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: { label(ctx) { return `${parameter.title}: ${Number(ctx.parsed.y).toFixed(parameter.decimals)} ${parameter.unit}`; } } } },
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            normalized: true,
+            interaction: { intersect: false, mode: "nearest" },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: "bottom",
+                    labels: {
+                        color: "#9db0c7",
+                        boxWidth: 12,
+                        boxHeight: 2,
+                        usePointStyle: true,
+                        pointStyle: "line",
+                        font: { size: 10 },
+                    },
+                },
+                tooltip: {
+                    displayColors: true,
+                    callbacks: {
+                        label(ctx) {
+                            if (ctx.parsed.y === null || ctx.parsed.y === undefined) return "";
+                            return `${ctx.dataset.label}: ${Number(ctx.parsed.y).toFixed(parameter.decimals)} ${parameter.unit}`;
+                        },
+                    },
+                },
+            },
             scales: {
-                x: { grid: { color: "rgba(32,53,82,.30)" }, border: { color: "rgba(32,53,82,.70)" }, ticks: { color: "#71869f", maxTicksLimit: 8, font: { size: 9 } } },
-                y: { grace: "10%", grid: { color: "rgba(32,53,82,.38)" }, border: { color: "rgba(32,53,82,.70)" }, ticks: { color: "#71869f", font: { size: 9 }, callback(v) { return Number(v).toFixed(parameter.decimals); } } },
+                x: {
+                    grid: { color: "rgba(32,53,82,.30)" },
+                    border: { color: "rgba(32,53,82,.70)" },
+                    ticks: { color: "#71869f", maxTicksLimit: 9, font: { size: 9 } },
+                },
+                y: {
+                    grace: "10%",
+                    grid: { color: "rgba(32,53,82,.38)" },
+                    border: { color: "rgba(32,53,82,.70)" },
+                    ticks: {
+                        color: "#71869f",
+                        font: { size: 9 },
+                        callback(v) { return Number(v).toFixed(parameter.decimals); },
+                    },
+                },
             },
         };
     }
 
-    function createChart(key, parameter) {
+    function createChart(parameter) {
         const canvas = document.getElementById(parameter.canvasId);
         if (!canvas) return null;
-        const ctx = canvas.getContext("2d");
-        const gradient = ctx.createLinearGradient(0, 0, 0, 190);
-        gradient.addColorStop(0, "rgba(0,217,255,.24)");
-        gradient.addColorStop(1, "rgba(0,217,255,.01)");
-        return new Chart(ctx, {
+        return new Chart(canvas.getContext("2d"), {
             type: "line",
-            data: {
-                labels: [],
-                datasets: [{
-                    label: parameter.title,
-                    data: [],
-                    borderColor: "#00d9ff",
-                    backgroundColor: gradient,
-                    borderWidth: 1.6,
-                    pointRadius: 2.6,
-                    pointHoverRadius: 5,
-                    pointBorderWidth: 1,
-                    tension: CONFIG.tension,
-                    fill: true,
-                    showLine: true,
-                }],
-            },
-            options: options(parameter),
+            data: { labels: [], datasets: [] },
+            options: chartOptions(parameter),
         });
     }
 
-    function append(key, value, ts) {
+    function datasetFor(chart, id) {
+        let dataset = chart.data.datasets.find(item => item.altairId === id);
+        if (dataset) return dataset;
+        const color = colorForId(id);
+        dataset = {
+            altairId: id,
+            label: `ID ${id}`,
+            data: Array(chart.data.labels.length).fill(null),
+            borderColor: color,
+            backgroundColor: color,
+            borderWidth: 1.8,
+            pointRadius: 2.7,
+            pointHoverRadius: 5,
+            pointBorderWidth: 1,
+            pointBackgroundColor: color,
+            pointBorderColor: color,
+            tension: CONFIG.tension,
+            fill: false,
+            showLine: true,
+            spanGaps: true,
+        };
+        chart.data.datasets.push(dataset);
+        return dataset;
+    }
+
+    function trimChart(chart) {
+        while (chart.data.labels.length > CONFIG.maximumPoints) {
+            chart.data.labels.shift();
+            chart.data.datasets.forEach(dataset => dataset.data.shift());
+        }
+    }
+
+    function appendSample(key, value, id, timestamp) {
         const chart = state.charts[key];
         const numeric = Number(value);
         if (!chart || !Number.isFinite(numeric)) return false;
-        chart.data.labels.push(timeLabel(ts));
-        chart.data.datasets[0].data.push(numeric);
-        while (chart.data.labels.length > CONFIG.maximumPoints) { chart.data.labels.shift(); chart.data.datasets[0].data.shift(); }
+        const label = timeLabel(timestamp);
+        chart.data.labels.push(label);
+        chart.data.datasets.forEach(dataset => dataset.data.push(null));
+        const dataset = datasetFor(chart, id);
+        while (dataset.data.length < chart.data.labels.length) dataset.data.push(null);
+        dataset.data[dataset.data.length - 1] = numeric;
+        trimChart(chart);
         chart.update("none");
         const parameter = PARAMETERS[key];
         const current = document.getElementById(parameter.valueId);
-        if (current) current.textContent = `${numeric.toFixed(parameter.decimals)} ${parameter.unit}`;
+        if (current) {
+            current.textContent = `ID ${id}: ${numeric.toFixed(parameter.decimals)} ${parameter.unit}`;
+            current.style.color = colorForId(id);
+        }
         return true;
     }
 
     function setStatus(status) {
         if (!elements.status) return;
         elements.status.classList.remove("active", "paused");
-        if (status === "active") { elements.status.textContent = "ПРИЁМ ДАННЫХ"; elements.status.classList.add("active"); }
-        else if (status === "paused") { elements.status.textContent = "ПАУЗА"; elements.status.classList.add("paused"); }
-        else elements.status.textContent = "ОЖИДАНИЕ ДАННЫХ";
+        if (status === "active") {
+            elements.status.textContent = `ПРИЁМ · ${state.ids.length || 1} ID`;
+            elements.status.classList.add("active");
+        } else if (status === "paused") {
+            elements.status.textContent = "ПАУЗА";
+            elements.status.classList.add("paused");
+        } else {
+            elements.status.textContent = "ОЖИДАНИЕ ДАННЫХ";
+        }
     }
 
     function updateStats() {
         const lengths = Object.values(state.charts).map(c => c.data.labels.length);
         if (elements.pointCount) elements.pointCount.textContent = String(lengths.length ? Math.max(...lengths) : 0);
-        if (elements.timeWindow) elements.timeWindow.textContent = `${CONFIG.maximumPoints} отсчётов`;
+        if (elements.timeWindow) elements.timeWindow.textContent = `${CONFIG.maximumPoints} общих отсчётов`;
         if (elements.recordingState) elements.recordingState.textContent = state.paused ? "ПАУЗА" : "ЗАПИСЬ";
     }
 
     function processTelemetry(telemetry) {
         if (state.paused || !telemetry || typeof telemetry !== "object") return;
+        const id = normalizeId(telemetry.ID);
+        colorForId(id);
         const ts = Date.now();
         let added = 0;
-        Object.keys(PARAMETERS).forEach(key => { if (Object.hasOwn(telemetry, key) && append(key, telemetry[key], ts)) added += 1; });
-        if (added) { state.totalPackets += 1; updateStats(); setStatus("active"); }
+        Object.keys(PARAMETERS).forEach(key => {
+            if (Object.hasOwn(telemetry, key) && appendSample(key, telemetry[key], id, ts)) added += 1;
+        });
+        if (added) {
+            state.totalPackets += 1;
+            updateStats();
+            setStatus("active");
+        }
     }
 
     function clearCharts() {
-        Object.values(state.charts).forEach(chart => { chart.data.labels.length = 0; chart.data.datasets[0].data.length = 0; chart.update("none"); });
-        Object.values(PARAMETERS).forEach(p => { const el = document.getElementById(p.valueId); if (el) el.textContent = "--"; });
-        state.totalPackets = 0; updateStats(); setStatus(state.paused ? "paused" : "waiting");
+        Object.values(state.charts).forEach(chart => {
+            chart.data.labels.length = 0;
+            chart.data.datasets.length = 0;
+            chart.update("none");
+        });
+        Object.values(PARAMETERS).forEach(parameter => {
+            const el = document.getElementById(parameter.valueId);
+            if (el) {
+                el.textContent = "--";
+                el.style.color = "";
+            }
+        });
+        state.totalPackets = 0;
+        state.idColors.clear();
+        state.ids.length = 0;
+        updateStats();
+        setStatus(state.paused ? "paused" : "waiting");
     }
 
     function initialize() {
@@ -107,19 +239,43 @@
         elements.pointCount = document.getElementById("chartPointCount");
         elements.timeWindow = document.getElementById("chartTimeWindow");
         elements.recordingState = document.getElementById("chartRecordingState");
-        Object.entries(PARAMETERS).forEach(([key, parameter]) => { const chart = createChart(key, parameter); if (chart) state.charts[key] = chart; });
-        window.addEventListener("openmcc:telemetry", e => processTelemetry(e.detail));
+        Object.entries(PARAMETERS).forEach(([key, parameter]) => {
+            const chart = createChart(parameter);
+            if (chart) state.charts[key] = chart;
+        });
+        window.addEventListener("openmcc:telemetry", event => processTelemetry(event.detail));
         window.addEventListener("openmcc:serial-disconnected", () => { if (!state.paused) setStatus("waiting"); });
-        elements.pauseButton?.addEventListener("click", () => { state.paused = !state.paused; elements.pauseButton.textContent = state.paused ? "Продолжить" : "Пауза"; setStatus(state.paused ? "paused" : "active"); updateStats(); });
+        elements.pauseButton?.addEventListener("click", () => {
+            state.paused = !state.paused;
+            elements.pauseButton.textContent = state.paused ? "Продолжить" : "Пауза";
+            setStatus(state.paused ? "paused" : "active");
+            updateStats();
+        });
         elements.clearButton?.addEventListener("click", clearCharts);
-        updateStats(); setStatus("waiting"); state.initialized = true;
-        log("Графики телеметрии v0.7.0 готовы: точки на каждом отсчёте", "success");
+        updateStats();
+        setStatus("waiting");
+        state.initialized = true;
+        log("Графики v0.8.0 готовы: отдельная линия для каждого ID спутника.", "success");
     }
 
-    window.OpenMCCCharts = Object.freeze({ config: CONFIG, processTelemetry, clear: clearCharts, getState: () => ({ ...state, chartKeys: Object.keys(state.charts) }) });
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initialize, { once: true }); else initialize();
+    window.OpenMCCCharts = Object.freeze({
+        config: CONFIG,
+        processTelemetry,
+        clear: clearCharts,
+        colorForId,
+        getState: () => ({
+            initialized: state.initialized,
+            paused: state.paused,
+            totalPackets: state.totalPackets,
+            ids: [...state.ids],
+            chartKeys: Object.keys(state.charts),
+        }),
+    });
+
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initialize, { once: true });
+    else initialize();
 })();
 
-// v7 runtime patch загружается после регистрации графиков. Внутри он ждёт
-// завершения инициализации app.js/help.js, поэтому не зависит от порядка DOMContentLoaded.
-import("/js/v7.js").catch(error => console.error("Altair v7 patch failed", error));
+import("/js/v8.js")
+    .then(() => import("/js/v8-final.js"))
+    .catch(error => console.error("Altair v8 runtime failed", error));

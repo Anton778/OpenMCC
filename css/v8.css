@@ -1,0 +1,152 @@
+/* ЦУП Альтаир v8 */
+.altairLogo .logoMark.v8LogoMark {
+    width: 42px;
+    height: 42px;
+    border: 0;
+    background: rgba(255,255,255,.96);
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    box-shadow: 0 0 24px rgba(44,108,255,.25);
+}
+.altairLogo .logoMark.v8LogoMark img { width: 36px; height: 36px; object-fit: contain; }
+
+.v8FrequencyMetric #v8FrequencyValue {
+    color: #73e8ff;
+    font-weight: 800;
+    letter-spacing: .04em;
+    white-space: nowrap;
+}
+
+.v8PanelToggle {
+    margin-left: auto;
+    min-width: 118px;
+    border: 1px solid rgba(79,180,255,.34);
+    border-radius: 9px;
+    background: rgba(8,29,52,.78);
+    color: #a9dfff;
+    padding: 7px 10px;
+    cursor: pointer;
+}
+.v8PanelToggle:hover { border-color: rgba(79,180,255,.7); color: #e3f7ff; }
+
+#serialPanel.v8-collapsed > :not(.panelTitleRow):not(.v8ConnectionSummary) { display: none !important; }
+.v8ConnectionSummary {
+    display: none;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+#serialPanel.v8-collapsed .v8ConnectionSummary { display: flex; }
+.v8ConnectionSummary span {
+    border: 1px solid rgba(77,116,157,.34);
+    border-radius: 999px;
+    padding: 6px 10px;
+    color: #9fb6cf;
+    background: rgba(4,17,31,.65);
+    font-size: .78rem;
+}
+.v8ConnectionSummary strong { color: #d9f5ff; }
+
+.v8ResetButton {
+    border: 1px solid rgba(255,170,70,.38);
+    background: rgba(80,42,8,.22);
+    color: #ffd29b;
+    border-radius: 9px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+.v8ResetButton:hover { border-color: rgba(255,170,70,.75); }
+
+#rawSerialPanel .rawToolbar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+#rawSerialConsole {
+    background: #020811;
+    border: 1px solid rgba(72,114,160,.35);
+    border-radius: 10px;
+    min-height: 180px;
+    max-height: 360px;
+    overflow: auto;
+    padding: 10px 12px;
+    color: #a7c8e8;
+    font: 12px/1.45 "Cascadia Mono","Consolas",monospace;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+#rawSerialConsole .rx { color: #9de9ff; }
+#rawSerialConsole .tx { color: #ffd479; }
+#rawSerialConsole .err { color: #ff8e9a; }
+#rawSerialConsole .info { color: #8cf0b4; }
+
+.v8CommandTarget {
+    display: grid;
+    grid-template-columns: minmax(100px, 180px) 1fr;
+    gap: 10px;
+    align-items: center;
+    margin: 0 0 14px;
+}
+.v8CommandTarget input {
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(4,17,31,.8);
+    color: #d9f5ff;
+    border: 1px solid rgba(77,116,157,.42);
+    border-radius: 8px;
+    padding: 9px 10px;
+}
+.v8ProtocolNote {
+    margin-top: 10px;
+    color: #8299b4;
+    font-size: .8rem;
+    line-height: 1.45;
+}
+.v8ProtocolNote code { color: #bfeeff; }
+
+.v8AboutButton { font-size: 14px !important; }
+#v8AboutDialog {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,6,14,.78);
+    backdrop-filter: blur(7px);
+    padding: 24px;
+}
+#v8AboutDialog.open { display: flex; }
+#v8AboutDialog .aboutCard {
+    width: min(680px, 94vw);
+    max-height: 88vh;
+    overflow: auto;
+    background: #071523;
+    border: 1px solid rgba(77,157,216,.45);
+    border-radius: 16px;
+    box-shadow: 0 22px 80px rgba(0,0,0,.55);
+    padding: 24px;
+}
+#v8AboutDialog .aboutHeader { display:flex; align-items:center; gap:14px; }
+#v8AboutDialog .aboutHeader img { width:56px; height:56px; background:#fff; border-radius:12px; padding:5px; }
+#v8AboutDialog h2 { margin:0; color:#e8f8ff; }
+#v8AboutDialog p, #v8AboutDialog li { color:#a9bdcf; line-height:1.55; }
+#v8AboutDialog code { color:#7de7ff; }
+#v8AboutDialog .closeAbout {
+    float:right;
+    border:1px solid rgba(105,142,177,.4);
+    background:#0b2137;
+    color:#dceeff;
+    border-radius:8px;
+    padding:7px 10px;
+    cursor:pointer;
+}
+
+@media (max-width: 900px) {
+    .v8FrequencyMetric { display: none; }
+    .v8CommandTarget { grid-template-columns: 1fr; }
+}

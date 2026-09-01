@@ -1,4 +1,4 @@
-name: ЦУП Альтаир — Windows installer
+name: ЦУП Альтаир v8 — Windows installer
 
 on:
   push:
@@ -20,10 +20,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Compile v7 LaTeX manual
+      - name: Compile v8 LaTeX manual
         uses: xu-cheng/latex-action@v4
         with:
-          root_file: CUP_Altair_v7_Manual.tex
+          root_file: CUP_Altair_v8_Manual.tex
           working_directory: docs
           work_in_root_file_dir: true
           latexmk_use_xelatex: true
@@ -31,8 +31,8 @@ jobs:
       - name: Upload PDF manual
         uses: actions/upload-artifact@v4
         with:
-          name: CUP-Altair-v7-Manual
-          path: docs/CUP_Altair_v7_Manual.pdf
+          name: CUP-Altair-v8-Manual
+          path: docs/CUP_Altair_v8_Manual.pdf
           if-no-files-found: error
           retention-days: 30
 
@@ -47,7 +47,7 @@ jobs:
       - name: Download compiled PDF manual
         uses: actions/download-artifact@v4
         with:
-          name: CUP-Altair-v7-Manual
+          name: CUP-Altair-v8-Manual
           path: docs
 
       - name: Set up Python
@@ -58,11 +58,11 @@ jobs:
       - name: Install PlatformIO
         run: python -m pip install --upgrade platformio
 
-      - name: Verify ESP32 release sources are identical
+      - name: Verify ESP32 v8 release sources are identical
         shell: pwsh
         run: |
-          $ino = "firmware/radio_gateway_esp32/Altair_Gateway_v7/Altair_Gateway_v7.ino"
-          $cpp = "firmware/radio_gateway_esp32/src/main_v7.cpp"
+          $ino = "firmware/radio_gateway_esp32/Altair_Gateway_v8/Altair_Gateway_v8.ino"
+          $cpp = "firmware/radio_gateway_esp32/src/main_v8.cpp"
           $inoHash = (Get-FileHash -Algorithm SHA256 $ino).Hash
           $cppHash = (Get-FileHash -Algorithm SHA256 $cpp).Hash
           Write-Host "Arduino sketch SHA256: $inoHash"
@@ -71,21 +71,18 @@ jobs:
             throw "ESP32 Arduino sketch and bundled PlatformIO source differ. Release blocked."
           }
 
-      - name: Compile ESP32 radio gateway v7.1
+      - name: Compile ESP32 radio gateway v8
         run: pio run -d firmware/radio_gateway_esp32
-
-      - name: Compile STM32 v7 transmitter reference
-        run: pio run -d firmware/transmitter_stm32_v7
 
       - name: Prepare bundled ESP32 firmware
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
           $buildDir = "firmware/radio_gateway_esp32/.pio/build/esp32dev"
-          $sourceCode = Get-Content "firmware/radio_gateway_esp32/src/main_v7.cpp" -Raw
+          $sourceCode = Get-Content "firmware/radio_gateway_esp32/src/main_v8.cpp" -Raw
 
-          if ($sourceCode -notmatch 'FW_VERSION_V7\[\]\s*=\s*"([^"]+)"') {
-            throw "Unable to read FW_VERSION_V7 from ESP32 gateway source."
+          if ($sourceCode -notmatch 'FW_VERSION\[\]\s*=\s*"([^"]+)"') {
+            throw "Unable to read FW_VERSION from ESP32 gateway source."
           }
           $firmwareVersion = $Matches[1]
 
@@ -97,7 +94,7 @@ jobs:
             @{ Source = "$buildDir/bootloader.bin"; File = "gateway-bootloader.bin"; Label = "Bootloader"; Address = 4096 },
             @{ Source = "$buildDir/partitions.bin"; File = "gateway-partitions.bin"; Label = "Partition table"; Address = 32768 },
             @{ Source = $bootApp0.FullName; File = "gateway-boot_app0.bin"; Label = "boot_app0"; Address = 57344 },
-            @{ Source = "$buildDir/firmware.bin"; File = "gateway-firmware.bin"; Label = "Altair v7.1 radio gateway"; Address = 65536 }
+            @{ Source = "$buildDir/firmware.bin"; File = "gateway-firmware.bin"; Label = "Altair v8 radio gateway"; Address = 65536 }
           )
 
           $manifestImages = @()
@@ -107,7 +104,13 @@ jobs:
             Copy-Item $image.Source $target -Force
             $fileInfo = Get-Item $target
             $md5 = (Get-FileHash -Algorithm MD5 $target).Hash.ToLowerInvariant()
-            $manifestImages += [ordered]@{ file=$image.File; label=$image.Label; address=$image.Address; size=$fileInfo.Length; md5=$md5 }
+            $manifestImages += [ordered]@{
+              file=$image.File
+              label=$image.Label
+              address=$image.Address
+              size=$fileInfo.Length
+              md5=$md5
+            }
           }
 
           $appVersion = (Get-Content package.json -Raw | ConvertFrom-Json).version
@@ -117,7 +120,7 @@ jobs:
             targetChip = "ESP32"
             firmwareVersion = $firmwareVersion
             applicationVersion = $appVersion
-            buildLabel = "Altair MCC v$appVersion / v7.1-proven-rx-bw203"
+            buildLabel = "Altair MCC v$appVersion / v8-rx203-xor-bypass-rftx"
             flashMode = "dio"
             flashFreq = "40m"
             flashSize = "4MB"
@@ -137,21 +140,20 @@ jobs:
       - name: Build Windows installer
         run: npm run dist:win
 
-      - name: Upload Windows installer artifact
+      - name: Upload v8 artifact
         uses: actions/upload-artifact@v4
         with:
-          name: CUP-Altair-v7.1-Windows-Installer
+          name: CUP-Altair-v8-Windows-Installer
           path: |
             release/*.exe
             release/*.yml
             release/*.blockmap
             bundled_firmware/*.json
             bundled_firmware/*.bin
-            firmware/radio_gateway_esp32/Altair_Gateway_v7/Altair_Gateway_v7.ino
-            firmware/transmitter_stm32_v7/Transmit_v7_static/Transmit_v7_static.ino
-            docs/CUP_Altair_v7_Manual.pdf
-            docs/CUP_Altair_v7_Manual.tex
-            docs/RELEASE_V7.md
+            firmware/radio_gateway_esp32/Altair_Gateway_v8/Altair_Gateway_v8.ino
+            docs/CUP_Altair_v8_Manual.pdf
+            docs/CUP_Altair_v8_Manual.tex
+            docs/RELEASE_V8.md
           if-no-files-found: error
           retention-days: 30
 
@@ -164,7 +166,7 @@ jobs:
           "version=$version" >> $env:GITHUB_OUTPUT
           "tag=v$version" >> $env:GITHUB_OUTPUT
 
-      - name: Publish GitHub Release when this version is new
+      - name: Publish GitHub Release v8
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         shell: pwsh
         env:
@@ -172,23 +174,43 @@ jobs:
           RELEASE_TAG: ${{ steps.app_version.outputs.tag }}
         run: |
           gh release view $env:RELEASE_TAG *> $null
-          if ($LASTEXITCODE -eq 0) {
-            Write-Host "Release $env:RELEASE_TAG already exists."
-            exit 0
-          }
-          $installer = Get-ChildItem -Path release -Filter "CUP-Altair-Setup-*.exe" | Select-Object -First 1
-          if (-not $installer) { throw "Altair Windows installer was not found in release/." }
+          if ($LASTEXITCODE -ne 0) {
+            $installer = Get-ChildItem -Path release -Filter "CUP-Altair-Setup-*.exe" | Select-Object -First 1
+            if (-not $installer) { throw "Altair Windows installer was not found in release/." }
 
-          gh release create $env:RELEASE_TAG `
-            $installer.FullName `
-            "firmware/radio_gateway_esp32/Altair_Gateway_v7/Altair_Gateway_v7.ino" `
-            "firmware/transmitter_stm32_v7/Transmit_v7_static/Transmit_v7_static.ino" `
-            "docs/CUP_Altair_v7_Manual.pdf" `
-            "docs/CUP_Altair_v7_Manual.tex" `
-            "docs/RELEASE_V7.md" `
-            "bundled_firmware/gateway-firmware.bin" `
-            "bundled_firmware/manifest.json" `
-            --target main `
-            --title "ЦУП Альтаир v7.1 ($env:RELEASE_TAG) — Технопром 2026. Миссия на Луну" `
-            --notes-file "docs/RELEASE_V7.md" `
-            --latest
+            gh release create $env:RELEASE_TAG `
+              $installer.FullName `
+              "firmware/radio_gateway_esp32/Altair_Gateway_v8/Altair_Gateway_v8.ino" `
+              "docs/CUP_Altair_v8_Manual.pdf" `
+              "docs/CUP_Altair_v8_Manual.tex" `
+              "docs/RELEASE_V8.md" `
+              "bundled_firmware/gateway-firmware.bin" `
+              "bundled_firmware/manifest.json" `
+              --target main `
+              --title "ЦУП Альтаир v8 ($env:RELEASE_TAG) — Миссия на Луну" `
+              --notes-file "docs/RELEASE_V8.md" `
+              --latest
+            if ($LASTEXITCODE -ne 0) { throw "Unable to publish $env:RELEASE_TAG" }
+          } else {
+            Write-Host "Release $env:RELEASE_TAG already exists."
+          }
+
+      - name: Remove previous GitHub releases after v8 is published
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.app_version.outputs.tag }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          gh release view $env:RELEASE_TAG *> $null
+          if ($LASTEXITCODE -ne 0) { throw "Current release $env:RELEASE_TAG is not published; old releases will not be removed." }
+
+          $tags = gh release list --limit 100 --json tagName --jq '.[].tagName'
+          foreach ($tag in $tags) {
+            if ($tag -and $tag -ne $env:RELEASE_TAG) {
+              Write-Host "Deleting old release: $tag"
+              gh release delete $tag --yes --cleanup-tag
+              if ($LASTEXITCODE -ne 0) { throw "Unable to delete old release $tag" }
+            }
+          }

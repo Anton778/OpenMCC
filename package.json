@@ -1,8 +1,9 @@
 {
   "name": "altair-mcc",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "private": true,
-  "description": "ЦУП Альтаир — Центр управления полётами, Технопром 2026, Миссия на Луну",
+  "description": "ЦУП Альтаир v8 — учебный центр управления полётами и радиошлюз для CubeSat",
+  "author": "Антон Т.",
   "main": "desktop/main.cjs",
   "repository": {
     "type": "git",
@@ -39,6 +40,7 @@
       "desktop/**/*",
       "firmware/**/*",
       "bundled_firmware/**/*",
+      "assets/**/*",
       "README.md",
       "CHANGELOG.md",
       "package.json"
@@ -47,10 +49,13 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
-      "artifactName": "CUP-Altair-Setup-${version}.${ext}"
+      "artifactName": "CUP-Altair-Setup-${version}.${ext}",
+      "icon": "assets/altair-logo.png"
     },
     "nsis": {
       "oneClick": false,

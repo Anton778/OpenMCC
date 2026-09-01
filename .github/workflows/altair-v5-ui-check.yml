@@ -1,4 +1,4 @@
-name: Altair v7 checks
+name: Altair v8 checks
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
 
@@ -25,7 +25,8 @@ jobs:
           node --check js/parser.js
           node --check js/app.js
           node --check js/charts.js
-          node --check js/v7.js
+          node --check js/v8.js
+          node --check js/v8-final.js
           node --check js/help.js
           node --check js/flasher-v5.js
           node --check js/serial.js
@@ -35,31 +36,45 @@ jobs:
           node - <<'NODE'
           const fs = require('fs');
           const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-          if (pkg.version !== '0.7.1') throw new Error(`Expected 0.7.1, got ${pkg.version}`);
-          const prefix = '02,00001,00015,3.00,4.20,1,';
-          let xor = 0;
-          for (const ch of prefix) xor ^= ch.charCodeAt(0);
-          if (xor !== 0x33) throw new Error(`Expected XOR 0x33, got 0x${xor.toString(16)}`);
-          if ((prefix + '33').length !== 29) throw new Error('Canonical packet must contain 29 ASCII characters');
-          console.log('v7.1 package and canonical telemetry packet OK');
+          if (pkg.version !== '0.8.0') throw new Error(`Expected 0.8.0, got ${pkg.version}`);
+          if (pkg.build?.win?.icon !== 'assets/altair-logo.png') throw new Error('Altair Windows PNG icon source is not configured');
+          if (pkg.author !== 'Антон Т.') throw new Error('Application author metadata is missing');
+
+          const parser = fs.readFileSync('js/parser.js', 'utf8');
+          if (!parser.includes('checksumValidation: false')) {
+            throw new Error('Application checksum validation must be disabled in v8 parser');
+          }
+
+          const app = fs.readFileSync('js/app.js', 'utf8');
+          if (!app.includes('version: "0.8.0"')) throw new Error('app.js must identify v0.8.0');
+          if (app.includes('applyV6BrandingAndRadioProfile')) throw new Error('Legacy v6 runtime override is still present');
+
+          const charts = fs.readFileSync('js/charts.js', 'utf8');
+          if (!charts.includes('datasetFor(chart, id)')) throw new Error('Multi-ID chart datasets are missing');
+          if (!charts.includes('pointRadius: 2.7')) throw new Error('Visible chart points are missing');
+
+          const finalRuntime = fs.readFileSync('js/v8-final.js', 'utf8');
+          if (!finalRuntime.includes('bandwidth: "203"')) throw new Error('v8 UI must enforce RX BW 203 kHz');
+
+          console.log('Altair v8 JS/package checks OK');
           NODE
 
-      - name: Validate v7.1 radio profile and UI patch
+      - name: Validate v8 radio profile and release files
         shell: bash
         run: |
-          grep -Fq 'bandwidth: 203' js/v7.js
-          grep -Fq '"ANTENNA", "RSSI", "SNR"' js/v7.js
-          grep -Fq 'pointRadius: 2.6' js/charts.js
-          grep -Fq 'RADIO_BW_KHZ = 203.0f' firmware/radio_gateway_esp32/src/main_v7.cpp
-          grep -Fq 'const int state = radio.receive(packet);' firmware/radio_gateway_esp32/src/main_v7.cpp
-          grep -Fq '203.0f' firmware/radio_gateway_esp32/Altair_Gateway_v7/Altair_Gateway_v7.ino
-          grep -Fq 'const int state = radio.receive(packet);' firmware/radio_gateway_esp32/Altair_Gateway_v7/Altair_Gateway_v7.ino
-          cmp -s firmware/radio_gateway_esp32/src/main_v7.cpp firmware/radio_gateway_esp32/Altair_Gateway_v7/Altair_Gateway_v7.ino
-          grep -Fq '02,00001,00015,3.00,4.20,1,33' firmware/transmitter_stm32_v7/Transmit_v7_static/Transmit_v7_static.ino
-          grep -Fq '+<main_v7.cpp>' firmware/radio_gateway_esp32/platformio.ini
-          test -f docs/CUP_Altair_v7_Manual.tex
-          test -f docs/RELEASE_V7.md
-          if grep -Fq 'id="CURR"' index.html; then
-            echo 'CURR must not be present in the v7 main interface'
-            exit 1
-          fi
+          grep -Fq 'RF_FREQ_MHZ = 435.000f' firmware/radio_gateway_esp32/src/main_v8.cpp
+          grep -Fq 'RF_BW_KHZ = 203.0f' firmware/radio_gateway_esp32/src/main_v8.cpp
+          grep -Fq 'APPLICATION_XOR_CHECK=DISABLED' firmware/radio_gateway_esp32/src/main_v8.cpp
+          grep -Fq '$CMD,RF,' firmware/radio_gateway_esp32/src/main_v8.cpp
+          grep -Fq '$CMD,RADIO_STATUS' firmware/radio_gateway_esp32/src/main_v8.cpp
+          grep -Fq 'const int state = radio.receive(packet);' firmware/radio_gateway_esp32/src/main_v8.cpp
+          cmp -s firmware/radio_gateway_esp32/src/main_v8.cpp firmware/radio_gateway_esp32/Altair_Gateway_v8/Altair_Gateway_v8.ino
+          grep -Fq '+<main_v8.cpp>' firmware/radio_gateway_esp32/platformio.ini
+          grep -Fq '435.000' js/v8.js
+          grep -Fq 'rawSerialConsole' js/v8.js
+          grep -Fq 'Сбросить принятые данные' js/v8.js
+          test -f docs/CUP_Altair_v8_Manual.tex
+          test -f docs/RELEASE_V8.md
+          test -f docs/media/mcc-technoprom.jpg
+          test -f docs/media/cubesat-technoprom.jpg
+          test -f assets/altair-logo.png
