@@ -1,45 +1,67 @@
-name: ЦУП Альтаир — ESP32 radio gateway firmware
+name: ЦУП Альтаир — проверка прошивок
 
 on:
   push:
     branches:
       - main
     paths:
-      - "firmware/radio_gateway_esp32/**"
-      - ".github/workflows/esp32-radio-gateway.yml"
+      - "firmware/**"
+      - ".github/workflows/firmware-build.yml"
   pull_request:
     branches:
       - main
     paths:
-      - "firmware/radio_gateway_esp32/**"
-      - ".github/workflows/esp32-radio-gateway.yml"
+      - "firmware/**"
+      - ".github/workflows/firmware-build.yml"
   workflow_dispatch:
 
 jobs:
   build:
+    name: ${{ matrix.name }}
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Наземный ЦУП — ESP32-WROOM-32
+            id: ground-esp32
+            project: firmware/ground_station/esp32
+          - name: Наземный ЦУП — Arduino Uno
+            id: ground-uno
+            project: firmware/ground_station/arduino_uno
+          - name: Наземный ЦУП — Arduino Nano
+            id: ground-nano
+            project: firmware/ground_station/arduino_nano
+          - name: Спутник — STM32 Blue Pill
+            id: satellite-stm32
+            project: firmware/satellite/stm32
+          - name: Спутник — Arduino Nano
+            id: satellite-nano
+            project: firmware/satellite/arduino_nano
+
     steps:
-      - name: Checkout repository
+      - name: Получить исходный код
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Настроить Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install PlatformIO
+      - name: Установить PlatformIO
         run: python -m pip install --upgrade platformio
 
-      - name: Compile ESP32 radio gateway
-        run: pio run -d firmware/radio_gateway_esp32
+      - name: Скомпилировать прошивку
+        run: pio run -d "${{ matrix.project }}"
 
-      - name: Prepare firmware artifact
+      - name: Подготовить бинарные файлы ESP32
+        if: matrix.id == 'ground-esp32'
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p firmware-artifact
-          BUILD_DIR="firmware/radio_gateway_esp32/.pio/build/esp32dev"
+          BUILD_DIR="firmware/ground_station/esp32/.pio/build/esp32dev"
           BOOT_APP0="$(find "$HOME/.platformio/packages" -name boot_app0.bin -print -quit)"
           test -n "$BOOT_APP0"
 
@@ -58,7 +80,8 @@ jobs:
 
           md5sum firmware-artifact/*.bin > firmware-artifact/md5sums.txt
 
-      - name: Upload compiled firmware
+      - name: Сохранить бинарные файлы ESP32
+        if: matrix.id == 'ground-esp32'
         uses: actions/upload-artifact@v4
         with:
           name: Altair-ESP32-Radio-Gateway

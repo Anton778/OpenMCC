@@ -58,28 +58,15 @@ jobs:
       - name: Install PlatformIO
         run: python -m pip install --upgrade platformio
 
-      - name: Verify ESP32 v8 release sources are identical
-        shell: pwsh
-        run: |
-          $ino = "firmware/radio_gateway_esp32/Altair_Gateway_v8/Altair_Gateway_v8.ino"
-          $cpp = "firmware/radio_gateway_esp32/src/main_v8.cpp"
-          $inoHash = (Get-FileHash -Algorithm SHA256 $ino).Hash
-          $cppHash = (Get-FileHash -Algorithm SHA256 $cpp).Hash
-          Write-Host "Arduino sketch SHA256: $inoHash"
-          Write-Host "Bundled source SHA256: $cppHash"
-          if ($inoHash -ne $cppHash) {
-            throw "ESP32 Arduino sketch and bundled PlatformIO source differ. Release blocked."
-          }
-
       - name: Compile ESP32 radio gateway v8
-        run: pio run -d firmware/radio_gateway_esp32
+        run: pio run -d firmware/ground_station/esp32
 
       - name: Prepare bundled ESP32 firmware
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          $buildDir = "firmware/radio_gateway_esp32/.pio/build/esp32dev"
-          $sourceCode = Get-Content "firmware/radio_gateway_esp32/src/main_v8.cpp" -Raw
+          $buildDir = "firmware/ground_station/esp32/.pio/build/esp32dev"
+          $sourceCode = Get-Content "firmware/ground_station/esp32/Altair_Ground_ESP32/Altair_Ground_ESP32.ino" -Raw
 
           if ($sourceCode -notmatch 'FW_VERSION\[\]\s*=\s*"([^"]+)"') {
             throw "Unable to read FW_VERSION from ESP32 gateway source."
@@ -150,7 +137,7 @@ jobs:
             release/*.blockmap
             bundled_firmware/*.json
             bundled_firmware/*.bin
-            firmware/radio_gateway_esp32/Altair_Gateway_v8/Altair_Gateway_v8.ino
+            firmware/ground_station/esp32/Altair_Ground_ESP32/Altair_Ground_ESP32.ino
             docs/CUP_Altair_v8_Manual.pdf
             docs/CUP_Altair_v8_Manual.tex
             docs/RELEASE_V8.md
@@ -180,7 +167,7 @@ jobs:
 
             gh release create $env:RELEASE_TAG `
               $installer.FullName `
-              "firmware/radio_gateway_esp32/Altair_Gateway_v8/Altair_Gateway_v8.ino" `
+              "firmware/ground_station/esp32/Altair_Ground_ESP32/Altair_Ground_ESP32.ino" `
               "docs/CUP_Altair_v8_Manual.pdf" `
               "docs/CUP_Altair_v8_Manual.tex" `
               "docs/RELEASE_V8.md" `

@@ -11,12 +11,21 @@
 
 ## Скачать
 
-> Для обычной работы достаточно установщика и ESP32 с CC1101.
+### 1. Наземный ЦУП
 
-- **[Скачать программу ЦУП Альтаир v8 для Windows](https://github.com/Anton778/OpenMCC/releases/download/v0.8.0/CUP-Altair-Setup-0.8.0.exe)**
-- **[Скачать скетч ESP32 радиошлюза для наземного ЦУП](firmware/radio_gateway_esp32/Altair_Gateway_v8/Altair_Gateway_v8.ino)**
-- **[Скачать скетч STM32 радиошлюза для спутника IntroSat](firmware/)**
-- [Скачать руководство пользователя PDF](https://github.com/Anton778/OpenMCC/releases/download/v0.8.0/CUP_Altair_v8_Manual.pdf)
+- **[Программа ЦУП Альтаир v8 для Windows](https://github.com/Anton778/OpenMCC/releases/download/v0.8.0/CUP-Altair-Setup-0.8.0.exe)**
+- [Скетч радиошлюза для ESP32-WROOM-32](firmware/ground_station/esp32/Altair_Ground_ESP32/Altair_Ground_ESP32.ino)
+- [Скетч радиошлюза для Arduino Uno](firmware/ground_station/arduino_uno/Altair_Ground_Arduino_Uno/Altair_Ground_Arduino_Uno.ino)
+- [Скетч радиошлюза для Arduino Nano](firmware/ground_station/arduino_nano/Altair_Ground_Arduino_Nano/Altair_Ground_Arduino_Nano.ino)
+
+### 2. Спутник
+
+- [Скетч спутника IntroSat для STM32F103C8T6 / Blue Pill](firmware/satellite/stm32/Altair_Satellite_STM32/Altair_Satellite_STM32.ino)
+- [Скетч спутника для Arduino Nano](firmware/satellite/arduino_nano/Altair_Satellite_Arduino_Nano/Altair_Satellite_Arduino_Nano.ino)
+
+### 3. Руководство
+
+- [Руководство пользователя ЦУП Альтаир v8, PDF](https://github.com/Anton778/OpenMCC/releases/download/v0.8.0/CUP_Altair_v8_Manual.pdf)
 
 ## Как выглядит система
 
@@ -36,7 +45,7 @@
 ## Быстрый запуск
 
 1. Подключите CC1101 к ESP32-WROOM-32 по таблице ниже.
-2. Загрузите `Altair_Gateway_v8.ino` через Arduino IDE **или** прошейте ESP32 встроенной прошивкой из программы.
+2. Загрузите `Altair_Ground_ESP32.ino` через Arduino IDE **или** прошейте ESP32 встроенной прошивкой из программы.
 3. Подключите ESP32 к компьютеру по USB.
 4. Запустите `ЦУП Альтаир`.
 5. В блоке **«Соединение с ЦУПом»** выберите ESP32 и `115200 бод`.

@@ -22,7 +22,7 @@
 
 ## ESP32 gateway
 
-`Altair_Gateway_v8.ino`
+`Altair_Ground_ESP32.ino`
 
 Профиль:
 
@@ -84,7 +84,7 @@ $CMD,RADIO_STATUS
 ## Файлы релиза
 
 - `CUP-Altair-Setup-0.8.0.exe`
-- `Altair_Gateway_v8.ino`
+- `Altair_Ground_ESP32.ino`
 - `CUP_Altair_v8_Manual.pdf`
 - `CUP_Altair_v8_Manual.tex`
 - `gateway-firmware.bin`
