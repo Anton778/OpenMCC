@@ -77,7 +77,13 @@ jobs:
           grep -Fq 'APPLICATION_XOR_CHECK=DISABLED' "$ground_esp32"
           grep -Fq '$CMD,RF,' "$ground_esp32"
           grep -Fq '$CMD,RADIO_STATUS' "$ground_esp32"
-          grep -Fq 'const int state = radio.receive(packet);' "$ground_esp32"
+          grep -Fq 'FW_VERSION[] = "8.2.0"' "$ground_esp32"
+          grep -Fq 'radio.setPacketReceivedAction(onRfPacketReceived);' "$ground_esp32"
+          grep -Fq 'const int state = radio.readData(packet);' "$ground_esp32"
+          if grep -Fq 'const int state = radio.receive(packet);' "$ground_esp32"; then
+            echo 'Blocking CC1101 receive must not be used in the ESP32 gateway'
+            exit 1
+          fi
           grep -Fq 'src_dir = Altair_Ground_ESP32' firmware/ground_station/esp32/platformio.ini
 
           test -f firmware/ground_station/arduino_uno/Altair_Ground_Arduino_Uno/Altair_Ground_Arduino_Uno.ino
