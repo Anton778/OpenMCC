@@ -276,4 +276,6 @@
     else initialize();
 })();
 
-import("/js/v8.js").catch(error => console.error("Altair v8 patch failed", error));
+import("/js/v8.js")
+    .then(() => import("/js/v8-final.js"))
+    .catch(error => console.error("Altair v8 runtime failed", error));
