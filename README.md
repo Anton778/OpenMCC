@@ -24,7 +24,7 @@
 <tr>
 <td width="50%" valign="top">
 <img src="docs/media/mcc-technoprom.jpg" alt="ЦУП Альтаир на Технопроме">
-<br><b>Наземный ЦУП.</b> Большой экран с программой, направленная антенна, радиошлюз ESP32 + CC1101 и поворотное устройство.
+<br><b>Наземный ЦУП.</b> Большой экран с программой, направленная антенна, радиошлюз ESP32 + CC1101 и в планах поворотное устройство.
 </td>
 <td width="50%" valign="top">
 <img src="docs/media/cubesat-technoprom.jpg" alt="Учебный CubeSat">
