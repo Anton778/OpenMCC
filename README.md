@@ -13,10 +13,10 @@
 
 > Для обычной работы достаточно установщика и ESP32 с CC1101.
 
-- **[Скачать ЦУП Альтаир v8 для Windows](https://github.com/Anton778/OpenMCC/releases/download/v0.8.0/CUP-Altair-Setup-0.8.0.exe)**
-- **[Скачать скетч ESP32 радиошлюза](firmware/radio_gateway_esp32/Altair_Gateway_v8/Altair_Gateway_v8.ino)**
+- **[Скачать программу ЦУП Альтаир v8 для Windows](https://github.com/Anton778/OpenMCC/releases/download/v0.8.0/CUP-Altair-Setup-0.8.0.exe)**
+- **[Скачать скетч ESP32 радиошлюза для наземного ЦУП](firmware/radio_gateway_esp32/Altair_Gateway_v8/Altair_Gateway_v8.ino)**
+- **[Скачать скетч STM32 радиошлюза для спутника IntroSat](firmware/)**
 - [Скачать руководство пользователя PDF](https://github.com/Anton778/OpenMCC/releases/download/v0.8.0/CUP_Altair_v8_Manual.pdf)
-- [Исходник руководства LaTeX](docs/CUP_Altair_v8_Manual.tex)
 
 ## Как выглядит система
 
