@@ -275,5 +275,3 @@
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initialize, { once: true });
     else initialize();
 })();
-
-    .catch(error => console.error("Altair v8 runtime failed", error));
