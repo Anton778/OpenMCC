@@ -170,3 +170,4 @@
 })();
 
 import("/js/v8.1.js").catch(error => console.error("Altair v8.0.1 UI patch failed", error));
+import("/js/logo-transparent.js").catch(error => console.error("Altair transparent logo patch failed", error));
