@@ -422,21 +422,46 @@ function installAboutDialog() {
         <div class="aboutCard" role="dialog" aria-modal="true" aria-labelledby="v8AboutTitle">
             <button type="button" class="closeAbout">Закрыть</button>
             <div class="aboutHeader">
-                <img src="assets/altair-logo.png" alt="Альтаир">
+                <img src="assets/altair-logo.png" alt="Логотип Альтаира">
                 <div>
-                    <h2 id="v8AboutTitle">ЦУП Альтаир v8</h2>
-                    <div>Центр управления полётами · версия 0.8.0</div>
+                    <h2 id="v8AboutTitle">ЦУП Альтаир</h2>
+                    <div class="aboutSubtitle">Учебный центр управления полётами</div>
                 </div>
             </div>
-            <p><strong>Автор: Антон Т.</strong></p>
-            <p>Программа создана в рамках образовательного проекта «Миссия на Луну» к профильной смене по спутникостроению и развивалась во время Технопрома-2026.</p>
-            <p>ЦУП принимает телеметрию нескольких учебных аппаратов, строит графики по каждому ID, показывает сырые данные COM-порта и передаёт команды через радиошлюз ESP32 + CC1101.</p>
-            <ul>
-                <li>Рабочая частота: <strong>435.000 МГц</strong>.</li>
-                <li>Наземный RX bandwidth: <strong>203 кГц</strong>.</li>
-                <li>USB: <strong>115200 бод</strong>.</li>
-                <li>Прикладная проверка XOR в v8 отключена для совместимости учебных команд.</li>
-            </ul>
+
+            <div class="aboutMetaGrid">
+                <div><span>Версия</span><strong>v8 · 0.8.0</strong></div>
+                <div><span>Автор</span><strong>Антон Т.</strong></div>
+            </div>
+
+            <section class="aboutSection">
+                <h3>Назначение</h3>
+                <p>Программа предназначена для приёма и отображения телеметрии учебных космических аппаратов, анализа параметров радиолинии и передачи команд управления через радиошлюз ESP32 + CC1101.</p>
+            </section>
+
+            <section class="aboutSection">
+                <h3>Основные функции</h3>
+                <ul>
+                    <li>приём телеметрии нескольких аппаратов с разделением по ID;</li>
+                    <li>построение графиков и отображение RSSI, SNR и LQI;</li>
+                    <li>просмотр исходных строк последовательного порта;</li>
+                    <li>передача адресных и широковещательных команд по радиоканалу.</li>
+                </ul>
+            </section>
+
+            <section class="aboutSection">
+                <h3>Рабочий радиопрофиль</h3>
+                <div class="aboutSpecGrid">
+                    <div><span>Частота</span><strong>435.000 МГц</strong></div>
+                    <div><span>Модуляция</span><strong>2-FSK</strong></div>
+                    <div><span>Скорость</span><strong>4,8 кбит/с</strong></div>
+                    <div><span>Полоса RX</span><strong>203 кГц</strong></div>
+                    <div><span>Интерфейс USB</span><strong>115200 бод</strong></div>
+                    <div><span>Аппаратный CRC</span><strong>включён</strong></div>
+                </div>
+            </section>
+
+            <div class="aboutFootnote">Проект разработан для образовательной программы «Миссия на Луну» и профильной смены по спутникостроению на Технопроме-2026.</div>
         </div>
     `;
     document.body.appendChild(dialog);

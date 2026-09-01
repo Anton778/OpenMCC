@@ -1,4 +1,62 @@
 /* ЦУП Альтаир v8 */
+
+/* Компактная верхняя панель: все элементы располагаются в одной строке. */
+:root { --topbar-h: 62px; }
+
+#topBar {
+    min-height: var(--topbar-h);
+    grid-template-columns:
+        minmax(245px, 1.65fr)
+        minmax(125px, .78fr)
+        minmax(190px, 1.05fr)
+        minmax(100px, .62fr)
+        minmax(135px, .78fr)
+        auto;
+    gap: 12px;
+    padding: 8px 14px;
+}
+
+#topBar .altairBrand h1 {
+    font-size: clamp(20px, 1.6vw, 25px);
+    line-height: 1.05;
+}
+
+#topBar .altairBrand .subtitle {
+    margin-top: 2px;
+    font-size: 10px;
+}
+
+#topBar .topMetric { padding-left: 11px; }
+#topBar .topMetric > :last-child { margin-top: 2px; }
+#topBar .topActions { flex-wrap: nowrap; gap: 7px; white-space: nowrap; }
+#topBar .buildBadge { min-height: 22px; padding: 3px 7px; }
+#topBar .iconButton { width: 32px; height: 32px; }
+#quickNav { top: 80px; }
+
+@media (max-width: 1450px) {
+    #topBar {
+        grid-template-columns:
+            minmax(235px, 1.55fr)
+            minmax(185px, 1fr)
+            minmax(100px, .62fr)
+            auto;
+    }
+    #topBar .topMetric.mission,
+    #topBar .topMetric.connection { display: none; }
+}
+
+@media (max-width: 1050px) {
+    #topBar { grid-template-columns: minmax(225px, 1fr) minmax(100px, .55fr) auto; }
+    #topBar .v8FrequencyMetric { display: none; }
+    #quickNav { top: 8px; }
+}
+
+@media (max-width: 720px) {
+    #topBar { grid-template-columns: 1fr auto; }
+    #topBar .topMetric,
+    #topBar .buildBadge { display: none; }
+    #quickNav { top: auto; }
+}
 .altairLogo .logoMark.v8LogoMark {
     width: 42px;
     height: 42px;
@@ -122,7 +180,8 @@
 }
 #v8AboutDialog.open { display: flex; }
 #v8AboutDialog .aboutCard {
-    width: min(680px, 94vw);
+    position: relative;
+    width: min(720px, 94vw);
     max-height: 88vh;
     overflow: auto;
     background: #071523;
@@ -131,19 +190,68 @@
     box-shadow: 0 22px 80px rgba(0,0,0,.55);
     padding: 24px;
 }
-#v8AboutDialog .aboutHeader { display:flex; align-items:center; gap:14px; }
+#v8AboutDialog .aboutHeader {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 100px 18px 0;
+    border-bottom: 1px solid rgba(77,157,216,.24);
+}
 #v8AboutDialog .aboutHeader img { width:56px; height:56px; background:#fff; border-radius:12px; padding:5px; }
-#v8AboutDialog h2 { margin:0; color:#e8f8ff; }
+#v8AboutDialog h2 { margin:0; color:#e8f8ff; font-size:1.4rem; }
+#v8AboutDialog h3 { margin:0 0 8px; color:#dceeff; font-size:.88rem; letter-spacing:.06em; text-transform:uppercase; }
 #v8AboutDialog p, #v8AboutDialog li { color:#a9bdcf; line-height:1.55; }
+#v8AboutDialog p { margin:0; }
+#v8AboutDialog ul { margin:8px 0 0; padding-left:20px; }
+#v8AboutDialog li + li { margin-top:5px; }
 #v8AboutDialog code { color:#7de7ff; }
+#v8AboutDialog .aboutSubtitle { margin-top:4px; color:#829bb3; font-size:.86rem; }
+#v8AboutDialog .aboutSection { margin-top:18px; }
+#v8AboutDialog .aboutMetaGrid,
+#v8AboutDialog .aboutSpecGrid {
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:8px;
+    margin-top:14px;
+}
+#v8AboutDialog .aboutMetaGrid > div,
+#v8AboutDialog .aboutSpecGrid > div {
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:14px;
+    padding:9px 11px;
+    border:1px solid rgba(77,157,216,.18);
+    border-radius:9px;
+    background:rgba(20,51,76,.34);
+}
+#v8AboutDialog .aboutMetaGrid span,
+#v8AboutDialog .aboutSpecGrid span { color:#7892aa; font-size:.76rem; }
+#v8AboutDialog .aboutMetaGrid strong,
+#v8AboutDialog .aboutSpecGrid strong { color:#dceeff; text-align:right; font-size:.82rem; }
+#v8AboutDialog .aboutFootnote {
+    margin-top:18px;
+    padding-top:14px;
+    border-top:1px solid rgba(77,157,216,.18);
+    color:#7892aa;
+    font-size:.78rem;
+}
 #v8AboutDialog .closeAbout {
-    float:right;
+    position:absolute;
+    top:18px;
+    right:18px;
     border:1px solid rgba(105,142,177,.4);
     background:#0b2137;
     color:#dceeff;
     border-radius:8px;
     padding:7px 10px;
     cursor:pointer;
+}
+
+@media (max-width: 620px) {
+    #v8AboutDialog .aboutMetaGrid,
+    #v8AboutDialog .aboutSpecGrid { grid-template-columns:1fr; }
+    #v8AboutDialog .aboutHeader { padding-right:0; padding-top:42px; }
 }
 
 @media (max-width: 900px) {
