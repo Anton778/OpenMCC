@@ -74,12 +74,14 @@
 |---|---|
 | VCC | 3V3 |
 | GND | GND |
-| SCK | GPIO18 |
-| MISO / SO | GPIO19 |
-| MOSI / SI | GPIO23 |
-| CSN / CS | GPIO21 |
-| GDO0 | GPIO4 |
-| GDO2 | GPIO27 |
+| SCK | GPIO18 (D18) |
+| MISO / SO | GPIO19 (D19) |
+| MOSI / SI | GPIO23 (D23) |
+| CSN / CS | GPIO21 (D21) |
+| GDO0 | GPIO4 (D4) |
+| GDO2 | GPIO27 (D27) |
+
+> `GPIO21` и `D21` — это один и тот же вывод ESP32. На разных платах и в разных средах он может быть подписан как `21`, `GPIO21` или `D21`; аналогично для остальных выводов таблицы.
 
 ### Arduino Nano *
 
