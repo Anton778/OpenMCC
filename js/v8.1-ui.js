@@ -128,7 +128,8 @@
                     return;
                 }
                 firmware.classList.remove("v81-utility-collapsed");
-                firmware.querySelector(".v81UtilityToggle")?.replaceChildren(document.createTextNode("Свернуть"));
+                const utilityToggle = firmware.querySelector(".v81UtilityToggle");
+                if (utilityToggle) utilityToggle.textContent = "Свернуть";
                 firmware.scrollIntoView({ behavior: "smooth", block: "start" });
             });
 
@@ -172,7 +173,8 @@
     function compactFirmwarePanel() {
         const firmware = document.getElementById("firmwarePanel");
         if (!firmware) return;
-        firmware.classList.add("v81FirmwarePanel", "v81-utility-collapsed");
+        firmware.classList.add("v81FirmwarePanel");
+        if (!firmware.dataset.v81Opened) firmware.classList.add("v81-utility-collapsed");
         const eyebrow = firmware.querySelector(".panelEyebrow");
         if (eyebrow) eyebrow.textContent = "ШАГ 1 · ESP32 FLASH";
 
@@ -181,10 +183,11 @@
             const button = document.createElement("button");
             button.type = "button";
             button.className = "v81UtilityToggle";
-            button.textContent = "Развернуть";
+            button.textContent = firmware.classList.contains("v81-utility-collapsed") ? "Развернуть" : "Свернуть";
             row?.appendChild(button);
             button.addEventListener("click", () => {
                 const collapsed = firmware.classList.toggle("v81-utility-collapsed");
+                firmware.dataset.v81Opened = collapsed ? "" : "1";
                 button.textContent = collapsed ? "Развернуть" : "Свернуть";
             });
         }
@@ -267,7 +270,7 @@
             item.classList.remove("never", "seen", "active");
             if (!info) {
                 item.classList.add("never");
-                if (dot) dot.style.background = "";
+                if (dot) { dot.style.background = ""; dot.style.color = ""; }
                 if (status) status.textContent = "НЕТ СВЯЗИ";
                 if (small) small.textContent = "0 пак.";
                 return;
@@ -275,7 +278,7 @@
             const active = now - info.lastSeen <= 5000;
             item.classList.add("seen");
             if (active) item.classList.add("active");
-            if (dot) dot.style.background = info.color;
+            if (dot) { dot.style.background = info.color; dot.style.color = info.color; }
             if (status) status.textContent = active ? "ПЕРЕДАЁТ" : "БЫЛ НА СВЯЗИ";
             if (small) small.textContent = `${info.count} пак.`;
         });
@@ -295,6 +298,16 @@
         updateRoster();
     }
 
+    function placeAfter(anchor, node) {
+        if (!anchor || !node || anchor.nextElementSibling === node) return;
+        anchor.insertAdjacentElement("afterend", node);
+    }
+
+    function placeBefore(anchor, node) {
+        if (!anchor || !node || anchor.previousElementSibling === node) return;
+        anchor.parentNode?.insertBefore(node, anchor);
+    }
+
     function reorganizeDashboard() {
         const dashboard = document.getElementById("dashboard");
         if (!dashboard) return;
@@ -309,14 +322,14 @@
         const raw = document.getElementById("rawSerialPanel");
         const logPanel = document.getElementById("logPanel");
 
-        if (flow && telemetry) flow.insertAdjacentElement("afterend", telemetry);
-        if (telemetry && charts) telemetry.insertAdjacentElement("afterend", charts);
-        if (charts && command) charts.insertAdjacentElement("afterend", command);
-        if (command && system) command.insertAdjacentElement("afterend", system);
-        if (system && radio) system.insertAdjacentElement("afterend", radio);
-        if (radio && firmware) radio.insertAdjacentElement("afterend", firmware);
-        if (firmware && serial) firmware.insertAdjacentElement("afterend", serial);
-        if (logPanel && raw) logPanel.parentNode.insertBefore(raw, logPanel);
+        placeAfter(flow, telemetry);
+        placeAfter(telemetry, charts);
+        placeAfter(charts, command);
+        placeAfter(command, system);
+        placeAfter(system, radio);
+        placeAfter(radio, firmware);
+        placeAfter(firmware, serial);
+        placeBefore(logPanel, raw);
 
         makeSerialCompact();
         compactFirmwarePanel();
