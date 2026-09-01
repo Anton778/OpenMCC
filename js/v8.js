@@ -13,6 +13,7 @@ const v8State = {
     errors: 0,
     rawLines: [],
     rawLimit: 600,
+    idPacketCounts: new Map(),
     connection: {
         device: "не подключено",
         baud: "115200",
@@ -170,6 +171,9 @@ function resetReceivedData() {
     v8State.rawLines.length = 0;
     renderRawConsole();
 
+    v8State.idPacketCounts.clear();
+    renderSatelliteIdSummary();
+
     window.dispatchEvent(new CustomEvent("openmcc:v8-reset"));
     v8Log("Принятые данные, графики и счётчики сброшены.", "success");
 }
@@ -225,8 +229,10 @@ function appendRaw(text) {
 
 function installRawSerialPanel() {
     if (document.getElementById("rawSerialPanel")) return;
-    const serial = document.getElementById("serialPanel");
-    if (!serial) return;
+    const chartPanel = document.getElementById("chartPanel");
+    const telemetryPanel = document.getElementById("telemetryPanel");
+    const anchor = chartPanel || telemetryPanel;
+    if (!anchor) return;
 
     const section = document.createElement("section");
     section.className = "panel wide";
@@ -247,7 +253,7 @@ function installRawSerialPanel() {
         </div>
         <div id="rawSerialConsole" aria-live="polite"></div>
     `;
-    serial.parentNode.insertBefore(section, serial.nextSibling);
+    anchor.parentNode.insertBefore(section, anchor.nextSibling);
 
     const nav = document.getElementById("quickNav");
     if (nav && !nav.querySelector('[data-scroll-target="rawSerialPanel"]')) {
@@ -266,6 +272,86 @@ function installRawSerialPanel() {
 
     window.addEventListener("openmcc:raw-line", event => appendRaw(event.detail?.line));
     window.addEventListener("openmcc:serial-write", event => appendRaw(`TX> ${String(event.detail?.text || "").trim()}`));
+}
+
+
+function renderSatelliteIdSummary() {
+    const list = document.getElementById("v8SatelliteIdList");
+    if (!list) return;
+
+    if (v8State.idPacketCounts.size === 0) {
+        list.innerHTML = '<div class="v8IdEmpty">Телеметрия ещё не принята</div>';
+        return;
+    }
+
+    list.innerHTML = Array.from(v8State.idPacketCounts.entries())
+        .map(([id, count]) => {
+            const color = window.OpenMCCCharts?.colorForId?.(id) || "#7f9bb6";
+            return `
+                <div class="v8IdRow" style="--satellite-color:${color}">
+                    <span class="v8IdSwatch" aria-hidden="true"></span>
+                    <strong>ID ${escapeHtml(id)}</strong>
+                    <span>${count.toLocaleString("ru-RU")} пак.</span>
+                </div>
+            `;
+        })
+        .join("");
+}
+
+function installSatelliteIdSummary() {
+    const chartPanel = document.getElementById("chartPanel");
+    const chartGrid = chartPanel?.querySelector(".chartGrid");
+    if (!chartPanel || !chartGrid || document.getElementById("v8SatelliteIdSummary")) return;
+
+    const layout = document.createElement("div");
+    layout.className = "v8ChartsLayout";
+    chartGrid.parentNode.insertBefore(layout, chartGrid);
+    layout.appendChild(chartGrid);
+
+    const summary = document.createElement("aside");
+    summary.id = "v8SatelliteIdSummary";
+    summary.className = "v8SatelliteIdSummary";
+    summary.setAttribute("aria-label", "Принятые идентификаторы спутников");
+    summary.innerHTML = `
+        <div class="v8IdSummaryTitle">Принятые аппараты</div>
+        <div class="v8IdSummaryCaption">ID и количество пакетов за текущий сеанс</div>
+        <div id="v8SatelliteIdList" class="v8SatelliteIdList"></div>
+    `;
+    layout.appendChild(summary);
+
+    window.addEventListener("openmcc:telemetry", event => {
+        const id = String(event.detail?.ID ?? "UNKNOWN").trim() || "UNKNOWN";
+        const count = v8State.idPacketCounts.get(id) || 0;
+        v8State.idPacketCounts.set(id, count + 1);
+        renderSatelliteIdSummary();
+    });
+
+    document.getElementById("clearChartsButton")?.addEventListener("click", () => {
+        setTimeout(renderSatelliteIdSummary, 0);
+    });
+
+    renderSatelliteIdSummary();
+}
+
+function markUnavailablePanels() {
+    const panels = ["rotatorPanel", "mapPanel"];
+
+    panels.forEach(id => {
+        const panel = document.getElementById(id);
+        if (!panel) return;
+
+        panel.classList.add("v8UnavailablePanel");
+        panel.setAttribute("aria-disabled", "true");
+        panel.querySelectorAll("button, input, select, textarea").forEach(control => {
+            control.disabled = true;
+        });
+
+        const status = panel.querySelector(".panelState, .rotatorStatus");
+        if (status) {
+            status.textContent = "НЕ РЕАЛИЗОВАНО";
+            status.className = "panelState neutral";
+        }
+    });
 }
 
 function getTargetId() {
@@ -420,13 +506,13 @@ function installAboutDialog() {
     dialog.id = "v8AboutDialog";
     dialog.innerHTML = `
         <div class="aboutCard" role="dialog" aria-modal="true" aria-labelledby="v8AboutTitle">
-            <button type="button" class="closeAbout">Закрыть</button>
             <div class="aboutHeader">
                 <img src="assets/altair-logo.png" alt="Логотип Альтаира">
                 <div>
                     <h2 id="v8AboutTitle">ЦУП Альтаир</h2>
                     <div class="aboutSubtitle">Учебный центр управления полётами</div>
                 </div>
+                <button type="button" class="closeAbout" title="Закрыть" aria-label="Закрыть">×</button>
             </div>
 
             <div class="aboutMetaGrid">
@@ -539,9 +625,11 @@ function initializeV8() {
     installCollapsibleConnection();
     installResetButton();
     installRawSerialPanel();
+    installSatelliteIdSummary();
     installCommandTransmission();
     installAboutDialog();
     patchTelemetryPresentation();
+    markUnavailablePanels();
     installV8Counters();
 
     v8Log("ЦУП Альтаир v8 готов: 435.000 МГц, BW 203 кГц, multi-ID графики, RF TX, raw COM.", "success");

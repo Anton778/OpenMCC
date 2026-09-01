@@ -60,7 +60,6 @@
         <button type="button" data-scroll-target="telemetryPanel">Телеметрия</button>
         <button type="button" data-scroll-target="chartPanel">Графики</button>
         <button type="button" data-scroll-target="commandPanel">Команды</button>
-        <button type="button" data-scroll-target="radioPanel">Радиоканал</button>
         <button type="button" data-scroll-target="rotatorPanel">Поворотка</button>
         <button type="button" data-scroll-target="satellitePanel">3D</button>
         <button type="button" data-scroll-target="projectPanel">Статус</button>
@@ -279,41 +278,6 @@
             <div class="systemFootnote">Индикатор телеметрии становится зелёным после первого корректно разобранного пакета.</div>
         </section>
 
-        <section class="panel" id="radioPanel">
-            <div class="panelTitleRow">
-                <div>
-                    <span class="panelEyebrow">RF GATEWAY</span>
-                    <h2>Радиоканал ЦУПа</h2>
-                </div>
-                <span class="panelState live">ГОТОВ К НАСТРОЙКЕ</span>
-            </div>
-
-            <p class="panelLead">Основной профиль Технопрома настроен под CC1101 и загруженный передатчик: <strong>434.000 МГц · 4.8 kbps · 2-FSK · Δf 5 кГц · RX BW 58 кГц</strong>.</p>
-
-            <div class="radioArchitecture" aria-label="Архитектура радиоканала">
-                <span>ЦУП Альтаир</span><i>USB</i><span>ESP32-WROOM-32</span><i id="radioInterfaceLabel">SPI</i><span id="radioModuleLabel">CC1101</span><i>RF</i><span>МКА</span>
-            </div>
-
-            <label class="settingField radioSelector">
-                <span>Радиомодуль</span>
-                <select id="radioModuleType">
-                    <option value="cc1101" selected>CC1101 — профиль Технопром 2026</option>
-                    <option value="e32">E32-433T30D</option>
-                    <option value="unknown">Не выбран</option>
-                </select>
-            </label>
-
-            <div class="radioHintGrid">
-                <div><span>Плата шлюза</span><strong>ESP32-WROOM-32</strong></div>
-                <div><span>Интерфейс</span><strong id="radioInterfaceValue">SPI + GDO0/GDO2</strong></div>
-                <div><span>Питание</span><strong id="radioPowerValue">CC1101: 3,3 В</strong></div>
-                <div><span>Профиль</span><strong>Технопром 2026</strong></div>
-            </div>
-
-            <div id="radioConfigHint" class="noticeBox">После подключения ESP32 нажмите «Применить профиль Технопром 2026», чтобы приёмник совпал с параметрами передатчика.</div>
-            <div id="radioControlContainer"></div>
-        </section>
-
         <section class="panel" id="rotatorPanel">
             <div class="panelTitleRow">
                 <div>
@@ -409,7 +373,10 @@
                 <div class="mapCenterMark" aria-hidden="true">＋</div>
                 <div class="mapMessage">
                     <strong>Траектория / TLE / SGP4</strong>
-                    <span>Блок оставлен для дальнейшего развития навигации и автоматического наведения антенны.</span>
+                    <span>Пример двухстрочного набора орбитальных элементов:</span>
+                    <pre class="v8TleExample">1 25544U 98067A   26001.00000000  .00010000  00000-0  18000-3 0  9990
+2 25544  51.6400 120.0000 0005000  45.0000 315.0000 15.50000000123450</pre>
+                    <span>Расчёт траектории и автоматическое сопровождение пока не реализованы.</span>
                 </div>
             </div>
         </section>
