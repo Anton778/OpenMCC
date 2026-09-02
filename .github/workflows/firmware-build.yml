@@ -42,6 +42,9 @@ jobs:
           - name: Спутник — шаг 02, счётчик пакетов Arduino Nano
             id: satellite-step-02-counter
             project: firmware/satellite/02_packet_counter_tx
+          - name: Спутник — шаг 03, UPTIME Arduino Nano
+            id: satellite-step-03-uptime
+            project: firmware/satellite/03_uptime_tx
           - name: Спутник — Arduino Nano
             id: satellite-nano
             project: firmware/satellite/arduino_nano
