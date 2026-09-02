@@ -36,7 +36,7 @@ jobs:
           node - <<'NODE'
           const fs = require('fs');
           const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-          if (pkg.version !== '0.8.0') throw new Error(`Expected 0.8.0, got ${pkg.version}`);
+          if (pkg.version !== '0.8.1') throw new Error(`Expected 0.8.1, got ${pkg.version}`);
           if (pkg.build?.win?.icon !== 'assets/altair-logo.png') throw new Error('Altair Windows PNG icon source is not configured');
           if (pkg.author !== 'Антон Т.') throw new Error('Application author metadata is missing');
 
@@ -46,7 +46,7 @@ jobs:
           }
 
           const app = fs.readFileSync('js/app.js', 'utf8');
-          if (!app.includes('version: "0.8.0"')) throw new Error('app.js must identify v0.8.0');
+          if (!app.includes('version: "0.8.1"')) throw new Error('app.js must identify v0.8.1');
           if (app.includes('applyV6BrandingAndRadioProfile')) throw new Error('Legacy v6 runtime override is still present');
           if (!app.includes('"VOLT", "TEMP", "MODE"')) throw new Error('MCU temperature must follow battery voltage in UI telemetry order');
 

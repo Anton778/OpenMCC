@@ -169,7 +169,6 @@ jobs:
               $installer.FullName `
               "firmware/ground_station/esp32/Altair_Ground_ESP32/Altair_Ground_ESP32.ino" `
               "docs/CUP_Altair_v8_Manual.pdf" `
-              "docs/CUP_Altair_v8_Manual.tex" `
               "docs/RELEASE_V8.md" `
               "bundled_firmware/gateway-firmware.bin" `
               "bundled_firmware/manifest.json" `

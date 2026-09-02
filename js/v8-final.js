@@ -97,7 +97,7 @@
 
     function cleanLegacyUi() {
         const badge = document.querySelector(".buildBadge");
-        if (badge) badge.textContent = "v8 · 0.8.0";
+        if (badge) badge.textContent = "v8 · 0.8.1";
 
         const projectEyebrow = document.querySelector("#projectPanel .panelEyebrow");
         if (projectEyebrow) projectEyebrow.textContent = "RELEASE V8";

@@ -2,14 +2,14 @@
 
 /* ============================================================
    ЦУП Альтаир — application coordinator
-   Release v8 / 0.8.0
+   Release v8 / 0.8.1
    ============================================================ */
 
 (() => {
     const APP_CONFIG = Object.freeze({
         name: "ЦУП Альтаир",
         fullName: "Центр управления полётами",
-        version: "0.8.0",
+        version: "0.8.1",
         missionName: "Миссия на Луну",
         baudRate: 115200,
         telemetryTimeoutMs: 3500,
@@ -329,7 +329,7 @@
         setConnectionState(Boolean(window.OpenMCCSerial?.getState?.().connected));
         setTelemetryStatus("waiting");
         state.initialized = true;
-        writeLog("ЦУП Альтаир v0.8.0 готов. Радиопрофиль 435.000 МГц, RX BW 203 кГц.", "success");
+        writeLog("ЦУП Альтаир v0.8.1 готов. Радиопрофиль 435.000 МГц, RX BW 203 кГц.", "success");
     }
 
     window.OpenMCCApp = Object.freeze({

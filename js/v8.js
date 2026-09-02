@@ -1,7 +1,7 @@
 "use strict";
 
 const ALTAIR_V8 = Object.freeze({
-    version: "0.8.0",
+    version: "0.8.1",
     displayVersion: "v8",
     frequencyMHz: 435.000,
     rxBandwidthKHz: 203,
@@ -51,7 +51,7 @@ function installBranding() {
     document.title = "ЦУП Альтаир v8 — Миссия на Луну";
 
     const badge = document.querySelector(".buildBadge");
-    if (badge) badge.textContent = "v8 · 0.8.0";
+    if (badge) badge.textContent = "v8 · 0.8.1";
 
     const mark = document.querySelector(".altairLogo .logoMark");
     if (mark) {
@@ -750,7 +750,7 @@ function installAboutDialog() {
             </div>
 
             <div class="aboutMetaGrid">
-                <div><span>Версия</span><strong>v8 · 0.8.0</strong></div>
+                <div><span>Версия</span><strong>v8 · 0.8.1</strong></div>
                 <div><span>Автор</span><strong>Антон Т.</strong></div>
             </div>
 

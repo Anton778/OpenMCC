@@ -10,14 +10,14 @@
 
 Примечание разработчикам: Официальное руководство по использованию данных радиомодулей было удалено производителем с сайта. Это связано с конструктивной особенностью: на интерфейсном шилде отсутствуют несколько необходимых контактов, что делает прямое (стандартное) подключение невозможным и требует аппаратной доработки.
 
-**Текущая версия: v8 / 0.8.0.**  
+**Текущая версия: v8 / 0.8.1.**  
 Проект создан в рамках образовательного проекта **«Миссия на Луну»** и профильной смены по спутникостроению; стенд использовался на Технопроме-2026.
 
 ## Скачать
 
 ### 1. Наземный ЦУП
 
-- **[Программа ЦУП Альтаир v8 для Windows](https://github.com/Anton778/OpenMCC/releases/download/v0.8.0/CUP-Altair-Setup-0.8.0.exe)**
+- **[Программа ЦУП Альтаир v8 для Windows](https://github.com/Anton778/OpenMCC/releases/download/v0.8.1/CUP-Altair-Setup-0.8.1.exe)**
 - [Скетч радиошлюза для ESP32-WROOM-32](firmware/ground_station/esp32/Altair_Ground_ESP32/Altair_Ground_ESP32.ino)
 - [Скетч радиошлюза для Arduino Uno](firmware/ground_station/arduino_uno/Altair_Ground_Arduino_Uno/Altair_Ground_Arduino_Uno.ino)
 - [Скетч радиошлюза для Arduino Nano](firmware/ground_station/arduino_nano/Altair_Ground_Arduino_Nano/Altair_Ground_Arduino_Nano.ino)
@@ -269,7 +269,7 @@ $CMD,RADIO,RESET
 - окно **«О программе»**;
 - новый значок Альтаира для интерфейса и Windows-приложения;
 - фотографии реального ЦУПа и CubeSat в документации;
-- один актуальный GitHub Release — **v0.8.0**.
+- один актуальный GitHub Release — **v0.8.1**.
 
 ## О программе
 

@@ -5,7 +5,7 @@
  */
 (() => {
     const CONFIG = Object.freeze({
-        version: "0.8.0",
+        version: "0.8.1",
         maximumBufferLength: 65536,
         maximumLineLength: 4096,
         checksumValidation: false,
@@ -293,7 +293,7 @@
     function initialize() {
         if (state.initialized) return;
         state.initialized = true;
-        log("Парсер телеметрии v0.8.0 готов. Прикладная проверка XOR отключена.", "success");
+        log("Парсер телеметрии v0.8.1 готов. Прикладная проверка XOR отключена.", "success");
         emit("openmcc:parser-ready", {
             version: CONFIG.version,
             checksumValidation: false,

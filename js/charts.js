@@ -1,11 +1,11 @@
 "use strict";
 
-/* ЦУП Альтаир — telemetry charts v8 / 0.8.0
+/* ЦУП Альтаир — telemetry charts v8 / 0.8.1
  * Каждый ID спутника получает отдельную линию и цвет.
  */
 (() => {
     const CONFIG = Object.freeze({
-        version: "0.8.0",
+        version: "0.8.1",
         maximumPoints: 180,
         tension: 0.18,
     });
@@ -256,7 +256,7 @@
         updateStats();
         setStatus("waiting");
         state.initialized = true;
-        log("Графики v0.8.0 готовы: отдельная линия для каждого ID спутника.", "success");
+        log("Графики v0.8.1 готовы: отдельная линия для каждого ID спутника.", "success");
     }
 
     window.OpenMCCCharts = Object.freeze({
