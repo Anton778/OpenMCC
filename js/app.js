@@ -57,8 +57,8 @@
             const card = document.createElement("div");
             card.className = "card telemetryCard telemetryChecksum";
             card.dataset.telemetry = "CHECKSUM";
-            card.dataset.tip = "Поле контрольной суммы принимается и отображается. В v8 прикладная XOR-проверка отключена.";
-            card.innerHTML = '<span class="label">Контрольная сумма (поле)</span><span id="CHECKSUM" class="value telemetryTextValue">--</span><span class="unit">принимается без проверки</span>';
+            card.dataset.tip = "Контрольная сумма пакета отображается как CRC. В v8 прикладная проверка этого поля отключена.";
+            card.innerHTML = '<span class="label">Контрольная сумма (CRC)</span><span id="CHECKSUM" class="value telemetryTextValue">--</span><span class="unit">принимается без проверки</span>';
             const rssiCard = grid.querySelector('[data-telemetry="RSSI"]');
             if (rssiCard) grid.insertBefore(card, rssiCard);
             else grid.appendChild(card);

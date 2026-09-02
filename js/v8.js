@@ -43,7 +43,7 @@ function loadV8Styles() {
     const link = document.createElement("link");
     link.id = "altairV8Styles";
     link.rel = "stylesheet";
-    link.href = "css/v8.css";
+    link.href = "css/v8.css?v=20260902-1";
     document.head.appendChild(link);
 }
 
@@ -89,7 +89,16 @@ function installFrequencyMetric() {
     block.className = "topMetric v8FrequencyMetric";
     block.innerHTML = `
         <div class="caption">РАДИОКАНАЛ</div>
-        <div id="v8FrequencyValue">${ALTAIR_V8.frequencyMHz.toFixed(3)} МГц · BW ${ALTAIR_V8.rxBandwidthKHz} кГц</div>
+        <div id="v8FrequencyValue">
+            <div class="v8LinkRow">
+                <span class="v8LinkLabel">UPLINK</span>
+                <span id="v8UplinkValue">${ALTAIR_V8.frequencyMHz.toFixed(3)} МГц · BW ${ALTAIR_V8.rxBandwidthKHz} кГц</span>
+            </div>
+            <div class="v8LinkRow">
+                <span class="v8LinkLabel">DOWNLINK</span>
+                <span id="v8DownlinkValue">${ALTAIR_V8.frequencyMHz.toFixed(3)} МГц · BW ${ALTAIR_V8.rxBandwidthKHz} кГц</span>
+            </div>
+        </div>
     `;
     utc.parentNode.insertBefore(block, utc);
 }
@@ -440,10 +449,11 @@ function renderRadioProfile(profile) {
     if (power) power.value = String(profile.powerDbm);
     if (bandwidth) bandwidth.value = String(profile.bandwidthKHz);
 
-    const metric = document.getElementById("v8FrequencyValue");
-    if (metric) {
-        metric.textContent = `${profile.frequencyMHz.toFixed(3)} МГц · BW ${profile.bandwidthKHz} кГц`;
-    }
+    const linkText = `${profile.frequencyMHz.toFixed(3)} МГц · BW ${profile.bandwidthKHz} кГц`;
+    const uplinkMetric = document.getElementById("v8UplinkValue");
+    const downlinkMetric = document.getElementById("v8DownlinkValue");
+    if (uplinkMetric) uplinkMetric.textContent = linkText;
+    if (downlinkMetric) downlinkMetric.textContent = linkText;
 
     const aboutFrequency = document.getElementById("v8AboutFrequency");
     const aboutPower = document.getElementById("v8AboutPower");
@@ -792,7 +802,7 @@ function patchTelemetryPresentation() {
     if (checksumCard) {
         const label = checksumCard.querySelector(".label");
         const unit = checksumCard.querySelector(".unit");
-        if (label) label.textContent = "Контрольная сумма (поле)";
+        if (label) label.textContent = "Контрольная сумма (CRC)";
         if (unit) unit.textContent = "принимается без проверки";
     }
 

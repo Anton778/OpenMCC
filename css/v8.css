@@ -8,7 +8,7 @@
     grid-template-columns:
         minmax(245px, 1.65fr)
         minmax(125px, .78fr)
-        minmax(190px, 1.05fr)
+        minmax(230px, 1.18fr)
         minmax(100px, .62fr)
         minmax(135px, .78fr)
         auto;
@@ -37,7 +37,7 @@
     #topBar {
         grid-template-columns:
             minmax(235px, 1.55fr)
-            minmax(185px, 1fr)
+            minmax(230px, 1.12fr)
             minmax(100px, .62fr)
             auto;
     }
@@ -73,8 +73,21 @@
 .v8FrequencyMetric #v8FrequencyValue {
     color: #73e8ff;
     font-weight: 800;
-    letter-spacing: .04em;
+    letter-spacing: .025em;
     white-space: nowrap;
+}
+.v8FrequencyMetric .v8LinkRow {
+    display: grid;
+    grid-template-columns: 62px minmax(0, 1fr);
+    gap: 7px;
+    align-items: baseline;
+    font-size: 10px;
+    line-height: 1.25;
+}
+.v8FrequencyMetric .v8LinkLabel {
+    color: #7f96ac;
+    font-size: 8px;
+    letter-spacing: .09em;
 }
 
 .v8PanelToggle {

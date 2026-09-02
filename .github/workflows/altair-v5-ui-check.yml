@@ -51,8 +51,8 @@ jobs:
           if (!app.includes('"VOLT", "TEMP", "MODE"')) throw new Error('MCU temperature must follow battery voltage in UI telemetry order');
 
           const index = fs.readFileSync('index.html', 'utf8');
-          if (!index.includes('<script src="js/v8.js"></script>')) throw new Error('v8.js is not connected in index.html');
-          if (!index.includes('<script src="js/v8-final.js"></script>')) throw new Error('v8-final.js is not connected in index.html');
+          if (!index.includes('<script src="js/v8.js?v=20260902-1"></script>')) throw new Error('Current v8.js revision is not connected in index.html');
+          if (!index.includes('<script src="js/v8-final.js?v=20260902-1"></script>')) throw new Error('Current v8-final.js revision is not connected in index.html');
           if (!index.includes('Температура бортового компьютера')) throw new Error('MCU temperature card is missing');
           if (!index.includes('Команды, передаваемые на спутник')) throw new Error('Uplink panel purpose is unclear');
 
@@ -62,6 +62,10 @@ jobs:
           if (!v8Runtime.includes('$CMD,RADIO,SET,FREQ=')) throw new Error('Runtime radio settings command is missing');
           if (!v8Runtime.includes('$CMD,RADIO,RESET')) throw new Error('Radio settings reset command is missing');
           if (!v8Runtime.includes('id="v8RadioFrequency"')) throw new Error('Radio settings controls are missing');
+          if (!v8Runtime.includes('id="v8UplinkValue"') || !v8Runtime.includes('id="v8DownlinkValue"')) {
+            throw new Error('Separate uplink/downlink indicators are missing');
+          }
+          if (!v8Runtime.includes('Контрольная сумма (CRC)')) throw new Error('CRC card label is incorrect');
 
           const charts = fs.readFileSync('js/charts.js', 'utf8');
           if (!charts.includes('datasetFor(chart, id)')) throw new Error('Multi-ID chart datasets are missing');
