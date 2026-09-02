@@ -16,17 +16,29 @@
 
 Частоту, мощность TX и полосу приёмника ЦУПа можно изменять из панели команд. Команда `$CMD,RADIO,RESET` возвращает исходные значения `435.000 МГц`, `5 дБм` и `203 кГц`. Настройки хранятся до перезапуска ESP32; после включения питания используется исходный профиль.
 
-## Спутник
+## Спутник: скетчи по возрастанию сложности
+
+### Шаг 01 — неизменяемый пакет
 
 | Плата | Скетч |
 |---|---|
-| STM32F103C8T6 / Blue Pill / IntroSat | [`Altair_Satellite_STM32.ino`](satellite/stm32/Altair_Satellite_STM32/Altair_Satellite_STM32.ino) |
-| Arduino Nano | [`Altair_Satellite_Arduino_Nano.ino`](satellite/arduino_nano/Altair_Satellite_Arduino_Nano/Altair_Satellite_Arduino_Nano.ino) |
-| Arduino Nano, только передатчик | [`Altair_Satellite_Arduino_Nano_Static_TX.ino`](satellite/arduino_nano_static_tx/Altair_Satellite_Arduino_Nano_Static_TX/Altair_Satellite_Arduino_Nano_Static_TX.ino) |
+| Arduino Nano, только передатчик | [`Altair_Satellite_01_Static_Telemetry_TX.ino`](satellite/01_static_telemetry_tx/Altair_Satellite_01_Static_Telemetry_TX/Altair_Satellite_01_Static_Telemetry_TX.ino) |
 
-Бортовые скетчи передают телеметрию, принимают адресованные команды и поддерживают `PING`, `INFO`, `TM_START`, `TM_STOP`, `TM_PERIOD` и `USER`.
+Первый скетч не включает приёмник и не обрабатывает команды. В программе одной строкой задан пакет `02,00001,00015,1.00,4.20,31.6,1,07`. Номер пакета, время работы, температура и остальные поля не изменяются. Одна и та же строка передаётся сразу после запуска и затем раз в секунду.
 
-Упрощённый вариант `Static_TX` не включает приёмник и обработку команд. Поля ID, номер пакета, uptime, мощность панелей `1.00 Вт`, напряжение аккумулятора `4.20 В` и режим заданы заранее. Поле `MCU_TEMP` измеряется внутренним температурным каналом ATmega328P, располагается сразу после напряжения аккумулятора и передаётся раз в секунду. XOR-контрольная сумма пересчитывается автоматически для каждого значения температуры.
+Следующие учебные варианты будут добавляться как шаги 02, 03 и далее без изменения этого исходного примера.
+
+### Другие существующие бортовые скетчи
+
+| Плата | Скетч |
+|---|---|
+| Arduino Nano, передатчик с измерением температуры | [`Altair_Satellite_Arduino_Nano_Static_TX.ino`](satellite/arduino_nano_static_tx/Altair_Satellite_Arduino_Nano_Static_TX/Altair_Satellite_Arduino_Nano_Static_TX.ino) |
+| Arduino Nano, двусторонняя связь | [`Altair_Satellite_Arduino_Nano.ino`](satellite/arduino_nano/Altair_Satellite_Arduino_Nano/Altair_Satellite_Arduino_Nano.ino) |
+| STM32F103C8T6 / Blue Pill / IntroSat, двусторонняя связь | [`Altair_Satellite_STM32.ino`](satellite/stm32/Altair_Satellite_STM32/Altair_Satellite_STM32.ino) |
+
+Двусторонние скетчи передают телеметрию, принимают адресованные команды и поддерживают `PING`, `INFO`, `TM_START`, `TM_STOP`, `TM_PERIOD` и `USER`.
+
+Вариант `Altair_Satellite_Arduino_Nano_Static_TX.ino` не включает приёмник, но измеряет температуру внутренним каналом ATmega328P и пересчитывает XOR-контрольную сумму для каждого пакета.
 
 ## Общий радиопрофиль
 

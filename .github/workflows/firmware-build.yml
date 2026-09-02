@@ -36,10 +36,13 @@ jobs:
           - name: Спутник — STM32 Blue Pill
             id: satellite-stm32
             project: firmware/satellite/stm32
+          - name: Спутник — шаг 01, неизменяемый пакет Arduino Nano
+            id: satellite-step-01-static
+            project: firmware/satellite/01_static_telemetry_tx
           - name: Спутник — Arduino Nano
             id: satellite-nano
             project: firmware/satellite/arduino_nano
-          - name: Спутник — Arduino Nano, статичный передатчик
+          - name: Спутник — Arduino Nano, статичный передатчик с температурой
             id: satellite-nano-static-tx
             project: firmware/satellite/arduino_nano_static_tx
 

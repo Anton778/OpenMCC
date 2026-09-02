@@ -105,6 +105,13 @@ jobs:
           test -f firmware/ground_station/arduino_nano/Altair_Ground_Arduino_Nano/Altair_Ground_Arduino_Nano.ino
           test -f firmware/satellite/stm32/Altair_Satellite_STM32/Altair_Satellite_STM32.ino
           test -f firmware/satellite/arduino_nano/Altair_Satellite_Arduino_Nano/Altair_Satellite_Arduino_Nano.ino
+          step_01='firmware/satellite/01_static_telemetry_tx/Altair_Satellite_01_Static_Telemetry_TX/Altair_Satellite_01_Static_Telemetry_TX.ino'
+          grep -Fq 'static const char TELEMETRY_PACKET[] = "02,00001,00015,1.00,4.20,31.6,1,07";' "$step_01"
+          grep -Fq 'radio.transmit(TELEMETRY_PACKET)' "$step_01"
+          if grep -Eq 'startReceive|radio\.receive|radio\.readData' "$step_01"; then
+            echo 'Step 01 must remain transmit-only'
+            exit 1
+          fi
           static_nano='firmware/satellite/arduino_nano_static_tx/Altair_Satellite_Arduino_Nano_Static_TX/Altair_Satellite_Arduino_Nano_Static_TX.ino'
           grep -Fq '1.00,4.20,' "$static_nano"
           grep -Fq 'readMcuTemperatureC()' "$static_nano"
