@@ -26,8 +26,8 @@
 
 - **[Шаг 01 — передатчик неизменяемого пакета для Arduino Nano](firmware/satellite/01_static_telemetry_tx/Altair_Satellite_01_Static_Telemetry_TX/Altair_Satellite_01_Static_Telemetry_TX.ino)**
 - **[Шаг 02 — передатчик со счётчиком пакетов для Arduino Nano](firmware/satellite/02_packet_counter_tx/Altair_Satellite_02_Packet_Counter_TX/Altair_Satellite_02_Packet_Counter_TX.ino)**
-- **[Шаг 03 — передатчик со счётчиком пакетов и UPTIME](firmware/satellite/03_uptime_tx/Altair_Satellite_03_Uptime_TX/Altair_Satellite_03_Uptime_TX.ino)**
-- **[Шаг 04 — передатчик с измерением температуры кристалла](firmware/satellite/04_mcu_temperature_tx/Altair_Satellite_04_MCU_Temperature_TX/Altair_Satellite_04_MCU_Temperature_TX.ino)**
+- **[Шаг 03 — передатчик со счётчиком пакетов и UPTIME для Arduino Nano](firmware/satellite/03_uptime_tx/Altair_Satellite_03_Uptime_TX/Altair_Satellite_03_Uptime_TX.ino)**
+- **[Шаг 04 — передатчик с измерением температуры кристалла для Arduino Nano](firmware/satellite/04_mcu_temperature_tx/Altair_Satellite_04_MCU_Temperature_TX/Altair_Satellite_04_MCU_Temperature_TX.ino)**
 
 ## Как выглядит система
 
