@@ -98,14 +98,10 @@
 Фотографии радиомодуля IntroSat, использовавшегося на профильной смене:
 
 <p align="center">
-  <img src="docs/media/introsat-cc1101-radio-module-antenna-side.jpg" width="760" alt="Радиомодуль IntroSat 433 МГц, сторона с антенной">
+  <img src="docs/media/introsat-cc1101-radio-module-antenna-side.jpg" width="48%" alt="Радиомодуль IntroSat 433 МГц, сторона с антенной">
+  <img src="docs/media/introsat-cc1101-radio-module-component-side.jpg" width="48%" alt="Радиомодуль IntroSat 433 МГц, сторона с CC1101 и контактным разъёмом">
 </p>
-<p align="center"><em>Радиомодуль IntroSat 433 МГц: сторона с антенной.</em></p>
-
-<p align="center">
-  <img src="docs/media/introsat-cc1101-radio-module-component-side.jpg" width="760" alt="Радиомодуль IntroSat 433 МГц, сторона с CC1101 и контактным разъёмом">
-</p>
-<p align="center"><em>Радиомодуль IntroSat 433 МГц: сторона с микросхемой CC1101 и контактным разъёмом.</em></p>
+<p align="center"><em>Слева — сторона с антенной; справа — сторона с микросхемой CC1101 и контактным разъёмом.</em></p>
 
 ### ESP32-WROOM-32
 
