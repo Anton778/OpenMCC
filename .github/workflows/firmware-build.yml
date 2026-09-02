@@ -45,6 +45,9 @@ jobs:
           - name: Спутник — шаг 03, UPTIME Arduino Nano
             id: satellite-step-03-uptime
             project: firmware/satellite/03_uptime_tx
+          - name: Спутник — шаг 04, температура кристалла Arduino Nano
+            id: satellite-step-04-temperature
+            project: firmware/satellite/04_mcu_temperature_tx
           - name: Спутник — Arduino Nano
             id: satellite-nano
             project: firmware/satellite/arduino_nano

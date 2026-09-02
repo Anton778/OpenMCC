@@ -25,14 +25,17 @@
 | 01 | Весь пакет неизменяемый | [`Altair_Satellite_01_Static_Telemetry_TX.ino`](satellite/01_static_telemetry_tx/Altair_Satellite_01_Static_Telemetry_TX/Altair_Satellite_01_Static_Telemetry_TX.ino) |
 | 02 | Увеличивается только поле `PACKET` | [`Altair_Satellite_02_Packet_Counter_TX.ino`](satellite/02_packet_counter_tx/Altair_Satellite_02_Packet_Counter_TX/Altair_Satellite_02_Packet_Counter_TX.ino) |
 | 03 | Поле `UPTIME` показывает секунды после запуска | [`Altair_Satellite_03_Uptime_TX.ino`](satellite/03_uptime_tx/Altair_Satellite_03_Uptime_TX/Altair_Satellite_03_Uptime_TX.ino) |
+| 04 | Поле `MCU_TEMP` измеряется внутренним каналом ATmega328P | [`Altair_Satellite_04_MCU_Temperature_TX.ino`](satellite/04_mcu_temperature_tx/Altair_Satellite_04_MCU_Temperature_TX/Altair_Satellite_04_MCU_Temperature_TX.ino) |
 
 В шаге 01 одна и та же строка `02,00001,00015,1.00,4.20,31.6,1,07` передаётся сразу после запуска и затем раз в секунду.
 
 В шаге 02 номер пакета последовательно изменяется от `00001` до `99999`. Остальные телеметрические параметры остаются постоянными.
 
-В шаге 03 дополнительно изменяется `UPTIME`: поле содержит число секунд с момента включения Arduino Nano. Поле `CHECKSUM` пересчитывается автоматически. Приёмник и обработка команд во всех трёх шагах отсутствуют.
+В шаге 03 дополнительно изменяется `UPTIME`: поле содержит число секунд с момента включения Arduino Nano.
 
-Следующие учебные варианты будут добавляться как шаги 04, 05 и далее без изменения предыдущих примеров.
+В шаге 04 поле `MCU_TEMP` заполняется по внутреннему температурному каналу ATmega328P. Это температура кристалла, а не воздуха; для приемлемой абсолютной точности требуется калибровочная поправка. Поле `CHECKSUM` пересчитывается автоматически. Приёмник и обработка команд во всех четырёх шагах отсутствуют.
+
+Следующие учебные варианты будут добавляться как шаги 05, 06 и далее без изменения предыдущих примеров.
 
 ### Другие существующие бортовые скетчи
 
