@@ -127,16 +127,6 @@
                     <span id="ID" class="value telemetryTextValue">---</span>
                     <span class="unit">идентификатор</span>
                 </div>
-                <div class="card telemetryCard" data-telemetry="VOLT">
-                    <span class="label">Напряжение аккумулятора</span>
-                    <span id="VOLT" class="value">--</span>
-                    <span class="unit">В</span>
-                </div>
-                <div class="card telemetryCard" data-telemetry="PANEL_POWER">
-                    <span class="label">Мощность солнечных панелей</span>
-                    <span id="PANEL_POWER" class="value">--</span>
-                    <span class="unit">Вт</span>
-                </div>
                 <div class="card telemetryCard" data-telemetry="PACKET">
                     <span class="label">Отправлено пакетов</span>
                     <span id="PACKET" class="value">--</span>
@@ -147,10 +137,20 @@
                     <span id="UPTIME" class="value">--</span>
                     <span class="unit">с</span>
                 </div>
+                <div class="card telemetryCard" data-telemetry="PANEL_POWER">
+                    <span class="label">Мощность солнечных панелей</span>
+                    <span id="PANEL_POWER" class="value">--</span>
+                    <span class="unit">Вт</span>
+                </div>
+                <div class="card telemetryCard" data-telemetry="VOLT">
+                    <span class="label">Напряжение аккумулятора</span>
+                    <span id="VOLT" class="value">--</span>
+                    <span class="unit">В</span>
+                </div>
                 <div class="card telemetryCard" data-telemetry="TEMP">
-                    <span class="label">Температура</span>
+                    <span class="label">Температура бортового компьютера</span>
                     <span id="TEMP" class="value">--</span>
-                    <span class="unit">°C</span>
+                    <span class="unit">°C · температура кристалла</span>
                 </div>
                 <div class="card telemetryCard" data-telemetry="RSSI">
                     <span class="label">RSSI</span>
@@ -165,9 +165,9 @@
             </div>
 
             <div class="telemetryNote altairPacketNote">
-                <strong>Пакет миссии v5:</strong>
-                <code>$TM,&lt;ID&gt;,&lt;PACKET&gt;,&lt;UPTIME&gt;,&lt;VOLT&gt;,&lt;PANEL_POWER&gt;,&lt;TEMP&gt;</code>
-                <span>RSSI и оценка SNR добавляются наземным CC1101-приёмником. Формат <code>$TEL,KEY=VALUE,...</code> также поддерживается.</span>
+                <strong>Пакет v8:</strong>
+                <code>02,00001,00015,1.00,4.20,31.6,1,07</code>
+                <span>Температура кристалла MCU следует сразу после напряжения аккумулятора. RSSI и оценка SNR добавляются наземным CC1101-приёмником.</span>
             </div>
         </section>
 
@@ -190,12 +190,12 @@
                     <div class="chartCanvasContainer"><canvas id="chartVOLT"></canvas></div>
                 </article>
                 <article class="chartCard">
-                    <div class="chartHeader"><div><span class="chartName">Солнечные панели</span><span class="chartUnit">Вт</span></div><strong id="chartValuePANEL_POWER" class="chartCurrentValue">--</strong></div>
-                    <div class="chartCanvasContainer"><canvas id="chartPANEL_POWER"></canvas></div>
+                    <div class="chartHeader"><div><span class="chartName">Температура бортового компьютера</span><span class="chartUnit">°C · кристалл MCU</span></div><strong id="chartValueTEMP" class="chartCurrentValue">--</strong></div>
+                    <div class="chartCanvasContainer"><canvas id="chartTEMP"></canvas></div>
                 </article>
                 <article class="chartCard">
-                    <div class="chartHeader"><div><span class="chartName">Температура</span><span class="chartUnit">°C</span></div><strong id="chartValueTEMP" class="chartCurrentValue">--</strong></div>
-                    <div class="chartCanvasContainer"><canvas id="chartTEMP"></canvas></div>
+                    <div class="chartHeader"><div><span class="chartName">Солнечные панели</span><span class="chartUnit">Вт</span></div><strong id="chartValuePANEL_POWER" class="chartCurrentValue">--</strong></div>
+                    <div class="chartCanvasContainer"><canvas id="chartPANEL_POWER"></canvas></div>
                 </article>
                 <article class="chartCard">
                     <div class="chartHeader"><div><span class="chartName">RSSI</span><span class="chartUnit">dBm</span></div><strong id="chartValueRSSI" class="chartCurrentValue">--</strong></div>
@@ -218,26 +218,30 @@
         <section class="panel" id="commandPanel">
             <div class="panelTitleRow">
                 <div>
-                    <span class="panelEyebrow">UPLINK</span>
-                    <h2>Команды управления</h2>
+                    <span class="panelEyebrow">UPLINK · ЦУП → СПУТНИК</span>
+                    <h2>Команды, передаваемые на спутник</h2>
                 </div>
                 <span id="commandAvailability" class="commandAvailability offline">НЕДОСТУПЕН</span>
             </div>
 
+            <div class="v8CommandScope">
+                Эта панель не запускает телеметрию на компьютере. Она передаёт по радиоканалу команды выбранному спутнику.
+            </div>
+
             <div class="commandGroup">
-                <div class="commandGroupTitle">Быстрые команды</div>
+                <div class="commandGroupTitle">Быстрые команды спутнику</div>
                 <div class="commandButtonGrid">
-                    <button type="button" class="commandButton commandPrimary" data-command="PING"><span class="commandIcon">↔</span><span>Проверка связи</span></button>
-                    <button type="button" class="commandButton" data-command="INFO"><span class="commandIcon">i</span><span>Информация</span></button>
-                    <button type="button" class="commandButton commandSuccess" data-command="START"><span class="commandIcon">▶</span><span>Запустить телеметрию</span></button>
-                    <button type="button" class="commandButton commandDanger" data-command="STOP"><span class="commandIcon">■</span><span>Остановить телеметрию</span></button>
+                    <button type="button" class="commandButton commandPrimary" data-command="PING"><span class="commandIcon">↔</span><span>Спутнику: проверить связь</span></button>
+                    <button type="button" class="commandButton" data-command="INFO"><span class="commandIcon">i</span><span>Спутнику: запросить информацию</span></button>
+                    <button type="button" class="commandButton commandSuccess" data-command="START"><span class="commandIcon">▶</span><span>Спутнику: запустить телеметрию</span></button>
+                    <button type="button" class="commandButton commandDanger" data-command="STOP"><span class="commandIcon">■</span><span>Спутнику: остановить телеметрию</span></button>
                 </div>
             </div>
 
             <div class="commandGroup">
-                <div class="commandGroupTitle">Период телеметрии</div>
+                <div class="commandGroupTitle">Изменить период телеметрии на спутнике</div>
                 <label class="commandField">
-                    <span>Период передачи</span>
+                    <span>Новый период передачи спутника</span>
                     <select id="telemetryRate">
                         <option value="200">200 мс</option>
                         <option value="500">500 мс</option>
@@ -246,18 +250,18 @@
                         <option value="5000">5000 мс</option>
                     </select>
                 </label>
-                <button type="button" id="applyTelemetryRate" class="commandButton commandWide">Установить период</button>
+                <button type="button" id="applyTelemetryRate" class="commandButton commandWide">Передать спутнику новый период</button>
             </div>
 
             <div class="commandGroup">
-                <div class="commandGroupTitle">Произвольная команда</div>
+                <div class="commandGroupTitle">Произвольная команда спутнику</div>
                 <div class="customCommandRow">
-                    <input type="text" id="customCommand" maxlength="120" autocomplete="off" spellcheck="false" placeholder="Например: STATUS">
-                    <button type="button" id="sendCustomCommand" class="commandSendButton">Передать</button>
+                    <input type="text" id="customCommand" maxlength="120" autocomplete="off" spellcheck="false" placeholder="Например: STATUS — будет передано спутнику">
+                    <button type="button" id="sendCustomCommand" class="commandSendButton">На спутник</button>
                 </div>
             </div>
 
-            <div class="lastCommand"><span>Последняя команда</span><strong id="lastCommandText">---</strong></div>
+            <div class="lastCommand"><span>Последняя команда, переданная спутнику</span><strong id="lastCommandText">---</strong></div>
         </section>
 
         <section class="panel" id="systemPanel">

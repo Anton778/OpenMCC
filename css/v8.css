@@ -142,6 +142,17 @@
 #rawSerialConsole .err { color: #ff8e9a; }
 #rawSerialConsole .info { color: #8cf0b4; }
 
+.v8CommandScope {
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    border-left: 3px solid rgba(0,217,255,.72);
+    border-radius: 7px;
+    color: #b5c9dc;
+    background: rgba(0,217,255,.055);
+    font-size: .79rem;
+    line-height: 1.45;
+}
+
 .v8CommandTarget {
     display: grid;
     grid-template-columns: minmax(100px, 180px) 1fr;

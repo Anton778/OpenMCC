@@ -52,7 +52,7 @@
         if (apply) {
             apply.disabled = true;
             apply.textContent = "Рабочий профиль v8 зафиксирован";
-            apply.title = "435.000 МГц · 4.8 kbps · 2-FSK · Δf 5 кГц · RX BW 203 кГц";
+            apply.title = "435.000 МГц · 4.8 kbps · 2-FSK · Δf 5 кГц · полоса приёмника ЦУПа 203 кГц";
         }
 
         const preview = document.getElementById("radioCommandPreview");
@@ -63,7 +63,7 @@
 
         const lead = document.querySelector("#radioPanel .panelLead");
         if (lead) {
-            lead.innerHTML = 'Рабочий профиль v8: <strong>435.000 МГц · 4.8 kbps · 2-FSK · Δf 5 кГц · RX BW 203 кГц · RF TX включён</strong>. Профиль наземного CC1101 зафиксирован для воспроизводимой работы.';
+            lead.innerHTML = 'Рабочий профиль v8: <strong>435.000 МГц · 4.8 kbps · 2-FSK · Δf 5 кГц · полоса приёмника ЦУПа 203 кГц · RF TX включён</strong>.';
         }
 
         saveProfile();
@@ -81,6 +81,7 @@
             "UPTIME",
             "PANEL_POWER",
             "VOLT",
+            "TEMP",
             "MODE",
             "CHECKSUM",
             "ANTENNA",
@@ -106,12 +107,12 @@
 
         const projectItems = document.querySelectorAll("#projectPanel .projectItem strong");
         const projectTexts = [
-            "Телеметрия v8: ID / PACKET / UPTIME / PANEL / VOLT / MODE / CHECKSUM / ANTENNA / RSSI / SNR",
-            "Графики VOLT / PANEL / RSSI / SNR с отдельными линиями для каждого ID",
+            "Телеметрия v8: ID / PACKET / UPTIME / PANEL / VOLT / MCU_TEMP / MODE / CHECKSUM / ANTENNA / RSSI / SNR",
+            "Графики VOLT / MCU_TEMP / PANEL / RSSI / SNR с отдельными линиями для каждого ID",
             "ESP32 + CC1101: приём, передача RF-команд и встроенная прошивка",
             "Командный канал, RAW COM и полный сброс принятых данных",
             "Arduino Uno поворотки + симулятор AZ/EL",
-            "Рабочий профиль 435.000 МГц · 4.8 kbps · 2-FSK · RX BW 203 кГц",
+            "Рабочий профиль 435.000 МГц · 4.8 kbps · 2-FSK · полоса приёмника ЦУПа 203 кГц",
             "Проверка механики поворотки и конкретных бортовых обработчиков команд",
             "Автосопровождение по орбите / TLE / SGP4",
         ];
@@ -135,10 +136,10 @@
 
             const sections = help.querySelectorAll("section");
             if (sections[0]) {
-                sections[0].innerHTML = '<h3>ЦУП Альтаир v8</h3><p>Подключите ESP32-радиошлюз на 115200 бод. Рабочий радиоканал: <strong>435.000 МГц</strong>, 4.8 kbps, 2-FSK, девиация 5 кГц, RX BW 203 кГц.</p>';
+                sections[0].innerHTML = '<h3>ЦУП Альтаир v8</h3><p>Подключите ESP32-радиошлюз на 115200 бод. Рабочий радиоканал: <strong>435.000 МГц</strong>, 4.8 kbps, 2-FSK, девиация 5 кГц, полоса приёмника ЦУПа 203 кГц.</p>';
             }
             if (sections[1]) {
-                sections[1].innerHTML = '<h3>Телеметрия v8</h3><p>Принимаются позиционные пакеты с 7 полями и расширенные пакеты с полем <code>ANTENNA</code>. Поле контрольной суммы сохраняется, но прикладная XOR-проверка отключена: изменение ID не приводит к отбрасыванию пакета.</p>';
+                sections[1].innerHTML = '<h3>Телеметрия v8</h3><p>Новый пакет содержит поле <code>MCU_TEMP</code> сразу после напряжения аккумулятора. Значение показывает ориентировочную температуру кристалла бортового микроконтроллера. Старые пакеты без температуры и расширенные пакеты с полем <code>ANTENNA</code> также поддерживаются.</p>';
             }
             if (sections[2]) {
                 sections[2].innerHTML = '<h3>Радиоканал и команды</h3><p>Аппаратный CRC CC1101 включён. Шлюз поддерживает передачу команд с ЦУПа. Для диагностики используйте панель RAW COM, где видны все строки от ESP32 в реальном времени.</p>';

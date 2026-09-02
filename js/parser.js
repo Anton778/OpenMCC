@@ -42,7 +42,7 @@
         STATE: "MODE", OPERATING_MODE: "MODE",
         XOR: "CHECKSUM", CRC8: "CHECKSUM",
         ANT: "ANTENNA", ANTENNA_STATE: "ANTENNA", ANTENNA_DEPLOYED: "ANTENNA",
-        T: "TEMP", TEMPERATURE: "TEMP",
+        T: "TEMP", TEMPERATURE: "TEMP", MCU_TEMP: "TEMP", CPU_TEMP: "TEMP",
     });
 
     const state = {
@@ -101,27 +101,38 @@
     }
 
     // Позиционный формат:
-    // 7 полей: ID,PACKET,UPTIME,PANEL_POWER,VOLT,MODE,CHECKSUM
-    // 8 полей: ID,PACKET,UPTIME,PANEL_POWER,VOLT,MODE,ANTENNA,CHECKSUM
+    // 7 полей: прежний пакет без температуры и ANTENNA;
+    // 8 полей: новый пакет с MCU_TEMP либо прежний пакет с ANTENNA;
+    // 9 полей: новый пакет с MCU_TEMP и ANTENNA.
     function parsePositionPacket(line) {
         const f = line.split(",").map(v => v.trim());
-        if (f.length !== 7 && f.length !== 8) {
-            throw new Error(`Ожидалось 7 или 8 полей, получено ${f.length}`);
+        if (![7, 8, 9].includes(f.length)) {
+            throw new Error(`Ожидалось 7, 8 или 9 полей, получено ${f.length}`);
         }
-        const hasAntenna = f.length === 8;
-        const checksumIndex = hasAntenna ? 7 : 6;
+
+        // MODE старого формата содержит ровно 0 или 1. Температура нового
+        // статического пакета всегда записывается с одним десятичным знаком.
+        const eighthFieldContainsTemperature =
+            f.length === 8 && !/^(?:0|1)$/.test(f[5]);
+        const hasTemperature = f.length === 9 || eighthFieldContainsTemperature;
+        const hasAntenna =
+            f.length === 9 || (f.length === 8 && !eighthFieldContainsTemperature);
+        const modeIndex = hasTemperature ? 6 : 5;
+        const antennaIndex = f.length === 9 ? 7 : (hasAntenna ? 6 : -1);
+        const checksumIndex = f.length - 1;
         const packet = {
             ID: f[0],
             PACKET: Number(f[1]),
             UPTIME: Number(f[2]),
             PANEL_POWER: Number(f[3]),
             VOLT: Number(f[4]),
-            MODE: Number(f[5]),
+            ...(hasTemperature ? { TEMP: Number(f[5]) } : {}),
+            MODE: Number(f[modeIndex]),
             CHECKSUM: f[checksumIndex],
             CHECKSUM_BYPASS: 1,
             RAW_PACKET: line,
         };
-        if (hasAntenna) packet.ANTENNA = Number(f[6]);
+        if (hasAntenna) packet.ANTENNA = Number(f[antennaIndex]);
         return packet;
     }
 

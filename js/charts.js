@@ -12,6 +12,7 @@
 
     const PARAMETERS = Object.freeze({
         VOLT: { title: "Напряжение аккумулятора", unit: "В", decimals: 2, canvasId: "chartVOLT", valueId: "chartValueVOLT" },
+        TEMP: { title: "Температура бортового компьютера", unit: "°C", decimals: 1, canvasId: "chartTEMP", valueId: "chartValueTEMP" },
         PANEL_POWER: { title: "Мощность солнечных панелей", unit: "Вт", decimals: 2, canvasId: "chartPANEL_POWER", valueId: "chartValuePANEL_POWER" },
         RSSI: { title: "RSSI", unit: "dBm", decimals: 1, canvasId: "chartRSSI", valueId: "chartValueRSSI" },
         SNR: { title: "SNR", unit: "dB", decimals: 1, canvasId: "chartSNR", valueId: "chartValueSNR" },

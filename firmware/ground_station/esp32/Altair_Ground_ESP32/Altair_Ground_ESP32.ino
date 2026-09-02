@@ -27,7 +27,7 @@
 #define CC_GDO0  4
 #define CC_GDO2  27
 
-static constexpr char FW_VERSION[] = "8.3.0";
+static constexpr char FW_VERSION[] = "8.3.1";
 static constexpr float RF_FREQ_MHZ = 435.000f;
 static constexpr float RF_BITRATE_KBPS = 4.8f;
 static constexpr float RF_DEVIATION_KHZ = 5.0f;
@@ -365,18 +365,28 @@ void pollUsb() {
 void emitTelemetry(String packet) {
   packet.trim();
 
-  String fields[8];
+  String fields[9];
   int count = 0;
-  if (!splitCsv(packet, fields, 8, count) || (count != 7 && count != 8)) {
+  if (!splitCsv(packet, fields, 9, count) || (count != 7 && count != 8 && count != 9)) {
     Serial.print("$RAW,");
     Serial.println(packet);
     return;
   }
 
-  // Семь полей: ID,PACKET,UPTIME,PANEL_POWER,VOLT,MODE,CHECKSUM.
-  // Восьмое необязательное поле ANTENNA располагается перед CHECKSUM.
-  const bool hasAntenna = (count == 8);
-  const int checksumIndex = hasAntenna ? 7 : 6;
+  // Поддерживаются три варианта пакета:
+  // 7 полей — старый пакет без температуры и без ANTENNA;
+  // 8 полей — новый пакет с MCU_TEMP либо старый пакет с ANTENNA;
+  // 9 полей — новый пакет одновременно с MCU_TEMP и ANTENNA.
+  // В новом восьмипольном формате температура всегда передаётся с десятичной
+  // точкой, поэтому её можно отличить от бинарного MODE старого формата.
+  const bool eighthFieldContainsTemperature =
+    count == 8 && fields[5] != "0" && fields[5] != "1";
+  const bool hasTemperature = count == 9 || eighthFieldContainsTemperature;
+  const bool hasAntenna = count == 9 || (count == 8 && !eighthFieldContainsTemperature);
+  const int temperatureIndex = hasTemperature ? 5 : -1;
+  const int modeIndex = hasTemperature ? 6 : 5;
+  const int antennaIndex = count == 9 ? 7 : (hasAntenna ? 6 : -1);
+  const int checksumIndex = count - 1;
 
   const float rssi = radio.getRSSI();
   const uint8_t lqi = radio.getLQI();
@@ -392,11 +402,17 @@ void emitTelemetry(String packet) {
   Serial.print(",UPTIME="); Serial.print(fields[2]);
   Serial.print(",PANEL_POWER="); Serial.print(fields[3]);
   Serial.print(",VOLT="); Serial.print(fields[4]);
-  Serial.print(",MODE="); Serial.print(fields[5]);
+
+  if (hasTemperature) {
+    Serial.print(",MCU_TEMP=");
+    Serial.print(fields[temperatureIndex]);
+  }
+
+  Serial.print(",MODE="); Serial.print(fields[modeIndex]);
 
   if (hasAntenna) {
     Serial.print(",ANTENNA=");
-    Serial.print(fields[6]);
+    Serial.print(fields[antennaIndex]);
   }
 
   // Поле выводится для совместимости, но шлюз его не проверяет.

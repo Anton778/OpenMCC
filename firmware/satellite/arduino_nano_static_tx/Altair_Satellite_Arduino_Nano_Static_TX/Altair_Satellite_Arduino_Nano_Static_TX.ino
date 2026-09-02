@@ -1,13 +1,18 @@
-#include <Arduino.h>
-#include <SPI.h>
-#include <RadioLib.h>
+#include <Arduino.h>   // Подключает основные функции Arduino: Serial, delay(), millis() и типы данных.
+#include <SPI.h>       // Подключает аппаратный интерфейс SPI для обмена с радиомодулем CC1101.
+#include <RadioLib.h>  // Подключает библиотеку RadioLib, управляющую радиомодулем CC1101.
 
 /*
  * ЦУП Альтаир v8 — простой передатчик Arduino Nano + CC1101.
  *
- * Скетч выполняет только одну задачу: передаёт заранее заданный
- * статичный пакет телеметрии один раз в секунду.
- * Приём команд и переключение CC1101 в режим приёма отсутствуют.
+ * Скетч передаёт телеметрию один раз в секунду и не принимает команды.
+ * Все поля пакета, кроме температуры кристалла ATmega328P, заданы заранее.
+ *
+ * Порядок полей:
+ * ID,PACKET,UPTIME,PANEL_POWER,VOLT,MCU_TEMP,MODE,CHECKSUM.
+ *
+ * Поле MCU_TEMP содержит ориентировочную температуру кристалла, а не воздуха.
+ * Для точного измерения конкретную плату необходимо откалибровать.
  *
  * Подключение CC1101:
  *   CSN  -> D10
@@ -19,83 +24,150 @@
  *   VCC  -> 3,3 В
  *   GND  -> GND
  *
- * ВАЖНО: классический Arduino Nano работает с уровнями 5 В.
+ * ВАЖНО: классический Arduino Nano работает с логическими уровнями 5 В.
  * Линии SCK, MOSI и CSN необходимо подключать через преобразователь
- * уровней 5 В ↔ 3,3 В. Питать CC1101 от 5 В нельзя.
+ * уровней 5 В ↔ 3,3 В. Питать CC1101 напряжением 5 В нельзя.
  */
 
-#define CC_CS    10
-#define CC_GDO0  2
-#define CC_GDO2  3
+#define CC_CS 10    // Назначает цифровой вывод D10 сигналу выбора CC1101 — CSN.
+#define CC_GDO0 2   // Назначает цифровой вывод D2 сигнальной линии GDO0 радиомодуля.
+#define CC_GDO2 3   // Назначает цифровой вывод D3 сигнальной линии GDO2 радиомодуля.
 
-// Пакет можно изменить непосредственно в этой строке.
-// Формат: ID,PACKET,UPTIME,PANEL_POWER,VOLT,MODE,CHECKSUM.
-static const char TELEMETRY_PACKET[] = "02,00001,00015,3.00,4.20,1,33";
+static const char TELEMETRY_PREFIX[] = "02,00001,00015,1.00,4.20,";  // Задаёт статичные поля до температуры: ID, номер, uptime, мощность 1,00 Вт и напряжение 4,20 В.
+static const char TELEMETRY_MODE[] = "1";                             // Задаёт штатный режим работы спутника значением 1.
+static constexpr size_t TELEMETRY_BUFFER_SIZE = 64;                   // Резервирует достаточный размер строки для полного пакета и завершающего нуля.
+static constexpr uint8_t TEMPERATURE_SAMPLE_COUNT = 32;               // Задаёт количество измерений АЦП, используемых при усреднении температуры.
+static constexpr float ADC_REFERENCE_MV = 1100.0f;                    // Задаёт номинальное напряжение внутреннего опорного источника АЦП в милливольтах.
+static constexpr float SENSOR_VOLTAGE_AT_25C_MV = 314.0f;             // Задаёт типовое напряжение встроенного датчика при температуре 25 °C.
+static constexpr float SENSOR_SLOPE_MV_PER_C = 1.0f;                  // Задаёт типовую чувствительность встроенного датчика около 1 мВ/°C.
+static constexpr float TEMPERATURE_CALIBRATION_OFFSET_C = 0.0f;       // Позволяет скорректировать показания после сравнения с эталонным термометром.
 
-static const uint32_t TRANSMISSION_PERIOD_MS = 1000UL;
+static constexpr uint32_t TRANSMISSION_PERIOD_MS = 1000UL;  // Задаёт паузу 1000 мс между последовательными передачами.
 
-static const float RF_FREQ_MHZ = 435.000f;
-static const float RF_BITRATE_KBPS = 4.8f;
-static const float RF_DEVIATION_KHZ = 5.0f;
-static const float RF_BW_KHZ = 203.0f;
-static const int8_t RF_POWER_DBM = 5;
-static const uint16_t RF_PREAMBLE_BITS = 16;
+static constexpr float RF_FREQ_MHZ = 435.000f;       // Задаёт рабочую частоту радиоканала 435,000 МГц.
+static constexpr float RF_BITRATE_KBPS = 4.8f;       // Задаёт скорость передачи данных 4,8 кбит/с.
+static constexpr float RF_DEVIATION_KHZ = 5.0f;      // Задаёт частотную девиацию 2-FSK, равную 5 кГц.
+static constexpr float RF_BW_KHZ = 203.0f;           // Задаёт полосу приёмника CC1101, используемую библиотекой при инициализации.
+static constexpr int8_t RF_POWER_DBM = 5;            // Задаёт выходную мощность передатчика CC1101, равную 5 дБм.
+static constexpr uint16_t RF_PREAMBLE_BITS = 16;     // Задаёт длину преамбулы радиопакета, равную 16 битам.
 
-CC1101 radio = new Module(CC_CS, CC_GDO0, RADIOLIB_NC, CC_GDO2);
+CC1101 radio = new Module(CC_CS, CC_GDO0, RADIOLIB_NC, CC_GDO2);  // Создаёт объект CC1101 и передаёт ему номера соединённых выводов Arduino Nano.
 
-// Настраивает CC1101 в соответствии с единым радиопрофилем проекта.
-int configureRadio() {
-  SPI.begin();
+uint16_t readInternalTemperatureAdc() {                       // Объявляет функцию усреднённого чтения внутреннего температурного канала АЦП.
+  const uint8_t previousAdmux = ADMUX;                        // Сохраняет исходную настройку опорного напряжения и входного канала АЦП.
+  const uint8_t previousAdcsra = ADCSRA;                      // Сохраняет исходное состояние и делитель частоты АЦП.
+  ADCSRA |= _BV(ADEN);                                        // Включает АЦП установкой бита ADEN.
+  ADMUX = _BV(REFS1) | _BV(REFS0) | _BV(MUX3);               // Выбирает внутреннюю опору 1,1 В и температурный канал ADC8.
+  delay(2);                                                   // Даёт внутреннему источнику опорного напряжения время стабилизироваться.
+  ADCSRA |= _BV(ADSC);                                        // Запускает первое служебное преобразование после смены канала АЦП.
+  while (bit_is_set(ADCSRA, ADSC)) {                          // Ожидает завершения первого преобразования.
+    // В цикле ожидания действия не требуются.                 // Поясняет, почему тело цикла намеренно оставлено пустым.
+  }                                                           // Завершает цикл ожидания первого преобразования.
+  (void)ADC;                                                  // Считывает и отбрасывает первый результат, полученный во время стабилизации.
+  uint32_t adcSum = 0;                                        // Создаёт накопитель суммы последующих отсчётов АЦП.
+  for (uint8_t sample = 0; sample < TEMPERATURE_SAMPLE_COUNT; ++sample) {  // Повторяет измерение заданное число раз.
+    ADCSRA |= _BV(ADSC);                                      // Запускает очередное преобразование температуры.
+    while (bit_is_set(ADCSRA, ADSC)) {                        // Ожидает завершения текущего преобразования.
+      // В цикле ожидания действия не требуются.               // Поясняет пустое тело цикла ожидания.
+    }                                                         // Завершает цикл ожидания текущего преобразования.
+    adcSum += ADC;                                            // Добавляет десятибитный результат преобразования к общей сумме.
+  }                                                           // Завершает цикл накопления температурных отсчётов.
+  ADMUX = previousAdmux;                                      // Восстанавливает прежний источник опорного напряжения и канал АЦП.
+  ADCSRA = previousAdcsra;                                    // Восстанавливает прежнее состояние АЦП.
+  return static_cast<uint16_t>(adcSum / TEMPERATURE_SAMPLE_COUNT);  // Возвращает среднее значение температурного канала.
+}                                                             // Завершает функцию чтения внутреннего АЦП.
 
-  int state = radio.begin(
-    RF_FREQ_MHZ,
-    RF_BITRATE_KBPS,
-    RF_DEVIATION_KHZ,
-    RF_BW_KHZ,
-    RF_POWER_DBM,
-    RF_PREAMBLE_BITS
-  );
+float readMcuTemperatureC() {                                 // Объявляет функцию преобразования результата АЦП в градусы Цельсия.
+  const uint16_t adcCode = readInternalTemperatureAdc();      // Получает усреднённый код внутреннего температурного канала.
+  const float sensorVoltageMv =                               // Создаёт переменную для рассчитанного напряжения датчика в милливольтах.
+    static_cast<float>(adcCode) * ADC_REFERENCE_MV / 1024.0f; // Пересчитывает десятибитный код АЦП в напряжение относительно опоры 1,1 В.
+  const float temperatureC =                                  // Создаёт переменную для ориентировочной температуры кристалла.
+    25.0f +                                                   // Использует 25 °C как опорную температуру из типовой характеристики.
+    (sensorVoltageMv - SENSOR_VOLTAGE_AT_25C_MV) /            // Вычисляет изменение напряжения относительно значения при 25 °C.
+    SENSOR_SLOPE_MV_PER_C +                                   // Делит изменение напряжения на типовую температурную чувствительность.
+    TEMPERATURE_CALIBRATION_OFFSET_C;                         // Добавляет пользовательскую поправку калибровки.
+  return temperatureC;                                       // Возвращает рассчитанную температуру кристалла в градусах Цельсия.
+}                                                             // Завершает функцию расчёта температуры.
 
-  if (state == RADIOLIB_ERR_NONE) state = radio.setOOK(false);
-  if (state == RADIOLIB_ERR_NONE) state = radio.setDataShaping(RADIOLIB_SHAPING_NONE);
-  if (state == RADIOLIB_ERR_NONE) state = radio.setEncoding(RADIOLIB_ENCODING_NRZ);
-  if (state == RADIOLIB_ERR_NONE) state = radio.setSyncWord(0x12, 0xAD, 0, false);
-  if (state == RADIOLIB_ERR_NONE) {
-    state = radio.variablePacketLengthMode(RADIOLIB_CC1101_MAX_PACKET_LENGTH);
-  }
-  if (state == RADIOLIB_ERR_NONE) state = radio.setCrcFiltering(true);
+uint8_t calculateXorChecksum(const char* text) {               // Объявляет функцию вычисления XOR-контрольной суммы строки.
+  uint8_t checksum = 0;                                       // Устанавливает начальное значение контрольной суммы равным нулю.
+  while (*text != '\0') {                                      // Перебирает все символы строки до завершающего нулевого символа.
+    checksum ^= static_cast<uint8_t>(*text);                   // Выполняет XOR текущего символа с накопленной контрольной суммой.
+    ++text;                                                    // Переходит к следующему символу строки.
+  }                                                            // Завершает перебор символов.
+  return checksum;                                             // Возвращает рассчитанное восьмибитное значение XOR.
+}                                                              // Завершает функцию вычисления контрольной суммы.
 
-  return state;
-}
+void buildTelemetryPacket(float temperatureC, char* packet, size_t packetSize) {  // Объявляет функцию формирования полного текстового пакета.
+  char temperatureText[12];                                    // Создаёт отдельный буфер для текстовой записи температуры.
+  dtostrf(temperatureC, 0, 1, temperatureText);                // Записывает температуру с одним знаком после десятичной точки.
+  snprintf(                                                     // Формирует часть пакета, которая должна участвовать в расчёте XOR.
+    packet,                                                     // Передаёт функции адрес выходного буфера пакета.
+    packetSize,                                                 // Ограничивает запись фактическим размером выходного буфера.
+    "%s%s,%s,",                                                 // Задаёт шаблон: статичный префикс, температура, режим и конечная запятая.
+    TELEMETRY_PREFIX,                                           // Подставляет поля ID, PACKET, UPTIME, PANEL_POWER и VOLT.
+    temperatureText,                                            // Подставляет измеренную температуру сразу после напряжения аккумулятора.
+    TELEMETRY_MODE                                               // Подставляет статичный штатный режим работы спутника.
+  );                                                            // Завершает формирование части строки до контрольной суммы.
+  const uint8_t checksum = calculateXorChecksum(packet);        // Вычисляет XOR по всей строке, включая запятую перед CHECKSUM.
+  const size_t usedLength = strlen(packet);                     // Определяет число уже записанных символов пакета.
+  snprintf(                                                     // Дописывает контрольную сумму в конец пакета.
+    packet + usedLength,                                        // Начинает запись непосредственно после последней запятой.
+    packetSize - usedLength,                                    // Ограничивает длину записи оставшейся свободной частью буфера.
+    "%02X",                                                     // Задаёт вывод двух шестнадцатеричных цифр в верхнем регистре.
+    checksum                                                    // Подставляет рассчитанное значение XOR.
+  );                                                            // Завершает формирование полного пакета телеметрии.
+}                                                               // Завершает функцию построения пакета.
 
-void setup() {
-  Serial.begin(115200);
-  delay(500);
+int configureRadio() {                                         // Объявляет функцию настройки радиомодуля CC1101.
+  SPI.begin();                                                  // Запускает аппаратную шину SPI выводами D10–D13 Arduino Nano.
+  int state = radio.begin(                                      // Инициализирует CC1101 и сохраняет код результата операции.
+    RF_FREQ_MHZ,                                                // Передаёт библиотеке рабочую частоту 435,000 МГц.
+    RF_BITRATE_KBPS,                                            // Передаёт библиотеке скорость данных 4,8 кбит/с.
+    RF_DEVIATION_KHZ,                                           // Передаёт библиотеке частотную девиацию 5 кГц.
+    RF_BW_KHZ,                                                  // Передаёт библиотеке полосу приёмника 203 кГц.
+    RF_POWER_DBM,                                               // Передаёт библиотеке выходную мощность 5 дБм.
+    RF_PREAMBLE_BITS                                            // Передаёт библиотеке длину преамбулы 16 бит.
+  );                                                            // Завершает вызов начальной настройки CC1101.
+  if (state == RADIOLIB_ERR_NONE) state = radio.setOOK(false);  // Выбирает частотную, а не амплитудную манипуляцию.
+  if (state == RADIOLIB_ERR_NONE) state = radio.setDataShaping(RADIOLIB_SHAPING_NONE);  // Отключает дополнительное сглаживание импульсов.
+  if (state == RADIOLIB_ERR_NONE) state = radio.setEncoding(RADIOLIB_ENCODING_NRZ);     // Выбирает двоичное кодирование NRZ.
+  if (state == RADIOLIB_ERR_NONE) state = radio.setSyncWord(0x12, 0xAD, 0, false);      // Устанавливает слово синхронизации 0x12AD.
+  if (state == RADIOLIB_ERR_NONE) state = radio.variablePacketLengthMode(RADIOLIB_CC1101_MAX_PACKET_LENGTH);  // Включает пакеты переменной длины.
+  if (state == RADIOLIB_ERR_NONE) state = radio.setCrcFiltering(true);                  // Включает аппаратный CRC радиопакета CC1101.
+  return state;                                                  // Возвращает итоговый код настройки радиомодуля.
+}                                                                // Завершает функцию настройки CC1101.
 
-  const int state = configureRadio();
-  if (state != RADIOLIB_ERR_NONE) {
-    Serial.print(F("Ошибка инициализации CC1101, код "));
-    Serial.println(state);
-    while (true) delay(1000);
-  }
+void setup() {                                                   // Объявляет функцию однократной инициализации Arduino Nano.
+  Serial.begin(115200);                                          // Открывает последовательный порт со скоростью 115200 бод.
+  delay(500);                                                     // Даёт питанию, USB-UART и CC1101 время стабилизироваться.
+  const int state = configureRadio();                            // Настраивает радиомодуль и сохраняет результат инициализации.
+  if (state != RADIOLIB_ERR_NONE) {                              // Проверяет, возникла ли ошибка настройки CC1101.
+    Serial.print(F("Ошибка инициализации CC1101, код "));        // Выводит пояснение ошибки в монитор последовательного порта.
+    Serial.println(state);                                       // Выводит числовой код ошибки RadioLib.
+    while (true) delay(1000);                                    // Останавливает работу скетча при неисправном радиомодуле.
+  }                                                              // Завершает обработку ошибки инициализации.
+  Serial.println(F("Простой передатчик Arduino Nano + CC1101 готов"));  // Сообщает об успешном запуске передатчика.
+  Serial.println(F("Профиль: 435,000 МГц / 4,8 кбит/с / 2-FSK / BW 203 кГц"));  // Выводит основные параметры радиоканала.
+  Serial.println(F("Температура: внутренний датчик ATmega328P, требуется калибровка"));  // Предупреждает об ориентировочном характере измерения.
+}                                                                // Завершает функцию setup().
 
-  Serial.println(F("Простой передатчик Arduino Nano + CC1101 готов"));
-  Serial.println(F("Профиль: 435,000 МГц / 4,8 кбит/с / 2-FSK / BW 203 кГц"));
-}
-
-void loop() {
-  Serial.print(F("Телеметрия TX: "));
-  Serial.println(TELEMETRY_PACKET);
-
-  const int state = radio.transmit(TELEMETRY_PACKET);
-  radio.standby();
-
-  if (state == RADIOLIB_ERR_NONE) {
-    Serial.println(F("Пакет успешно передан"));
-  } else {
-    Serial.print(F("Ошибка передачи CC1101, код "));
-    Serial.println(state);
-  }
-
-  delay(TRANSMISSION_PERIOD_MS);
-}
+void loop() {                                                    // Объявляет основной бесконечно повторяющийся цикл Arduino Nano.
+  const float mcuTemperatureC = readMcuTemperatureC();           // Измеряет текущую температуру кристалла ATmega328P.
+  char telemetryPacket[TELEMETRY_BUFFER_SIZE];                   // Создаёт локальный буфер для одного пакета телеметрии.
+  buildTelemetryPacket(mcuTemperatureC, telemetryPacket, sizeof(telemetryPacket));  // Формирует строку с температурой и новой XOR-суммой.
+  Serial.print(F("Температура кристалла: "));                    // Выводит подпись диагностического значения температуры.
+  Serial.print(mcuTemperatureC, 1);                              // Выводит температуру с одним знаком после десятичной точки.
+  Serial.println(F(" °C"));                                      // Дописывает единицу измерения и перевод строки.
+  Serial.print(F("Телеметрия TX: "));                            // Выводит подпись перед передаваемым пакетом.
+  Serial.println(telemetryPacket);                               // Выводит полный сформированный пакет для контроля.
+  const int state = radio.transmit(telemetryPacket);             // Передаёт сформированную строку в эфир через CC1101.
+  radio.standby();                                               // Переводит CC1101 в режим ожидания после завершения передачи.
+  if (state == RADIOLIB_ERR_NONE) {                              // Проверяет успешность передачи радиопакета.
+    Serial.println(F("Пакет успешно передан"));                  // Сообщает об успешной передаче.
+  } else {                                                       // Переходит к обработке ошибки передачи.
+    Serial.print(F("Ошибка передачи CC1101, код "));             // Выводит пояснение ошибки передачи.
+    Serial.println(state);                                       // Выводит числовой код ошибки RadioLib.
+  }                                                              // Завершает проверку результата передачи.
+  delay(TRANSMISSION_PERIOD_MS);                                 // Выдерживает заданную паузу перед формированием следующего пакета.
+}                                                                // Завершает один проход основного цикла loop().

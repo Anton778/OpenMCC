@@ -498,11 +498,11 @@ function installRadioSettings(panel, protocolNote) {
             </label>
 
             <label class="v8RadioSettingField">
-                <span>Полоса RX, кГц</span>
+                <span>Полоса приёмника ЦУПа, кГц</span>
                 <select class="v8RadioControl" id="v8RadioBandwidth">
                     ${V8_RADIO_BANDWIDTHS_KHZ.map(value => `<option value="${value}"${value === V8_RADIO_DEFAULTS.bandwidthKHz ? " selected" : ""}>${value} кГц</option>`).join("")}
                 </select>
-                <small>Полоса приёмника телеметрии</small>
+                <small>Входной фильтр наземного CC1101 при приёме телеметрии</small>
             </label>
         </div>
 
@@ -753,7 +753,8 @@ function installAboutDialog() {
                 <h3>Основные функции</h3>
                 <ul>
                     <li>приём телеметрии нескольких аппаратов с разделением по ID;</li>
-                    <li>построение графиков и отображение RSSI, SNR и LQI;</li>
+                    <li>построение графиков, включая температуру кристалла бортового компьютера;</li>
+                    <li>отображение RSSI, SNR и LQI наземного приёмника;</li>
                     <li>просмотр исходных строк последовательного порта;</li>
                     <li>передача адресных и широковещательных команд по радиоканалу.</li>
                     <li>изменение частоты, мощности TX и полосы RX наземного CC1101.</li>
@@ -767,7 +768,7 @@ function installAboutDialog() {
                     <div><span>Мощность TX</span><strong id="v8AboutPower">5 дБм</strong></div>
                     <div><span>Модуляция</span><strong>2-FSK</strong></div>
                     <div><span>Скорость</span><strong>4,8 кбит/с</strong></div>
-                    <div><span>Полоса RX</span><strong id="v8AboutBandwidth">203 кГц</strong></div>
+                    <div><span>Полоса приёмника ЦУПа</span><strong id="v8AboutBandwidth">203 кГц</strong></div>
                     <div><span>Интерфейс USB</span><strong>115200 бод</strong></div>
                     <div><span>Аппаратный CRC</span><strong>включён</strong></div>
                 </div>
@@ -806,13 +807,13 @@ function patchTelemetryPresentation() {
         const code = note.querySelector("code");
         const span = note.querySelector("span");
         if (strong) strong.textContent = "Пакет v8:";
-        if (code) code.textContent = "02,00001,00015,3.00,4.20,1,33";
-        if (span) span.textContent = "Последнее поле сохраняется, но прикладная XOR-проверка отключена. Можно менять ID и значения без пересчёта XOR. Опционально перед CHECKSUM можно добавить ANTENNA (0/1). RSSI и SNR добавляются наземным шлюзом.";
+        if (code) code.textContent = "02,00001,00015,1.00,4.20,31.6,1,07";
+        if (span) span.textContent = "Порядок: ID, PACKET, UPTIME, PANEL_POWER, VOLT, MCU_TEMP, MODE, CHECKSUM. Температура кристалла располагается сразу после напряжения аккумулятора. Опционально перед CHECKSUM можно добавить ANTENNA (0/1). RSSI и SNR добавляются наземным шлюзом.";
     }
 
     const radioLead = document.querySelector("#radioPanel .panelLead");
     if (radioLead) {
-        radioLead.innerHTML = 'Рабочий профиль v8: <strong>435.000 МГц · 4.8 kbps · 2-FSK · Δf 5 кГц · RX BW 203 кГц · RF TX включён</strong>.';
+        radioLead.innerHTML = 'Рабочий профиль v8: <strong>435.000 МГц · 4.8 kbps · 2-FSK · Δf 5 кГц · полоса приёмника ЦУПа 203 кГц · RF TX включён</strong>.';
     }
 
     const projectEyebrow = document.querySelector("#projectPanel .panelEyebrow");

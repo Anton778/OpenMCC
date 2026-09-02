@@ -31,7 +31,7 @@
 
     const elements = { telemetry: {} };
     const TELEMETRY_FIELDS = Object.freeze([
-        "ID", "PACKET", "UPTIME", "PANEL_POWER", "VOLT", "MODE", "CHECKSUM", "ANTENNA", "RSSI", "SNR",
+        "ID", "PACKET", "UPTIME", "PANEL_POWER", "VOLT", "TEMP", "MODE", "CHECKSUM", "ANTENNA", "RSSI", "SNR",
     ]);
 
     function writeLog(message, type = "info", metadata = null) {
@@ -43,20 +43,14 @@
         const grid = document.querySelector("#telemetryPanel .altairTelemetryGrid");
         if (!grid) return;
 
-        const tempCard = grid.querySelector('[data-telemetry="TEMP"]');
-        if (tempCard) {
-            tempCard.dataset.telemetry = "MODE";
-            tempCard.classList.add("telemetryMode");
-            const label = tempCard.querySelector(".label");
-            const value = tempCard.querySelector(".value");
-            const unit = tempCard.querySelector(".unit");
-            if (label) label.textContent = "Режим работы спутника";
-            if (value) {
-                value.id = "MODE";
-                value.textContent = "--";
-                value.classList.add("telemetryTextValue");
-            }
-            if (unit) unit.textContent = "1 — штатный · 0 — аварийный";
+        if (!document.getElementById("MODE")) {
+            const card = document.createElement("div");
+            card.className = "card telemetryCard telemetryMode";
+            card.dataset.telemetry = "MODE";
+            card.innerHTML = '<span class="label">Режим работы спутника</span><span id="MODE" class="value telemetryTextValue">--</span><span class="unit">1 — штатный · 0 — аварийный</span>';
+            const checksumCard = grid.querySelector('[data-telemetry="CHECKSUM"]');
+            if (checksumCard) grid.insertBefore(card, checksumCard);
+            else grid.appendChild(card);
         }
 
         if (!document.getElementById("CHECKSUM")) {
@@ -85,13 +79,9 @@
             const code = note.querySelector("code");
             const span = note.querySelector("span");
             if (strong) strong.textContent = "Пакет v8:";
-            if (code) code.textContent = "02,00001,00015,3.00,4.20,1,33";
-            if (span) span.textContent = "Порядок: ID, PACKET, UPTIME, PANEL_POWER, VOLT, MODE, CHECKSUM. Опционально перед CHECKSUM добавляется ANTENNA. Поле CHECKSUM не валидируется; RSSI/SNR добавляет наземный CC1101-шлюз.";
+            if (code) code.textContent = "02,00001,00015,1.00,4.20,31.6,1,07";
+            if (span) span.textContent = "Порядок: ID, PACKET, UPTIME, PANEL_POWER, VOLT, MCU_TEMP, MODE, CHECKSUM. Температура кристалла следует сразу после напряжения аккумулятора. Опционально перед CHECKSUM добавляется ANTENNA. RSSI/SNR добавляет наземный CC1101-шлюз.";
         }
-
-        document.querySelectorAll("#chartPanel .chartCard").forEach(card => {
-            if (card.querySelector("#chartTEMP")) card.remove();
-        });
     }
 
     const telemetryFormatters = Object.freeze({
@@ -100,6 +90,7 @@
         UPTIME: value => Number.isFinite(Number(value)) ? String(Math.trunc(Number(value))).padStart(5, "0") : "--",
         PANEL_POWER: value => Number.isFinite(Number(value)) ? Number(value).toFixed(2) : "--",
         VOLT: value => Number.isFinite(Number(value)) ? Number(value).toFixed(2) : "--",
+        TEMP: value => Number.isFinite(Number(value)) ? Number(value).toFixed(1) : "--",
         MODE(value) {
             const numeric = Number(value);
             return numeric === 1 ? "1 · ШТАТНЫЙ" : numeric === 0 ? "0 · АВАРИЙНЫЙ" : "--";
@@ -227,8 +218,9 @@
             ID: "02",
             PACKET: 1,
             UPTIME: 15,
-            PANEL_POWER: 3.00,
+            PANEL_POWER: 1.00,
             VOLT: 4.20,
+            TEMP: 31.6,
             MODE: 1,
             CHECKSUM: "33",
             CHECKSUM_BYPASS: 1,

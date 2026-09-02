@@ -48,10 +48,13 @@ jobs:
           const app = fs.readFileSync('js/app.js', 'utf8');
           if (!app.includes('version: "0.8.0"')) throw new Error('app.js must identify v0.8.0');
           if (app.includes('applyV6BrandingAndRadioProfile')) throw new Error('Legacy v6 runtime override is still present');
+          if (!app.includes('"VOLT", "TEMP", "MODE"')) throw new Error('MCU temperature must follow battery voltage in UI telemetry order');
 
           const index = fs.readFileSync('index.html', 'utf8');
           if (!index.includes('<script src="js/v8.js"></script>')) throw new Error('v8.js is not connected in index.html');
           if (!index.includes('<script src="js/v8-final.js"></script>')) throw new Error('v8-final.js is not connected in index.html');
+          if (!index.includes('Температура бортового компьютера')) throw new Error('MCU temperature card is missing');
+          if (!index.includes('Команды, передаваемые на спутник')) throw new Error('Uplink panel purpose is unclear');
 
           const v8Runtime = fs.readFileSync('js/v8.js', 'utf8');
           if (!v8Runtime.includes('control.disabled = !connected')) throw new Error('Visible command controls are not synchronized with serial state');
@@ -63,6 +66,7 @@ jobs:
           const charts = fs.readFileSync('js/charts.js', 'utf8');
           if (!charts.includes('datasetFor(chart, id)')) throw new Error('Multi-ID chart datasets are missing');
           if (!charts.includes('pointRadius: 2.7')) throw new Error('Visible chart points are missing');
+          if (!charts.includes('TEMP: { title: "Температура бортового компьютера"')) throw new Error('MCU temperature chart is not connected');
 
           const finalRuntime = fs.readFileSync('js/v8-final.js', 'utf8');
           if (!finalRuntime.includes('bandwidth: "203"')) throw new Error('v8 UI must enforce RX BW 203 kHz');
@@ -80,12 +84,13 @@ jobs:
           grep -Fq 'APPLICATION_XOR_CHECK=DISABLED' "$ground_esp32"
           grep -Fq '$CMD,RF,' "$ground_esp32"
           grep -Fq '$CMD,RADIO_STATUS' "$ground_esp32"
-          grep -Fq 'FW_VERSION[] = "8.3.0"' "$ground_esp32"
+          grep -Fq 'FW_VERSION[] = "8.3.1"' "$ground_esp32"
           grep -Fq 'radio.setPacketReceivedAction(onRfPacketReceived);' "$ground_esp32"
           grep -Fq 'const int state = radio.readData(packet);' "$ground_esp32"
           grep -Fq '$CMD,RADIO,SET,' "$ground_esp32"
           grep -Fq '$CMD,RADIO,RESET' "$ground_esp32"
           grep -Fq 'RADIO_CONFIG_APPLIED' "$ground_esp32"
+          grep -Fq 'Serial.print(",MCU_TEMP=");' "$ground_esp32"
           if grep -Fq 'const int state = radio.receive(packet);' "$ground_esp32"; then
             echo 'Blocking CC1101 receive must not be used in the ESP32 gateway'
             exit 1
@@ -96,6 +101,10 @@ jobs:
           test -f firmware/ground_station/arduino_nano/Altair_Ground_Arduino_Nano/Altair_Ground_Arduino_Nano.ino
           test -f firmware/satellite/stm32/Altair_Satellite_STM32/Altair_Satellite_STM32.ino
           test -f firmware/satellite/arduino_nano/Altair_Satellite_Arduino_Nano/Altair_Satellite_Arduino_Nano.ino
+          static_nano='firmware/satellite/arduino_nano_static_tx/Altair_Satellite_Arduino_Nano_Static_TX/Altair_Satellite_Arduino_Nano_Static_TX.ino'
+          grep -Fq '1.00,4.20,' "$static_nano"
+          grep -Fq 'readMcuTemperatureC()' "$static_nano"
+          grep -Fq 'calculateXorChecksum' "$static_nano"
 
           grep -Fq '435.000' js/v8.js
           grep -Fq 'rawSerialConsole' js/v8.js
