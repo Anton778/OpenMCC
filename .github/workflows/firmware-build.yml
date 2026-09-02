@@ -39,6 +39,9 @@ jobs:
           - name: Спутник — шаг 01, неизменяемый пакет Arduino Nano
             id: satellite-step-01-static
             project: firmware/satellite/01_static_telemetry_tx
+          - name: Спутник — шаг 02, счётчик пакетов Arduino Nano
+            id: satellite-step-02-counter
+            project: firmware/satellite/02_packet_counter_tx
           - name: Спутник — Arduino Nano
             id: satellite-nano
             project: firmware/satellite/arduino_nano

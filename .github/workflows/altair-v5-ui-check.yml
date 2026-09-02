@@ -112,6 +112,15 @@ jobs:
             echo 'Step 01 must remain transmit-only'
             exit 1
           fi
+          step_02='firmware/satellite/02_packet_counter_tx/Altair_Satellite_02_Packet_Counter_TX/Altair_Satellite_02_Packet_Counter_TX.ino'
+          grep -Fq 'uint32_t packetNumber = 1;' "$step_02"
+          grep -Fq 'packetNumber + 1' "$step_02"
+          grep -Fq 'calculateXorChecksum(packetBody)' "$step_02"
+          grep -Fq 'radio.transmit(telemetryPacket)' "$step_02"
+          if grep -Eq 'startReceive|radio\.receive|radio\.readData' "$step_02"; then
+            echo 'Step 02 must remain transmit-only'
+            exit 1
+          fi
           static_nano='firmware/satellite/arduino_nano_static_tx/Altair_Satellite_Arduino_Nano_Static_TX/Altair_Satellite_Arduino_Nano_Static_TX.ino'
           grep -Fq '1.00,4.20,' "$static_nano"
           grep -Fq 'readMcuTemperatureC()' "$static_nano"
